@@ -77,6 +77,36 @@
   @apply bg-gray-400;
 }
 
+/* Table specific scrollbar - more elegant and thinner */
+.table-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f9fafb;
+}
+
+.table-scrollbar::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.table-scrollbar::-webkit-scrollbar-track {
+  @apply bg-gray-50;
+  border-radius: 2px;
+}
+
+.table-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-300;
+  border-radius: 2px;
+  min-height: 20px;
+}
+
+.table-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+.table-scrollbar::-webkit-scrollbar-corner {
+  @apply bg-gray-50;
+}
+
 /* Utilidades adicionales */
 .animate-fade-in {
   animation: fadeIn 0.3s ease-in-out;

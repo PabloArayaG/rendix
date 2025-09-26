@@ -69,7 +69,7 @@ export const useDashboard = () => {
       // Calcular estadísticas
       const projectsData = projects as ProjectSummary[] || [];
       const totalProjects = projectsData.length;
-      const activeProjects = projectsData.filter(p => p.status === 'active').length;
+      const activeProjects = projectsData.filter(p => p.status === 'in_progress' || p.status === 'active').length;
       const completedProjects = projectsData.filter(p => p.status === 'completed').length;
       
       const totalSales = projectsData.reduce((sum, p) => sum + p.sale_amount, 0);

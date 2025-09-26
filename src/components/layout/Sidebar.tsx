@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { 
   LayoutDashboard, 
   FolderOpen, 
-  Receipt, 
-  BarChart3, 
   Settings, 
   LogOut, 
   Menu,
@@ -33,18 +31,6 @@ const sidebarItems: SidebarItem[] = [
     icon: FolderOpen,
     href: '/projects',
   },
-  {
-    id: 'expenses',
-    label: 'Gastos',
-    icon: Receipt,
-    href: '/expenses',
-  },
-  {
-    id: 'reports',
-    label: 'Reportes',
-    icon: BarChart3,
-    href: '/reports',
-  },
 ];
 
 interface SidebarProps {
@@ -72,18 +58,18 @@ export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
   };
 
   const SidebarContent = () => (
-    <div className="h-full flex flex-col bg-white border-r border-gray-200">
+    <div className="h-full flex flex-col bg-gradient-to-b from-blue-600 to-blue-700 shadow-xl">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-blue-500/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
               <Building2 className="h-5 w-5 text-white" />
             </div>
             {!isCollapsed && (
               <div>
-                <h1 className="text-xl font-bold text-gray-900">RENDIX</h1>
-                <p className="text-xs text-gray-500">Gestión Financiera</p>
+                <h1 className="text-xl font-bold text-white">RENDIX</h1>
+                <p className="text-xs text-blue-100">Gestión Financiera</p>
               </div>
             )}
           </div>
@@ -91,17 +77,17 @@ export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
           {/* Desktop collapse button */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:block p-1 hover:bg-gray-100 rounded"
+            className="hidden lg:block p-1 hover:bg-white/10 rounded transition-colors"
           >
-            <Menu className="h-4 w-4 text-gray-500" />
+            <Menu className="h-4 w-4 text-white/80" />
           </button>
 
           {/* Mobile close button */}
           <button
             onClick={() => setIsMobileOpen(false)}
-            className="lg:hidden p-1 hover:bg-gray-100 rounded"
+            className="lg:hidden p-1 hover:bg-white/10 rounded transition-colors"
           >
-            <X className="h-4 w-4 text-gray-500" />
+            <X className="h-4 w-4 text-white/80" />
           </button>
         </div>
       </div>
@@ -116,13 +102,13 @@ export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
             <button
               key={item.id}
               onClick={() => handleNavigation(item.href)}
-              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-all duration-200 ${
                 isActive
-                  ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
+                  : 'text-blue-100 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <Icon className={`h-5 w-5 ${isActive ? 'text-blue-700' : 'text-gray-500'}`} />
+              <Icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-blue-200'}`} />
               {!isCollapsed && (
                 <>
                   <span className="font-medium">{item.label}</span>
@@ -139,32 +125,32 @@ export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
       </nav>
 
       {/* User info and logout */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-blue-500/20">
         {!isCollapsed && user && (
-          <div className="mb-3 p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm font-medium text-gray-900 truncate">
+          <div className="mb-3 p-3 bg-white/10 backdrop-blur-sm rounded-lg">
+            <p className="text-sm font-medium text-white truncate">
               {user.email}
             </p>
-            <p className="text-xs text-gray-500">Usuario conectado</p>
+            <p className="text-xs text-blue-100">Usuario conectado</p>
           </div>
         )}
         
         <div className="space-y-2">
           <button
             onClick={() => handleNavigation('/settings')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
+            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-all duration-200 ${
               currentPath === '/settings'
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-100'
+                ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
+                : 'text-blue-100 hover:bg-white/10 hover:text-white'
             }`}
           >
-            <Settings className="h-5 w-5 text-gray-500" />
+            <Settings className={`h-5 w-5 ${currentPath === '/settings' ? 'text-white' : 'text-blue-200'}`} />
             {!isCollapsed && <span>Configuración</span>}
           </button>
           
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-red-600 hover:bg-red-50 transition-colors"
+            className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-red-200 hover:bg-red-500/20 hover:text-red-100 transition-all duration-200"
           >
             <LogOut className="h-5 w-5" />
             {!isCollapsed && <span>Cerrar Sesión</span>}
@@ -205,9 +191,9 @@ export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
       {/* Mobile menu button */}
       <button
         onClick={() => setIsMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-20 p-2 bg-white rounded-lg shadow-md border border-gray-200"
+        className="lg:hidden fixed top-4 left-4 z-20 p-2 bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg border border-blue-500 transition-colors"
       >
-        <Menu className="h-5 w-5 text-gray-600" />
+        <Menu className="h-5 w-5 text-white" />
       </button>
     </>
   );

@@ -46,7 +46,7 @@ export const useProjects = () => {
       projected_margin,
       real_cost: 0,
       real_margin: projectData.sale_amount,
-      status: 'active',
+      status: 'in_progress' as ProjectStatus,
       tags: projectData.tags || [],
       metadata: {},
       user_id: userId,
@@ -182,6 +182,35 @@ export const useProjects = () => {
     }));
   };
 
+  const canEditProject = (project: Project): boolean => {
+    return project.status === 'in_progress';
+  };
+
+  const canDeleteProject = (project: Project): boolean => {
+    return project.status === 'in_progress' && project.real_cost === 0;
+  };
+
+  const validateCustomId = async (customId: string, excludeProjectId?: string): Promise<boolean> => {
+    const userId = await getCurrentUserId();
+    if (!userId) return false;
+
+    let query = supabase
+      .from('projects')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('custom_id', customId);
+
+    if (excludeProjectId) {
+      query = query.neq('id', excludeProjectId);
+    }
+
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    
+    return (data || []).length === 0;
+  };
+
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -196,6 +225,9 @@ export const useProjects = () => {
     deleteProject,
     getProject,
     getProjectStats,
+    canEditProject,
+    canDeleteProject,
+    validateCustomId,
   };
 };
 

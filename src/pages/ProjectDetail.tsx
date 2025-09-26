@@ -1,27 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   ArrowLeft,
   Plus, 
   Receipt,
   DollarSign,
-  Calendar,
   Building2,
   TrendingUp,
   TrendingDown,
   Edit,
-  Filter,
   Search
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { ExpenseModal } from '../components/expenses/ExpenseModal';
+import { ProjectModal } from '../components/projects/ProjectModal';
 import { useProject } from '../hooks/useProjects';
 import { useExpenses } from '../hooks/useExpenses';
-import { EXPENSE_CATEGORIES } from '../types/database';
+import { EXPENSE_CATEGORIES, EXPENSE_STATUSES } from '../types/database';
 import { 
   formatCurrency, 
   formatShortDate, 
   getMarginColor,
-  getStatusColor 
+  getStatusColor,
+  getExpenseStatusColor
 } from '../lib/utils';
 
 interface ProjectDetailProps {
@@ -33,6 +33,9 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
   const { project, loading: projectLoading, error: projectError } = useProject(projectId);
   const { expenses, loading: expensesLoading, refetch: refetchExpenses } = useExpenses(projectId);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditExpenseModal, setShowEditExpenseModal] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<any>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
@@ -58,16 +61,39 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
     return cat?.label || category;
   };
 
+  const getStatusLabel = (status: string) => {
+    const stat = EXPENSE_STATUSES.find(s => s.value === status);
+    return stat?.label || status;
+  };
+
+  const handleEditExpense = (expense: any) => {
+    setSelectedExpense(expense);
+    setShowEditExpenseModal(true);
+  };
+
+  const handleCloseEditExpenseModal = () => {
+    setSelectedExpense(undefined);
+    setShowEditExpenseModal(false);
+  };
+
   const CategoryBadge = ({ category }: { category: string }) => (
     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
       {getCategoryLabel(category)}
     </span>
   );
 
+  const ExpenseStatusBadge = ({ status }: { status: string }) => (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getExpenseStatusColor(status)}`}>
+      {getStatusLabel(status)}
+    </span>
+  );
+
   const StatusBadge = ({ status }: { status: string }) => (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
-      {status === 'active' && 'Activo'}
-      {status === 'completed' && 'Completado'}
+      {status === 'in_progress' && 'En Proceso'}
+      {status === 'completed' && 'Terminado'}
+      {/* Mantener compatibilidad con estados anteriores */}
+      {status === 'active' && 'En Proceso'}
       {status === 'on_hold' && 'En Pausa'}
       {status === 'cancelled' && 'Cancelado'}
     </span>
@@ -119,7 +145,10 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
           
           <div className="flex items-center space-x-3">
             <StatusBadge status={project.status} />
-            <button className="flex items-center px-3 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50">
+            <button 
+              onClick={() => setShowEditModal(true)}
+              className="flex items-center px-3 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
               <Edit className="h-4 w-4 mr-2" />
               Editar Proyecto
             </button>
@@ -339,9 +368,23 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                           <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                             <Receipt className="h-4 w-4 text-green-600" />
                           </div>
-                          <div>
-                            <h4 className="font-medium text-gray-900">{expense.description}</h4>
-                            <p className="text-sm text-gray-500">{formatShortDate(expense.date)}</p>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium text-gray-900">{expense.description}</h4>
+                                <p className="text-sm text-gray-500">{formatShortDate(expense.date)}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {expense.status && <ExpenseStatusBadge status={expense.status} />}
+                                <button
+                                  onClick={() => handleEditExpense(expense)}
+                                  className="text-blue-400 hover:text-blue-600 transition-colors p-1 rounded-md hover:bg-blue-50"
+                                  title="Editar gasto"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                         
@@ -361,10 +404,15 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                               <p className="text-sm text-gray-900">{expense.supplier}</p>
                             </div>
                           )}
-                          {expense.invoice_number && (
+                          {(expense.document_number || expense.invoice_number) && (
                             <div>
-                              <p className="text-xs text-gray-500">Factura</p>
-                              <p className="text-sm text-gray-900">{expense.invoice_number}</p>
+                              <p className="text-xs text-gray-500">
+                                {expense.document_type === 'factura' ? 'Factura' : 
+                                 expense.document_type === 'boleta' ? 'Boleta' : 'Documento'}
+                              </p>
+                              <p className="text-sm text-gray-900">
+                                {expense.document_number || expense.invoice_number}
+                              </p>
                             </div>
                           )}
                           <div>
@@ -380,13 +428,17 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                         )}
                       </div>
                       
-                      <div className="flex items-center space-x-2 ml-4">
-                        {expense.receipt_url && (
-                          <div className="text-blue-600">
+                      {expense.receipt_url && (
+                        <div className="flex items-center ml-4">
+                          <button
+                            onClick={() => window.open(expense.receipt_url, '_blank')}
+                            className="text-blue-600 hover:text-blue-800 transition-colors p-1 rounded-md hover:bg-blue-50"
+                            title="Ver comprobante"
+                          >
                             <Receipt className="h-4 w-4" />
-                          </div>
-                        )}
-                      </div>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -404,6 +456,30 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
         onSuccess={() => {
           refetchExpenses();
           // Aquí podrías también refrescar los datos del proyecto si es necesario
+        }}
+      />
+
+      {/* Modal para editar proyecto */}
+      <ProjectModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        project={project}
+        onSuccess={() => {
+          setShowEditModal(false);
+          // Refrescar la página para mostrar los cambios
+          window.location.reload();
+        }}
+      />
+
+      {/* Modal para editar gasto */}
+      <ExpenseModal
+        isOpen={showEditExpenseModal}
+        onClose={handleCloseEditExpenseModal}
+        expense={selectedExpense}
+        defaultProjectId={projectId}
+        onSuccess={() => {
+          refetchExpenses();
+          handleCloseEditExpenseModal();
         }}
       />
     </Layout>

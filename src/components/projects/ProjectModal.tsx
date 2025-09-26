@@ -2,11 +2,17 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, Calendar, DollarSign } from 'lucide-react';
+import { X, Calendar, DollarSign, Building2, FileText, AlertTriangle } from 'lucide-react';
 import { useProjects } from '../../hooks/useProjects';
-import { Project, CreateProjectDTO } from '../../types/database';
+import { Project, CreateProjectDTO, PROJECT_STATUSES } from '../../types/database';
+import { Button, Card, CardContent, Badge, Tooltip } from '../ui';
+import { formatDateForInput, parseInputDate } from '../../lib/utils';
 
 const projectSchema = z.object({
+  custom_id: z.string()
+    .min(1, 'El ID del proyecto es requerido')
+    .max(50, 'El ID no puede exceder 50 caracteres')
+    .regex(/^[A-Za-z0-9\-_\.]+$/, 'Solo se permiten letras, números, guiones y puntos'),
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   client: z.string().min(1, 'El cliente es requerido'),
@@ -16,6 +22,8 @@ const projectSchema = z.object({
   end_date: z.string().optional(),
   purchase_order: z.string().optional(),
   hes: z.string().optional(),
+  sale_invoice: z.string().optional(),
+  status: z.enum(['in_progress', 'completed']).optional(),
   notes: z.string().optional(),
 }).refine((data) => {
   if (data.start_date && data.end_date) {
@@ -39,7 +47,7 @@ interface ProjectModalProps {
 export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { createProject, updateProject } = useProjects();
+  const { createProject, updateProject, validateCustomId, canEditProject } = useProjects();
 
   const {
     register,
@@ -50,6 +58,7 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
   } = useForm<ProjectFormData>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
+      custom_id: '',
       name: '',
       description: '',
       client: '',
@@ -59,6 +68,8 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
       end_date: '',
       purchase_order: '',
       hes: '',
+      sale_invoice: '',
+      status: 'in_progress',
       notes: '',
     },
   });
@@ -72,19 +83,23 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
   useEffect(() => {
     if (project) {
       reset({
+        custom_id: project.custom_id,
         name: project.name,
         description: project.description || '',
         client: project.client,
         sale_amount: project.sale_amount,
         projected_cost: project.projected_cost,
-        start_date: project.start_date || '',
-        end_date: project.end_date || '',
+        start_date: formatDateForInput(project.start_date),
+        end_date: formatDateForInput(project.end_date),
         purchase_order: project.purchase_order || '',
         hes: project.hes || '',
+        sale_invoice: project.sale_invoice || '',
+        status: project.status,
         notes: project.notes || '',
       });
     } else {
       reset({
+        custom_id: '',
         name: '',
         description: '',
         client: '',
@@ -94,6 +109,8 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
         end_date: '',
         purchase_order: '',
         hes: '',
+        sale_invoice: '',
+        status: 'in_progress',
         notes: '',
       });
     }
@@ -104,20 +121,37 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
       setLoading(true);
       setError('');
 
+      // Validar que el custom_id sea único (solo para proyectos nuevos o si cambió)
+      if (!project || data.custom_id !== project.custom_id) {
+        const isUnique = await validateCustomId(data.custom_id, project?.id);
+        if (!isUnique) {
+          setError('Ya existe un proyecto con ese ID. Por favor, elige otro.');
+          setLoading(false);
+          return;
+        }
+      }
+
       console.log('Datos del formulario:', data); // Debug
 
       const projectData: CreateProjectDTO = {
+        custom_id: data.custom_id,
         name: data.name,
         description: data.description || undefined,
         client: data.client,
         sale_amount: data.sale_amount,
         projected_cost: data.projected_cost,
-        start_date: data.start_date || undefined,
-        end_date: data.end_date || undefined,
+        start_date: parseInputDate(data.start_date || '') || undefined,
+        end_date: parseInputDate(data.end_date || '') || undefined,
         purchase_order: data.purchase_order || undefined,
         hes: data.hes || undefined,
+        sale_invoice: data.sale_invoice || undefined,
         notes: data.notes || undefined,
         tags: [],
+      };
+
+      // Si es edición, incluir status
+      if (project && data.status) {
+        (projectData as any).status = data.status;
       };
 
       console.log('Datos a enviar:', projectData); // Debug
@@ -150,263 +184,396 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
 
   if (!isOpen) return null;
 
+  const isEditing = !!project;
+  const canEdit = !project || canEditProject(project);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {project ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
-          </h2>
-          <button
-            onClick={handleClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Building2 className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {isEditing ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {isEditing ? 'Modifica la información del proyecto' : 'Completa los datos para crear un nuevo proyecto'}
+              </p>
+            </div>
+          </div>
+          <Tooltip content="Cerrar modal">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleClose}
+              className="h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </Tooltip>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-800 text-sm">{error}</p>
-            </div>
-          )}
-
-          {/* Información básica */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Información Básica</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre del Proyecto *
-                </label>
-                <input
-                  {...register('name')}
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Ej: Construcción Edificio ABC"
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cliente *
-                </label>
-                <input
-                  {...register('client')}
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Ej: Constructora XYZ S.A."
-                />
-                {errors.client && (
-                  <p className="mt-1 text-sm text-red-600">{errors.client.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Descripción
-              </label>
-              <textarea
-                {...register('description')}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Descripción detallada del proyecto..."
-              />
-            </div>
-          </div>
-
-          {/* Información financiera */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Información Financiera</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Monto de Venta (CLP) *
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSign className="h-4 w-4 text-gray-400" />
+        {/* Content */}
+        <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
+          <form id="project-form" onSubmit={handleSubmit(onSubmit)} className="p-6">
+            {/* Alerts */}
+            {error && (
+              <Card className="mb-6 border-red-200 bg-red-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-red-600" />
+                    <p className="text-red-800 text-sm">{error}</p>
                   </div>
-                  <input
-                    {...register('sale_amount', { valueAsNumber: true })}
-                    type="number"
-                    step="1"
-                    min="0"
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0"
-                  />
-                </div>
-                {errors.sale_amount && (
-                  <p className="mt-1 text-sm text-red-600">{errors.sale_amount.message}</p>
-                )}
-              </div>
+                </CardContent>
+              </Card>
+            )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Costo Proyectado (CLP) *
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSign className="h-4 w-4 text-gray-400" />
+            {isEditing && !canEdit && (
+              <Card className="mb-6 border-yellow-200 bg-yellow-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                    <p className="text-yellow-800 text-sm">
+                      Este proyecto está terminado. Solo se pueden editar documentos y notas.
+                    </p>
                   </div>
-                  <input
-                    {...register('projected_cost', { valueAsNumber: true })}
-                    type="number"
-                    step="1"
-                    min="0"
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0"
-                  />
-                </div>
-                {errors.projected_cost && (
-                  <p className="mt-1 text-sm text-red-600">{errors.projected_cost.message}</p>
-                )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Two Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column - Basic Info */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-6">
+                    <Building2 className="h-5 w-5 text-gray-600" />
+                    <h3 className="text-lg font-semibold text-gray-900">Información Básica</h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* ID y Nombre en una fila */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          ID del Proyecto *
+                        </label>
+                        <input
+                          {...register('custom_id')}
+                          type="text"
+                          disabled={isEditing && !canEdit}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          placeholder="Ej: 2024-001"
+                        />
+                        {errors.custom_id && (
+                          <p className="mt-1 text-sm text-red-600">{errors.custom_id.message}</p>
+                        )}
+                        <p className="mt-1 text-xs text-gray-500">
+                          Solo letras, números, guiones y puntos
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Estado
+                        </label>
+                        {isEditing ? (
+                          <select
+                            {...register('status')}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          >
+                            {PROJECT_STATUSES.map((status) => (
+                              <option key={status.value} value={status.value}>
+                                {status.label}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <div className="py-2">
+                            <Badge variant="in_progress">En Proceso</Badge>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Nombre del Proyecto *
+                      </label>
+                      <input
+                        {...register('name')}
+                        type="text"
+                        disabled={isEditing && !canEdit}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        placeholder="Ej: Construcción Edificio ABC"
+                      />
+                      {errors.name && (
+                        <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Cliente *
+                      </label>
+                      <input
+                        {...register('client')}
+                        type="text"
+                        disabled={isEditing && !canEdit}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        placeholder="Ej: Constructora XYZ S.A."
+                      />
+                      {errors.client && (
+                        <p className="mt-1 text-sm text-red-600">{errors.client.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Descripción
+                      </label>
+                      <textarea
+                        {...register('description')}
+                        rows={3}
+                        disabled={isEditing && !canEdit}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed resize-none"
+                        placeholder="Descripción detallada del proyecto..."
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Right Column - Financial & Additional Info */}
+              <div className="space-y-6">
+                {/* Financial Information */}
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-6">
+                      <DollarSign className="h-5 w-5 text-gray-600" />
+                      <h3 className="text-lg font-semibold text-gray-900">Información Financiera</h3>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Monto de Venta (CLP) *
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <span className="text-gray-500 text-sm">$</span>
+                            </div>
+                            <input
+                              {...register('sale_amount', { valueAsNumber: true })}
+                              type="number"
+                              step="1"
+                              min="0"
+                              disabled={isEditing && !canEdit}
+                              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed tabular-nums"
+                              placeholder="0"
+                            />
+                          </div>
+                          {errors.sale_amount && (
+                            <p className="mt-1 text-sm text-red-600">{errors.sale_amount.message}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Costo Proyectado (CLP) *
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                              <span className="text-gray-500 text-sm">$</span>
+                            </div>
+                            <input
+                              {...register('projected_cost', { valueAsNumber: true })}
+                              type="number"
+                              step="1"
+                              min="0"
+                              disabled={isEditing && !canEdit}
+                              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed tabular-nums"
+                              placeholder="0"
+                            />
+                          </div>
+                          {errors.projected_cost && (
+                            <p className="mt-1 text-sm text-red-600">{errors.projected_cost.message}</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Margin Preview */}
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-4">
+                          <h4 className="text-sm font-medium text-blue-900 mb-3">Margen Proyectado</h4>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-blue-700">Margen:</span>
+                              <p className="font-semibold text-blue-900 tabular-nums">
+                                {new Intl.NumberFormat('es-CL', { 
+                                  style: 'currency', 
+                                  currency: 'CLP',
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 0,
+                                }).format(projectedMargin)}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-blue-700">Porcentaje:</span>
+                              <p className="font-semibold text-blue-900 tabular-nums">
+                                {marginPercentage.toFixed(1)}%
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Dates & Documents */}
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-6">
+                      <Calendar className="h-5 w-5 text-gray-600" />
+                      <h3 className="text-lg font-semibold text-gray-900">Fechas</h3>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Fecha de Inicio
+                        </label>
+                        <input
+                          {...register('start_date')}
+                          type="date"
+                          disabled={isEditing && !canEdit}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Fecha de Finalización
+                        </label>
+                        <input
+                          {...register('end_date')}
+                          type="date"
+                          disabled={isEditing && !canEdit}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        />
+                        {errors.end_date && (
+                          <p className="mt-1 text-sm text-red-600">{errors.end_date.message}</p>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Documents */}
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-6">
+                      <FileText className="h-5 w-5 text-gray-600" />
+                      <h3 className="text-lg font-semibold text-gray-900">Documentos</h3>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Orden de Compra
+                        </label>
+                        <input
+                          {...register('purchase_order')}
+                          type="text"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Ej: OC-2024-001"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          HES (Hoja de Entrada en Servicio)
+                        </label>
+                        <input
+                          {...register('hes')}
+                          type="text"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Ej: HES-2024-001"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Factura de Venta
+                        </label>
+                        <input
+                          {...register('sale_invoice')}
+                          type="text"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Ej: FV-2024-001"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
 
-            {/* Mostrar cálculo de margen en tiempo real */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-blue-900 mb-2">Margen Proyectado</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-blue-700">Margen:</span>
-                  <span className="font-semibold ml-2">
-                    {new Intl.NumberFormat('es-CL', { 
-                      style: 'currency', 
-                      currency: 'CLP',
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    }).format(projectedMargin)}
-                  </span>
+            {/* Full Width Notes Section */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <FileText className="h-5 w-5 text-gray-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">Notas Adicionales</h3>
                 </div>
-                <div>
-                  <span className="text-blue-700">Porcentaje:</span>
-                  <span className="font-semibold ml-2">
-                    {marginPercentage.toFixed(1)}%
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Fechas */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Fechas</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fecha de Inicio
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <input
-                    {...register('start_date')}
-                    type="date"
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fecha de Finalización
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <input
-                    {...register('end_date')}
-                    type="date"
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                {errors.end_date && (
-                  <p className="mt-1 text-sm text-red-600">{errors.end_date.message}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Documentos */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Documentos</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Orden de Compra
-                </label>
-                <input
-                  {...register('purchase_order')}
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Ej: OC-2024-001"
+                <textarea
+                  {...register('notes')}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  placeholder="Notas adicionales sobre el proyecto..."
                 />
-              </div>
+              </CardContent>
+            </Card>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  HES (Hoja de Entrada en Servicio)
-                </label>
-                <input
-                  {...register('hes')}
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Ej: HES-2024-001"
-                />
-              </div>
-            </div>
+          </form>
+        </div>
+
+        {/* Footer with Actions */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="text-sm text-gray-500">
+            {isEditing && project?.status === 'completed' && (
+              <span className="flex items-center gap-1">
+                <AlertTriangle className="h-4 w-4" />
+                Proyecto terminado: edición limitada
+              </span>
+            )}
           </div>
-
-          {/* Notas */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Notas Adicionales
-            </label>
-            <textarea
-              {...register('notes')}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Notas adicionales sobre el proyecto..."
-            />
-          </div>
-
-          {/* Botones */}
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-            <button
-              type="button"
+          <div className="flex items-center gap-3">
+            <Button 
+              type="button" 
+              variant="secondary" 
               onClick={handleClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              disabled={loading}
             >
               Cancelar
-            </button>
-            <button
-              type="submit"
+            </Button>
+            <Button 
+              type="submit" 
+              variant="primary" 
+              loading={loading}
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              form="project-form"
             >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  {project ? 'Actualizando...' : 'Creando...'}
-                </div>
-              ) : (
-                project ? 'Actualizar Proyecto' : 'Crear Proyecto'
-              )}
-            </button>
+              {isEditing ? 'Actualizar Proyecto' : 'Crear Proyecto'}
+            </Button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

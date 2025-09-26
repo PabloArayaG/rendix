@@ -10,7 +10,7 @@ export function Header({ title, subtitle }: HeaderProps) {
   const { user } = useAuthStore();
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/60 px-6 py-4 shadow-sm">
       <div className="flex items-center justify-between">
         {/* Title section */}
         <div>

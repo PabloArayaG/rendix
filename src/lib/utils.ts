@@ -41,12 +41,39 @@ export const formatDate = (date: string | Date): string => {
 };
 
 export const formatShortDate = (date: string | Date): string => {
-  const d = typeof date === 'string' ? new Date(date) : date;
+  const d = typeof date === 'string' ? new Date(date + 'T00:00:00') : date;
   return new Intl.DateTimeFormat('es-ES', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
   }).format(d);
+};
+
+// Función para convertir Date a string en formato YYYY-MM-DD (para inputs date)
+export const formatDateForInput = (date: string | Date | null | undefined): string => {
+  if (!date) return '';
+  
+  let d: Date;
+  if (typeof date === 'string') {
+    // Si viene del backend como "YYYY-MM-DD", tratarlo como fecha local
+    d = new Date(date + 'T00:00:00');
+  } else {
+    d = date;
+  }
+  
+  // Formatear como YYYY-MM-DD para input date
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+};
+
+// Función para convertir input date string a formato correcto para envío
+export const parseInputDate = (dateString: string): string => {
+  if (!dateString) return '';
+  // Ya viene en formato YYYY-MM-DD del input, no necesita conversión
+  return dateString;
 };
 
 export const formatDateTime = (date: string | Date): string => {
@@ -63,9 +90,12 @@ export const formatDateTime = (date: string | Date): string => {
 // Utilidad para obtener el color según el estado del proyecto
 export const getStatusColor = (status: string): string => {
   switch (status) {
-    case 'active':
-      return 'text-green-600 bg-green-100';
+    case 'in_progress':
+      return 'text-blue-600 bg-blue-100';
     case 'completed':
+      return 'text-green-600 bg-green-100';
+    // Mantener compatibilidad con estados anteriores
+    case 'active':
       return 'text-blue-600 bg-blue-100';
     case 'on_hold':
       return 'text-yellow-600 bg-yellow-100';
@@ -82,6 +112,22 @@ export const getMarginColor = (marginPercentage: number): string => {
   if (marginPercentage >= 10) return 'text-yellow-600';
   if (marginPercentage >= 0) return 'text-orange-600';
   return 'text-red-600';
+};
+
+// Utilidad para obtener el color según el estado del gasto
+export const getExpenseStatusColor = (status: string): string => {
+  switch (status) {
+    case 'provision':
+      return 'text-yellow-600 bg-yellow-100';
+    case 'paid':
+      return 'text-green-600 bg-green-100';
+    case 'credit':
+      return 'text-blue-600 bg-blue-100';
+    case 'advance':
+      return 'text-purple-600 bg-purple-100';
+    default:
+      return 'text-gray-600 bg-gray-100';
+  }
 };
 
 // Utilidad para validar archivos

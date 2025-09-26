@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, Calendar, DollarSign, Upload, Tag, FileText } from 'lucide-react';
+import { X, Calendar, DollarSign, Upload, FileText, Lock } from 'lucide-react';
 import { useExpenses } from '../../hooks/useExpenses';
 import { useProjects } from '../../hooks/useProjects';
-import { Expense, CreateExpenseDTO, EXPENSE_CATEGORIES } from '../../types/database';
+import { Expense, CreateExpenseDTO, EXPENSE_CATEGORIES, EXPENSE_STATUSES, DOCUMENT_TYPES } from '../../types/database';
+import { Button } from '../ui';
+import { formatDateForInput, parseInputDate } from '../../lib/utils';
 
 const expenseSchema = z.object({
   project_id: z.string().min(1, 'El proyecto es requerido'),
@@ -15,6 +17,13 @@ const expenseSchema = z.object({
   amount: z.number().min(1, 'El monto total debe ser mayor a 0'),
   category: z.string().min(1, 'La categoría es requerida'),
   date: z.string().min(1, 'La fecha es requerida'),
+  status: z.enum(['provision', 'paid', 'credit', 'advance'], {
+    required_error: 'El estado es requerido',
+  }),
+  document_type: z.enum(['boleta', 'factura'], {
+    required_error: 'El tipo de documento es requerido',
+  }),
+  document_number: z.string().optional(),
   supplier: z.string().optional(),
   invoice_number: z.string().optional(),
   notes: z.string().optional(),
@@ -53,7 +62,10 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
       tax_amount: 0,
       amount: 0,
       category: 'general',
-      date: new Date().toISOString().split('T')[0],
+      date: formatDateForInput(new Date()),
+      status: 'provision',
+      document_type: 'boleta',
+      document_number: '',
       supplier: '',
       invoice_number: '',
       notes: '',
@@ -84,7 +96,10 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
         tax_amount: expense.tax_amount || (expense.amount - calculateNet(expense.amount)),
         amount: expense.amount,
         category: expense.category,
-        date: expense.date,
+        date: formatDateForInput(expense.date),
+        status: expense.status || 'provision',
+        document_type: expense.document_type || 'boleta',
+        document_number: expense.document_number || '',
         supplier: expense.supplier || '',
         invoice_number: expense.invoice_number || '',
         notes: expense.notes || '',
@@ -97,7 +112,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
         tax_amount: 0,
         amount: 0,
         category: 'general',
-        date: new Date().toISOString().split('T')[0],
+        date: formatDateForInput(new Date()),
         supplier: '',
         invoice_number: '',
         notes: '',
@@ -117,7 +132,10 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
         tax_amount: data.tax_amount,
         amount: data.net_amount + data.tax_amount,
         category: data.category as any,
-        date: data.date,
+        date: parseInputDate(data.date),
+        status: data.status as any,
+        document_type: data.document_type as any,
+        document_number: data.document_number || undefined,
         supplier: data.supplier || undefined,
         invoice_number: data.invoice_number || undefined,
         notes: data.notes || undefined,
@@ -171,22 +189,38 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
 
   if (!isOpen) return null;
 
+  const isEditing = !!expense;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {expense ? 'Editar Gasto' : 'Registrar Nuevo Gasto'}
-          </h2>
-          <button
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {isEditing ? 'Editar Gasto' : 'Registrar Nuevo Gasto'}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {isEditing ? 'Modifica la información del gasto' : 'Completa los datos para registrar un nuevo gasto'}
+              </p>
+            </div>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm"
             onClick={handleClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="h-8 w-8 p-0"
           >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
+        <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
+          <form id="expense-form" onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <p className="text-red-800 text-sm">{error}</p>
@@ -197,22 +231,44 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Información del Gasto</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Proyecto *
                 </label>
-                <select
-                  {...register('project_id')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Seleccionar proyecto</option>
-                  {projects.map((project) => (
-                    <option key={project.id} value={project.id}>
-                      {project.custom_id} - {project.name}
-                    </option>
-                  ))}
-                </select>
+                {defaultProjectId ? (
+                  // Si hay un proyecto preseleccionado, mostrarlo como readonly
+                  <div className="relative">
+                    <div className="w-full px-3 py-2 pl-9 border border-gray-300 rounded-md bg-gray-50 text-gray-700 flex items-center">
+                      <Lock className="absolute left-3 h-4 w-4 text-gray-400" />
+                      {(() => {
+                        const project = projects.find(p => p.id === defaultProjectId);
+                        return project ? `${project.custom_id} - ${project.name}` : 'Proyecto no encontrado';
+                      })()}
+                    </div>
+                    <input
+                      {...register('project_id')}
+                      type="hidden"
+                      value={defaultProjectId}
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Gasto asociado al proyecto actual
+                    </p>
+                  </div>
+                ) : (
+                  // Si no hay proyecto preseleccionado, mostrar selector
+                  <select
+                    {...register('project_id')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Seleccionar proyecto</option>
+                    {projects.map((project) => (
+                      <option key={project.id} value={project.id}>
+                        {project.custom_id} - {project.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 {errors.project_id && (
                   <p className="mt-1 text-sm text-red-600">{errors.project_id.message}</p>
                 )}
@@ -234,6 +290,25 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
                 </select>
                 {errors.category && (
                   <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Estado *
+                </label>
+                <select
+                  {...register('status')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {EXPENSE_STATUSES.map((status) => (
+                    <option key={status.value} value={status.value}>
+                      {status.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.status && (
+                  <p className="mt-1 text-sm text-red-600">{errors.status.message}</p>
                 )}
               </div>
             </div>
@@ -384,7 +459,38 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Información Adicional</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tipo de Documento *
+                </label>
+                <select
+                  {...register('document_type')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  {DOCUMENT_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.document_type && (
+                  <p className="mt-1 text-sm text-red-600">{errors.document_type.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {watch('document_type') === 'factura' ? 'Número de Factura' : 'Número de Boleta'}
+                </label>
+                <input
+                  {...register('document_number')}
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder={watch('document_type') === 'factura' ? 'Ej: FAC-2024-001' : 'Ej: BOL-2024-001'}
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Proveedor
@@ -394,18 +500,6 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Ej: Ferretería ABC S.L."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Número de Factura
-                </label>
-                <input
-                  {...register('invoice_number')}
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Ej: FAC-2024-001"
                 />
               </div>
             </div>
@@ -488,31 +582,31 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
             </div>
           </div>
 
-          {/* Botones */}
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-            <button
-              type="button"
+          </form>
+        </div>
+
+        {/* Footer with Actions */}
+        <div className="flex items-center justify-end px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-3">
+            <Button 
+              type="button" 
+              variant="secondary" 
               onClick={handleClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              disabled={loading}
             >
               Cancelar
-            </button>
-            <button
-              type="submit"
+            </Button>
+            <Button 
+              type="submit" 
+              variant="primary" 
+              loading={loading}
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              form="expense-form"
             >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  {expense ? 'Actualizando...' : 'Registrando...'}
-                </div>
-              ) : (
-                expense ? 'Actualizar Gasto' : 'Registrar Gasto'
-              )}
-            </button>
+              {isEditing ? 'Actualizar Gasto' : 'Registrar Gasto'}
+            </Button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

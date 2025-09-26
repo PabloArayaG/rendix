@@ -40,8 +40,10 @@ export function Projects() {
 
   const StatusBadge = ({ status }: { status: string }) => (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
-      {status === 'active' && 'Activo'}
-      {status === 'completed' && 'Completado'}
+      {status === 'in_progress' && 'En Proceso'}
+      {status === 'completed' && 'Terminado'}
+      {/* Mantener compatibilidad con estados anteriores */}
+      {status === 'active' && 'En Proceso'}
       {status === 'on_hold' && 'En Pausa'}
       {status === 'cancelled' && 'Cancelado'}
     </span>
@@ -67,9 +69,13 @@ export function Projects() {
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Building2 className="h-5 w-5 text-blue-600" />
               </div>
-              <div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                    {project.custom_id}
+                  </span>
+                </div>
                 <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
-                <p className="text-sm text-gray-500">{project.custom_id}</p>
               </div>
             </div>
             
@@ -163,13 +169,11 @@ export function Projects() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="pl-3 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 min-w-[140px]"
             >
               <option value="all">Todos los estados</option>
-              <option value="active">Activos</option>
-              <option value="completed">Completados</option>
-              <option value="on_hold">En Pausa</option>
-              <option value="cancelled">Cancelados</option>
+              <option value="in_progress">En Proceso</option>
+              <option value="completed">Terminados</option>
             </select>
             
             <button
@@ -202,9 +206,9 @@ export function Projects() {
                 <Building2 className="h-4 w-4 text-green-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Activos</p>
+                <p className="text-sm font-medium text-gray-600">En Proceso</p>
                 <p className="text-xl font-semibold text-gray-900">
-                  {projects.filter(p => p.status === 'active').length}
+                  {projects.filter(p => p.status === 'in_progress' || p.status === 'active').length}
                 </p>
               </div>
             </div>
@@ -216,7 +220,7 @@ export function Projects() {
                 <Building2 className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Completados</p>
+                <p className="text-sm font-medium text-gray-600">Terminados</p>
                 <p className="text-xl font-semibold text-gray-900">
                   {projects.filter(p => p.status === 'completed').length}
                 </p>

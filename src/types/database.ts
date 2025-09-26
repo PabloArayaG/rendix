@@ -16,11 +16,15 @@ export type ExpenseCategory =
   | 'other'           // Otros
   | 'general';        // General
 
-export type ProjectStatus = 'active' | 'completed' | 'on_hold' | 'cancelled';
+export type ExpenseStatus = 'provision' | 'paid' | 'credit' | 'advance';
+
+export type DocumentType = 'boleta' | 'factura';
+
+export type ProjectStatus = 'in_progress' | 'completed';
 
 export interface Project {
   id: string; // UUID primary key
-  custom_id?: string; // ID personalizado como "P-2024-001" (auto-generado)
+  custom_id: string; // ID personalizado definido por el usuario (REQUERIDO)
   name: string; // Nombre del proyecto (UNIQUE)
   description?: string; // Descripción opcional
   client: string; // Nombre del cliente (REQUERIDO)
@@ -41,6 +45,7 @@ export interface Project {
   purchase_order?: string; // Número de Orden de Compra (OC)
   hes?: string; // Hoja de Entrada en Servicio
   invoice?: string; // Número de Factura emitida
+  sale_invoice?: string; // Número de Factura de Venta al cliente
   
   // METADATOS
   tags: string[]; // Array de etiquetas
@@ -66,11 +71,14 @@ export interface Expense {
   date: string; // Fecha del gasto (DATE, default HOY)
   
   // INFORMACIÓN ADICIONAL
+  status: ExpenseStatus; // Estado del gasto (Provisión, Pagado, Crédito, Anticipo)
+  document_type: DocumentType; // Tipo de documento (Boleta o Factura)
+  document_number?: string; // Número de boleta o factura
   notes?: string; // Notas adicionales
   receipt_url?: string; // URL del comprobante (Supabase Storage)
   receipt_filename?: string; // Nombre original del archivo
   supplier?: string; // Proveedor/empresa
-  invoice_number?: string; // Número de factura del proveedor
+  invoice_number?: string; // Número de factura del proveedor (DEPRECATED - usar document_number)
   
   // METADATOS
   tags: string[]; // Array de etiquetas
@@ -84,6 +92,7 @@ export interface Expense {
 
 // Tipos derivados para formularios y API
 export interface CreateProjectDTO {
+  custom_id: string;
   name: string;
   description?: string;
   client: string;
@@ -93,6 +102,7 @@ export interface CreateProjectDTO {
   end_date?: string;
   purchase_order?: string;
   hes?: string;
+  sale_invoice?: string;
   tags?: string[];
   notes?: string;
 }
@@ -112,9 +122,12 @@ export interface CreateExpenseDTO {
   tax_amount: number;
   category: ExpenseCategory;
   date: string;
+  status: ExpenseStatus;
+  document_type: DocumentType;
+  document_number?: string;
   notes?: string;
   supplier?: string;
-  invoice_number?: string;
+  invoice_number?: string; // DEPRECATED - usar document_number
   tags?: string[];
 }
 
@@ -175,8 +188,18 @@ export const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string }[] = [
 ];
 
 export const PROJECT_STATUSES: { value: ProjectStatus; label: string; color: string }[] = [
-  { value: 'active', label: 'Activo', color: 'green' },
-  { value: 'completed', label: 'Completado', color: 'blue' },
-  { value: 'on_hold', label: 'En Pausa', color: 'yellow' },
-  { value: 'cancelled', label: 'Cancelado', color: 'red' }
+  { value: 'in_progress', label: 'En Proceso', color: 'blue' },
+  { value: 'completed', label: 'Terminado', color: 'green' }
+];
+
+export const EXPENSE_STATUSES: { value: ExpenseStatus; label: string; color: string }[] = [
+  { value: 'provision', label: 'Provisión', color: 'yellow' },
+  { value: 'paid', label: 'Pagado', color: 'green' },
+  { value: 'credit', label: 'Crédito', color: 'blue' },
+  { value: 'advance', label: 'Anticipo', color: 'purple' }
+];
+
+export const DOCUMENT_TYPES: { value: DocumentType; label: string }[] = [
+  { value: 'boleta', label: 'Boleta' },
+  { value: 'factura', label: 'Factura' }
 ];

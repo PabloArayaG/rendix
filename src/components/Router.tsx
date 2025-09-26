@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Dashboard } from '../pages/Dashboard';
 import { Projects } from '../pages/Projects';
 import { ProjectDetail } from '../pages/ProjectDetail';
-import { Expenses } from '../pages/Expenses';
 
 // Páginas placeholder para desarrollo
 const PlaceholderPage = ({ title, subtitle }: { title: string; subtitle: string }) => {
@@ -16,13 +15,6 @@ const PlaceholderPage = ({ title, subtitle }: { title: string; subtitle: string 
     </div>
   );
 };
-
-const Reports = () => (
-  <PlaceholderPage 
-    title="Reportes" 
-    subtitle="Analiza el rendimiento financiero de tus proyectos" 
-  />
-);
 
 const Settings = () => (
   <PlaceholderPage 
@@ -76,10 +68,6 @@ export function Router() {
         return <Dashboard />;
       case '/projects':
         return <Projects />;
-      case '/expenses':
-        return <Expenses />;
-      case '/reports':
-        return <Reports />;
       case '/settings':
         return <Settings />;
       default:
