@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { 
   Plus, 
   Search, 
-  Filter, 
   Receipt,
   Calendar,
   DollarSign,

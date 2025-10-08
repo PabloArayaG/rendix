@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { 
   Plus, 
   Search, 
-  Filter, 
   MoreHorizontal,
   Building2
 } from 'lucide-react';
