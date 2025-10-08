@@ -13,6 +13,8 @@ export type ExpenseCategory =
   | 'tools'           // Herramientas
   | 'safety'          // Seguridad/EPP
   | 'administration'  // Gastos administrativos
+  | 'food'            // Alimentación
+  | 'accommodation'   // Hospedaje
   | 'other'           // Otros
   | 'general';        // General
 
@@ -183,6 +185,8 @@ export const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: 'tools', label: 'Herramientas' },
   { value: 'safety', label: 'Seguridad/EPP' },
   { value: 'administration', label: 'Gastos administrativos' },
+  { value: 'food', label: 'Alimentación' },
+  { value: 'accommodation', label: 'Hospedaje' },
   { value: 'other', label: 'Otros' },
   { value: 'general', label: 'General' }
 ];
