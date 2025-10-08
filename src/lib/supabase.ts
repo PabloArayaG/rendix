@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Variables de entorno para Supabase
-// Soporte para Vite (desarrollo) y Next.js/Vercel (producción)
-const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Prioridad: NEXT_PUBLIC (Vercel) > VITE (desarrollo)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env?.VITE_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || import.meta.env?.VITE_SUPABASE_ANON_KEY;
 
 // DEBUG: Log temporal para verificar qué URL está usando
 console.log('🔍 SUPABASE DEBUG:', {
