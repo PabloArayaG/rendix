@@ -133,7 +133,12 @@ src/
 - Políticas por usuario
 - Validaciones en frontend y backend
 
-## 🚀 Producción
+## 🚀 Envs & Deploy
+
+### Entornos Disponibles
+
+- **Producción** → https://app.getrendix.com (rama `master`)
+- **Staging** → https://staging.getrendix.com (rama `staging`)
 
 ### Build
 
@@ -143,16 +148,51 @@ npm run build
 
 ### Deploy
 
-Los archivos de producción estarán en `dist/`. Puedes deployar en:
+**Producción:**
+- Plataforma: Vercel
+- Branch: `master`
+- Deploy automático en push
+- Dominio: app.getrendix.com
 
-- Vercel
-- Netlify  
-- Render
-- Tu servidor preferido
+**Staging:**
+- Plataforma: Vercel (Preview Environment)
+- Branch: `staging`
+- Deploy automático en push
+- Dominio: staging.getrendix.com
 
-### Variables de Entorno en Producción
+### Variables de Entorno
 
-Asegúrate de configurar las variables de entorno en tu plataforma de deploy.
+**Producción (Vercel Production):**
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://rendix-prod.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+PUBLIC_APP_URL=https://app.getrendix.com
+```
+
+**Staging (Vercel Preview):**
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://rendix-staging.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+PUBLIC_APP_URL=https://staging.getrendix.com
+```
+
+### Flujo de Desarrollo
+
+```bash
+# Desarrollo en staging
+git checkout staging
+# ... hacer cambios ...
+git add .
+git commit -m "nueva feature"
+git push origin staging  # Deploy automático a staging
+
+# Promoción a producción
+git checkout master
+git merge staging
+git push origin master   # Deploy automático a producción
+```
 
 ## 📊 Reglas de Negocio
 

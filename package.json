@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed:staging": "tsx scripts/seed.staging.ts",
+    "type-check": "tsc --noEmit",
+    "health:staging": "curl -I https://staging.getrendix.com",
+    "health:prod": "curl -I https://app.getrendix.com"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -35,6 +39,7 @@
     "eslint-plugin-react-refresh": "^0.4.3",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.7.0",
     "typescript": "^5.0.2",
     "vite": "^6.3.6"
   }
