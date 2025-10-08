@@ -10,7 +10,7 @@ interface LayoutProps {
 
 export function Layout({ children, title, subtitle }: LayoutProps) {
   const [currentPath, setCurrentPath] = useState('/dashboard');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed] = useState(false);
 
   useEffect(() => {
     // Obtener la ruta actual

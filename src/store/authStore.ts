@@ -13,7 +13,7 @@ interface AuthState {
   initialize: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   loading: false,
   initialized: false,
@@ -103,7 +103,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       // Escuchar cambios de autenticación
-      supabase.auth.onAuthStateChange((event, session) => {
+      supabase.auth.onAuthStateChange((_event, session) => {
         if (session?.user) {
           set({ 
             user: {

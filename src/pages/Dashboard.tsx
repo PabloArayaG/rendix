@@ -13,7 +13,7 @@ import {
 import { Layout } from '../components/layout/Layout';
 import { useDashboard } from '../hooks/useDashboard';
 import { formatCurrency, formatPercentage, formatShortDate, getMarginColor } from '../lib/utils';
-import { Card, CardContent, Badge, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCellNumber, EmptyState, Button } from '../components/ui';
+import { Card, CardContent, Badge, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCellNumber, EmptyState } from '../components/ui';
 import { ExpenseModal } from '../components/expenses/ExpenseModal';
 import { Expense } from '../types/database';
 

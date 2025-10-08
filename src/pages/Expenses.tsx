@@ -4,7 +4,6 @@ import {
   Search, 
   Filter, 
   Receipt,
-  Building2,
   Calendar,
   DollarSign,
   Tag
@@ -17,8 +16,7 @@ import { Expense } from '../types/database';
 import { EXPENSE_CATEGORIES } from '../types/database';
 import { 
   formatCurrency, 
-  formatShortDate,
-  formatDateTime
+  formatShortDate
 } from '../lib/utils';
 
 export function Expenses() {

@@ -4,9 +4,6 @@ import {
   Search, 
   Filter, 
   MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
   Building2
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
@@ -208,7 +205,7 @@ export function Projects() {
               <div>
                 <p className="text-sm font-medium text-gray-600">En Proceso</p>
                 <p className="text-xl font-semibold text-gray-900">
-                  {projects.filter(p => p.status === 'in_progress' || p.status === 'active').length}
+                  {projects.filter(p => p.status === 'in_progress').length}
                 </p>
               </div>
             </div>
