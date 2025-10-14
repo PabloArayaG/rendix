@@ -19,14 +19,27 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialized: false,
 
   login: async (email: string, password: string) => {
-    set({ loading: true });
+    // NO cambiar loading global para evitar re-renders
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Manejar errores específicos de autenticación
+        if (error.message.includes('Invalid login credentials')) {
+          throw new Error('Contraseña incorrecta');
+        } else if (error.message.includes('Email not confirmed')) {
+          throw new Error('Confirma tu email antes de iniciar sesión');
+        } else if (error.message.includes('Too many requests')) {
+          throw new Error('Demasiados intentos. Espera unos minutos');
+        } else {
+          // Solo hacer log de errores inesperados
+          console.error('Error inesperado en login:', error);
+          throw new Error('Error de autenticación');
+        }
+      }
 
       if (data.user) {
         set({ 
@@ -38,10 +51,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         });
       }
     } catch (error) {
-      console.error('Error en login:', error);
+      // Re-lanzar el error sin hacer log adicional
+      // (el log ya se hizo arriba si era necesario)
       throw error;
-    } finally {
-      set({ loading: false });
     }
   },
 
@@ -103,8 +115,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
 
       // Escuchar cambios de autenticación
-      supabase.auth.onAuthStateChange((_event, session) => {
-        if (session?.user) {
+      supabase.auth.onAuthStateChange((event, session) => {
+        // Solo actualizar el estado si el evento es SIGNED_IN o SIGNED_OUT explícito
+        // Esto evita que se limpie el estado en errores de login
+        if (event === 'SIGNED_IN' && session?.user) {
           set({ 
             user: {
               id: session.user.id,
@@ -112,7 +126,7 @@ export const useAuthStore = create<AuthState>((set) => ({
               created_at: session.user.created_at || ''
             }
           });
-        } else {
+        } else if (event === 'SIGNED_OUT') {
           set({ user: null });
         }
       });

@@ -19,7 +19,9 @@ interface LoginFormProps {
 export function LoginForm({ onToggleMode }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const { login, loading } = useAuthStore();
+  const [authError, setAuthError] = useState(''); // Estado adicional para errores de auth
+  const [isLoading, setIsLoading] = useState(false); // Loading local
+  const { login } = useAuthStore();
 
   const {
     register,
@@ -30,29 +32,33 @@ export function LoginForm({ onToggleMode }: LoginFormProps) {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    setAuthError('');
+    setIsLoading(true);
     try {
-      setError('');
       await login(data.email, data.password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setAuthError('Contraseña o email inválido, reintentar nuevamente');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="text-center mb-8">
+        <div className="flex justify-center mb-4">
+          <img 
+            src="/Rendix-favicon.png" 
+            alt="RENDIX Logo" 
+            className="w-16 h-16"
+          />
+        </div>
         <h1 className="text-3xl font-bold text-gray-900">RENDIX</h1>
         <p className="text-gray-600 mt-2">Sistema de Gestión Financiera</p>
       </div>
 
       <div className="bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold text-center mb-6">Iniciar Sesión</h2>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
@@ -102,10 +108,10 @@ export function LoginForm({ onToggleMode }: LoginFormProps) {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isLoading}
             className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? (
+            {isLoading ? (
               <div className="flex items-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                 Iniciando sesión...
@@ -118,6 +124,12 @@ export function LoginForm({ onToggleMode }: LoginFormProps) {
             )}
           </button>
         </form>
+
+        {authError && (
+          <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-center">
+            {authError}
+          </div>
+        )}
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">

@@ -15,6 +15,7 @@ export type ExpenseCategory =
   | 'administration'  // Gastos administrativos
   | 'food'            // Alimentación
   | 'accommodation'   // Hospedaje
+  | 'fuel'            // Combustible
   | 'other'           // Otros
   | 'general';        // General
 
@@ -187,6 +188,7 @@ export const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: 'administration', label: 'Gastos administrativos' },
   { value: 'food', label: 'Alimentación' },
   { value: 'accommodation', label: 'Hospedaje' },
+  { value: 'fuel', label: 'Combustible' },
   { value: 'other', label: 'Otros' },
   { value: 'general', label: 'General' }
 ];
