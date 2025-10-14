@@ -1,21 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Variables de entorno para Supabase
-// Prioridad: NEXT_PUBLIC (Vercel) > VITE (desarrollo)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || import.meta.env?.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || import.meta.env?.VITE_SUPABASE_ANON_KEY;
+// Compatible con Vite (desarrollo) y Next.js/Vercel (producción)
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_SUPABASE_URL : undefined);
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined);
 
 // DEBUG: Log temporal para verificar qué URL está usando
 console.log('🔍 SUPABASE DEBUG:', {
   url: supabaseUrl,
-  environment: process.env.NODE_ENV,
+  environment: import.meta.env.MODE || (typeof process !== 'undefined' ? process.env.NODE_ENV : 'unknown'),
   isStaging: supabaseUrl?.includes('lkqjqvzddqsvgyxkvjcf'),
-  hasViteEnv: !!import.meta.env?.VITE_SUPABASE_URL,
-  hasNextEnv: !!process.env.NEXT_PUBLIC_SUPABASE_URL
+  hasViteEnv: !!import.meta.env.VITE_SUPABASE_URL,
+  hasNextEnv: typeof process !== 'undefined' ? !!process.env.NEXT_PUBLIC_SUPABASE_URL : false
 });
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  throw new Error('Missing Supabase environment variables. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (desarrollo) or NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (producción)');
 }
 
 // Cliente de Supabase con configuración optimizada
