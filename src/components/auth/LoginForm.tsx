@@ -18,8 +18,7 @@ interface LoginFormProps {
 
 export function LoginForm({ onToggleMode }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [authError, setAuthError] = useState(''); // Estado adicional para errores de auth
+  const [authError, setAuthError] = useState(''); // Estado para errores de auth
   const [isLoading, setIsLoading] = useState(false); // Loading local
   const { login } = useAuthStore();
 
