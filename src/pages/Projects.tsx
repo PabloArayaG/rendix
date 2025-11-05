@@ -79,11 +79,11 @@ export function Projects() {
             
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <p className="text-sm text-gray-500">Venta</p>
+                <p className="text-sm text-gray-500">Venta Neto</p>
                 <p className="font-semibold text-gray-900">{formatCurrency(project.sale_amount)}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Costo Real</p>
+                <p className="text-sm text-gray-500">Costo Neto</p>
                 <p className="font-semibold text-gray-900">{formatCurrency(project.real_cost)}</p>
               </div>
               <div>

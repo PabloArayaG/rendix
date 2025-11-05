@@ -237,7 +237,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Venta Total</p>
+                <p className="text-sm font-medium text-gray-600">Venta Neto</p>
                 <p className="text-2xl font-bold text-gray-900">{formatCurrency(project.sale_amount)}</p>
               </div>
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -249,7 +249,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Costo Real</p>
+                <p className="text-sm font-medium text-gray-600">Costo Neto</p>
                 <p className="text-2xl font-bold text-gray-900">{formatCurrency(project.real_cost)}</p>
               </div>
               <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
