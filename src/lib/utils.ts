@@ -111,15 +111,44 @@ export const normalizeNumber = (value: number | string): number => {
 export const normalizeExpenseData = (data: any) => {
   console.log('🔍 DATOS ORIGINALES:', data);
   
+  // Verificar si los números están dentro de los límites de DECIMAL(15,2)
+  const MAX_AMOUNT = 9999999999999.99;
+  const net_amount = normalizeNumber(data.net_amount);
+  const tax_amount = normalizeNumber(data.tax_amount);
+  const amount = normalizeNumber(data.amount);
+  
+  // Validar límites
+  if (net_amount > MAX_AMOUNT) {
+    throw new Error(`El monto neto ($${net_amount.toLocaleString()}) excede el límite máximo permitido`);
+  }
+  if (tax_amount > MAX_AMOUNT) {
+    throw new Error(`El IVA ($${tax_amount.toLocaleString()}) excede el límite máximo permitido`);
+  }
+  if (amount > MAX_AMOUNT) {
+    throw new Error(`El monto total ($${amount.toLocaleString()}) excede el límite máximo permitido`);
+  }
+  
   const normalized = {
     ...data,
-    net_amount: normalizeNumber(data.net_amount),
-    tax_amount: normalizeNumber(data.tax_amount),
-    amount: normalizeNumber(data.amount),
+    net_amount,
+    tax_amount,
+    amount,
     date: parseInputDate(data.date),
+    // Asegurar que campos opcionales sean null en lugar de undefined
+    document_number: data.document_number || null,
+    supplier: data.supplier || null,
+    invoice_number: data.invoice_number || null,
+    notes: data.notes || null,
   };
   
   console.log('🔍 DATOS NORMALIZADOS:', normalized);
+  console.log('🔍 VALIDACIÓN LÍMITES:', {
+    net_amount_ok: net_amount <= MAX_AMOUNT,
+    tax_amount_ok: tax_amount <= MAX_AMOUNT,
+    amount_ok: amount <= MAX_AMOUNT,
+    max_allowed: MAX_AMOUNT,
+  });
+  
   return normalized;
 };
 

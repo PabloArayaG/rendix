@@ -17,7 +17,14 @@
 
 ## 🧪 Pasos para Probar con Gerardo
 
-### Paso 1: Actualizar la Aplicación
+### Paso 1: Actualizar Base de Datos
+```bash
+# Ejecutar el script SQL para aumentar límites DECIMAL
+# En Supabase Dashboard > SQL Editor, ejecutar:
+# fix_decimal_limits.sql
+```
+
+### Paso 2: Actualizar la Aplicación
 ```bash
 # Asegúrate de que la app esté actualizada
 git pull
@@ -25,13 +32,13 @@ npm install
 npm run dev
 ```
 
-### Paso 2: Prueba con Gerardo
+### Paso 3: Prueba con Gerardo
 1. **Abrir DevTools**: Presionar F12 en el navegador
 2. **Ir a la pestaña Console**
 3. **Intentar crear un gasto**
 4. **Buscar logs que empiecen con "🔍 GERARDO DEBUG"**
 
-### Paso 3: Información a Revisar
+### Paso 4: Información a Revisar
 Los logs mostrarán:
 - **Configuración del navegador**: idioma, timezone, locale
 - **Datos originales**: números tal como los introduce Gerardo

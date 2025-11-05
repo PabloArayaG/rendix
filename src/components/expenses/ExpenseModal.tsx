@@ -9,12 +9,22 @@ import { Expense, CreateExpenseDTO, EXPENSE_CATEGORIES, EXPENSE_STATUSES, DOCUME
 import { Button } from '../ui';
 import { formatDateForInput, normalizeExpenseData } from '../../lib/utils';
 
+// Límites actualizados para DECIMAL(15,2)
+const MAX_AMOUNT = 9999999999999.99; // 9.9 billones
+const MIN_AMOUNT = 0.01; // 1 centavo
+
 const expenseSchema = z.object({
   project_id: z.string().min(1, 'El proyecto es requerido'),
   description: z.string().min(1, 'La descripción es requerida'),
-  net_amount: z.number().min(1, 'El monto neto debe ser mayor a 0'),
-  tax_amount: z.number().min(0, 'El IVA no puede ser negativo'),
-  amount: z.number().min(1, 'El monto total debe ser mayor a 0'),
+  net_amount: z.number()
+    .min(MIN_AMOUNT, 'El monto neto debe ser mayor a $0')
+    .max(MAX_AMOUNT, 'El monto neto no puede exceder $9.999.999.999.999'),
+  tax_amount: z.number()
+    .min(0, 'El IVA no puede ser negativo')
+    .max(MAX_AMOUNT, 'El IVA no puede exceder $9.999.999.999.999'),
+  amount: z.number()
+    .min(MIN_AMOUNT, 'El monto total debe ser mayor a $0')
+    .max(MAX_AMOUNT, 'El monto total no puede exceder $9.999.999.999.999'),
   category: z.string().min(1, 'La categoría es requerida'),
   date: z.string().min(1, 'La fecha es requerida'),
   status: z.enum(['provision', 'paid', 'credit', 'advance'], {
