@@ -72,8 +72,55 @@ export const formatDateForInput = (date: string | Date | null | undefined): stri
 // Función para convertir input date string a formato correcto para envío
 export const parseInputDate = (dateString: string): string => {
   if (!dateString) return '';
-  // Ya viene en formato YYYY-MM-DD del input, no necesita conversión
-  return dateString;
+  // Validar que el formato sea correcto y normalizar
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    console.error('🔍 FECHA INVÁLIDA:', dateString);
+    return '';
+  }
+  // Devolver en formato ISO (YYYY-MM-DD)
+  return date.toISOString().split('T')[0];
+};
+
+// Función para normalizar números independientemente de la configuración regional
+export const normalizeNumber = (value: number | string): number => {
+  // Si ya es un número válido, devolverlo
+  if (typeof value === 'number' && !isNaN(value)) {
+    return Number(parseFloat(value.toString()).toFixed(2));
+  }
+  
+  // Si es string, normalizar formato
+  if (typeof value === 'string') {
+    // Remover espacios y reemplazar comas por puntos
+    const normalized = value.trim().replace(/,/g, '.');
+    const parsed = parseFloat(normalized);
+    
+    if (isNaN(parsed)) {
+      console.error('🔍 NÚMERO INVÁLIDO:', value, '-> normalizado:', normalized);
+      return 0;
+    }
+    
+    return Number(parsed.toFixed(2));
+  }
+  
+  console.error('🔍 VALOR NO NUMÉRICO:', value);
+  return 0;
+};
+
+// Función para validar y normalizar datos de gasto antes del envío
+export const normalizeExpenseData = (data: any) => {
+  console.log('🔍 DATOS ORIGINALES:', data);
+  
+  const normalized = {
+    ...data,
+    net_amount: normalizeNumber(data.net_amount),
+    tax_amount: normalizeNumber(data.tax_amount),
+    amount: normalizeNumber(data.amount),
+    date: parseInputDate(data.date),
+  };
+  
+  console.log('🔍 DATOS NORMALIZADOS:', normalized);
+  return normalized;
 };
 
 export const formatDateTime = (date: string | Date): string => {

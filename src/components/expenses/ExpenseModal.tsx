@@ -7,7 +7,7 @@ import { useExpenses } from '../../hooks/useExpenses';
 import { useProjects } from '../../hooks/useProjects';
 import { Expense, CreateExpenseDTO, EXPENSE_CATEGORIES, EXPENSE_STATUSES, DOCUMENT_TYPES } from '../../types/database';
 import { Button } from '../ui';
-import { formatDateForInput, parseInputDate } from '../../lib/utils';
+import { formatDateForInput, normalizeExpenseData } from '../../lib/utils';
 
 const expenseSchema = z.object({
   project_id: z.string().min(1, 'El proyecto es requerido'),
@@ -125,14 +125,23 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
       setLoading(true);
       setError('');
 
-      const expenseData: CreateExpenseDTO = {
+      // Log de debugging para identificar problemas
+      console.log('🔍 GERARDO DEBUG - Browser Info:', {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        languages: navigator.languages,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        locale: Intl.NumberFormat().resolvedOptions().locale,
+      });
+
+      const rawExpenseData: CreateExpenseDTO = {
         project_id: data.project_id,
         description: data.description,
         net_amount: data.net_amount,
         tax_amount: data.tax_amount,
         amount: data.net_amount + data.tax_amount,
         category: data.category as any,
-        date: parseInputDate(data.date),
+        date: data.date,
         status: data.status as any,
         document_type: data.document_type as any,
         document_number: data.document_number || undefined,
@@ -141,6 +150,9 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
         notes: data.notes || undefined,
         tags: [],
       };
+
+      // Normalizar datos antes de enviar para evitar problemas regionales
+      const expenseData = normalizeExpenseData(rawExpenseData) as CreateExpenseDTO;
 
       if (expense) {
         await updateExpense(expense.id, expenseData, receiptFile || undefined);
@@ -153,7 +165,13 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
       reset();
       setReceiptFile(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      console.error('🔍 GERARDO DEBUG - Error completo:', {
+        error: err,
+        message: errorMessage,
+        stack: err instanceof Error ? err.stack : undefined,
+      });
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -43,19 +43,44 @@ export const useExpenses = (projectId?: string) => {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('Usuario no autenticado');
 
+    // Log de debugging detallado
+    const finalData = {
+      ...expenseData,
+      tags: expenseData.tags || [],
+      metadata: {},
+      user_id: userId,
+    };
+
+    console.log('🔍 GERARDO DEBUG - Datos enviados a Supabase:', {
+      finalData,
+      dataTypes: {
+        net_amount: typeof finalData.net_amount,
+        tax_amount: typeof finalData.tax_amount,
+        amount: typeof finalData.amount,
+        date: typeof finalData.date,
+        project_id: typeof finalData.project_id,
+        user_id: typeof finalData.user_id,
+      }
+    });
+
     // Crear el gasto primero
     const { data: expense, error } = await supabase
       .from('expenses')
-      .insert({
-        ...expenseData,
-        tags: expenseData.tags || [],
-        metadata: {},
-        user_id: userId,
-      })
+      .insert(finalData)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('🔍 GERARDO DEBUG - Error de Supabase:', {
+        error,
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        sentData: finalData,
+      });
+      throw error;
+    }
 
     // Subir comprobante si existe
     if (receiptFile) {
