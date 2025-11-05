@@ -73,13 +73,13 @@ export function Expenses() {
               <p className="text-sm text-gray-500 mb-2">Monto</p>
               {expense.net_amount && expense.tax_amount ? (
                 <div className="space-y-1">
-                  <p className="text-sm text-gray-700">
-                    Neto: <span className="font-semibold text-gray-900">{formatCurrency(expense.net_amount)}</span>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(expense.net_amount)}
                   </p>
-                  <p className="text-sm text-gray-700">
-                    IVA (19%): <span className="font-semibold text-gray-900">{formatCurrency(expense.tax_amount)}</span>
+                  <p className="text-xs text-gray-600">
+                    IVA (19%): {formatCurrency(expense.tax_amount)}
                   </p>
-                  <p className="text-lg font-bold text-gray-900 pt-1 border-t border-gray-200">
+                  <p className="text-xs text-gray-600">
                     Total: {formatCurrency(expense.amount)}
                   </p>
                 </div>
