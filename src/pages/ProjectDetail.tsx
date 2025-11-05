@@ -390,12 +390,21 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                         
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
                           <div>
-                            <p className="text-xs text-gray-500">Total</p>
-                            <p className="font-semibold text-gray-900">{formatCurrency(expense.amount)}</p>
-                            {expense.net_amount && expense.tax_amount && (
-                              <p className="text-xs text-gray-500">
-                                Neto: {formatCurrency(expense.net_amount)} + IVA: {formatCurrency(expense.tax_amount)}
-                              </p>
+                            <p className="text-xs text-gray-500 mb-1">Monto</p>
+                            {expense.net_amount && expense.tax_amount ? (
+                              <div className="space-y-1">
+                                <p className="text-sm text-gray-700">
+                                  Neto: <span className="font-semibold text-gray-900">{formatCurrency(expense.net_amount)}</span>
+                                </p>
+                                <p className="text-sm text-gray-700">
+                                  IVA (19%): <span className="font-semibold text-gray-900">{formatCurrency(expense.tax_amount)}</span>
+                                </p>
+                                <p className="text-sm font-bold text-gray-900 pt-1 border-t border-gray-200">
+                                  Total: {formatCurrency(expense.amount)}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="font-semibold text-gray-900">{formatCurrency(expense.amount)}</p>
                             )}
                           </div>
                           {expense.supplier && (
