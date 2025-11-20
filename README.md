@@ -53,8 +53,10 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ### 3. Configurar Base de Datos
 
 1. Ve al SQL Editor en tu proyecto de Supabase
-2. Ejecuta el esquema completo desde el archivo `supabase_schema.sql`
+2. Ejecuta el esquema completo desde el archivo `migrations/schemas/supabase_schema.sql`
 3. Verifica que las tablas `projects` y `expenses` se crearon correctamente
+
+> 📁 Todos los archivos SQL están organizados en la carpeta `/migrations`. Ver [migrations/README.md](migrations/README.md) para más detalles.
 
 ### 4. Configurar Storage (Opcional)
 
