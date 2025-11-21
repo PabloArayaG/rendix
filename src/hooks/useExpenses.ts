@@ -189,7 +189,8 @@ export const useExpenses = (projectId?: string) => {
 
     if (error) throw error;
     
-    await updateProjectCosts(expense.project_id);
+    // El trigger de Supabase ya actualiza automáticamente los costos del proyecto
+    // No necesitamos llamar a updateProjectCosts manualmente
     await fetchExpenses();
   };
 
@@ -236,47 +237,8 @@ export const useExpenses = (projectId?: string) => {
     }));
   };
 
-  // Función helper para actualizar costos del proyecto
-  const updateProjectCosts = async (projectId: string) => {
-    const userId = await getCurrentUserId();
-    if (!userId) return;
-
-    // Calcular costo real (suma de gastos)
-    const { data: expensesSum } = await supabase
-      .from('expenses')
-      .select('amount')
-      .eq('project_id', projectId)
-      .eq('user_id', userId);
-
-    interface ExpenseSummary {
-      amount: number;
-    }
-    const expenseSumData = expensesSum as ExpenseSummary[] || [];
-    const realCost = expenseSumData.reduce((sum, expense) => sum + expense.amount, 0);
-
-    // Obtener información del proyecto para calcular margen real
-    const { data: project } = await supabase
-      .from('projects')
-      .select('sale_amount')
-      .eq('id', projectId)
-      .eq('user_id', userId)
-      .single();
-
-    if (project) {
-      const realMargin = project.sale_amount - realCost;
-
-      // Actualizar proyecto
-      await supabase
-        .from('projects')
-        .update({
-          real_cost: realCost,
-          real_margin: realMargin,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', projectId)
-        .eq('user_id', userId);
-    }
-  };
+  // Ya no necesitamos esta función porque el trigger de Supabase
+  // actualiza automáticamente los costos del proyecto usando net_amount
 
   useEffect(() => {
     fetchExpenses();
