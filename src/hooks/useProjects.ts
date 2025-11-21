@@ -236,43 +236,43 @@ export const useProject = (id: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchProject = async () => {
     if (!id) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error('Usuario no autenticado');
 
-    const fetchProject = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const userId = await getCurrentUserId();
-        if (!userId) throw new Error('Usuario no autenticado');
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', userId)
+        .single();
 
-        const { data, error } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('id', id)
-          .eq('user_id', userId)
-          .single();
-
-        if (error) {
-          if (error.code === 'PGRST116') {
-            setProject(null);
-            setError('Proyecto no encontrado');
-          } else {
-            throw error;
-          }
+      if (error) {
+        if (error.code === 'PGRST116') {
+          setProject(null);
+          setError('Proyecto no encontrado');
         } else {
-          setProject(data);
+          throw error;
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error desconocido');
-      } finally {
-        setLoading(false);
+      } else {
+        setProject(data);
       }
-    };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchProject();
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { project, loading, error };
+  return { project, loading, error, refetch: fetchProject };
 };

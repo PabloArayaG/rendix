@@ -32,7 +32,7 @@ interface ProjectDetailProps {
 }
 
 export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
-  const { project, loading: projectLoading, error: projectError } = useProject(projectId);
+  const { project, loading: projectLoading, error: projectError, refetch: refetchProject } = useProject(projectId);
   const { expenses, loading: expensesLoading, refetch: refetchExpenses, deleteExpense } = useExpenses(projectId);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -94,7 +94,8 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
       await deleteExpense(expenseToDelete.id);
       setShowDeleteConfirm(false);
       setExpenseToDelete(null);
-      refetchExpenses();
+      // Refrescar tanto los gastos como el proyecto para actualizar el resumen
+      await Promise.all([refetchExpenses(), refetchProject()]);
     } catch (error) {
       console.error('Error eliminando gasto:', error);
       alert('Error al eliminar el gasto');
@@ -503,7 +504,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
         defaultProjectId={projectId}
         onSuccess={() => {
           refetchExpenses();
-          // Aquí podrías también refrescar los datos del proyecto si es necesario
+          refetchProject(); // Actualizar resumen del proyecto
         }}
       />
 
@@ -527,6 +528,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
         defaultProjectId={projectId}
         onSuccess={() => {
           refetchExpenses();
+          refetchProject(); // Actualizar resumen del proyecto
           handleCloseEditExpenseModal();
         }}
       />
