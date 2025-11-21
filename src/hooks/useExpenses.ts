@@ -100,7 +100,7 @@ export const useExpenses = (projectId?: string) => {
 
         if (updateError) throw updateError;
         
-        await updateProjectCosts(expenseData.project_id);
+        // El trigger de Supabase actualiza automáticamente los costos
         await fetchExpenses();
         return updatedExpense;
       } catch (receiptError) {
@@ -110,7 +110,7 @@ export const useExpenses = (projectId?: string) => {
       }
     }
 
-    await updateProjectCosts(expenseData.project_id);
+    // El trigger de Supabase actualiza automáticamente los costos
     await fetchExpenses();
     return expense;
   };
@@ -159,7 +159,7 @@ export const useExpenses = (projectId?: string) => {
 
     if (error) throw error;
     
-    await updateProjectCosts(currentExpense.project_id);
+    // El trigger de Supabase actualiza automáticamente los costos
     await fetchExpenses();
     return data;
   };
