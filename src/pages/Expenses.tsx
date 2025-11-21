@@ -5,10 +5,13 @@ import {
   Receipt,
   Calendar,
   DollarSign,
-  Tag
+  Tag,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { ExpenseModal } from '../components/expenses/ExpenseModal';
+import { ConfirmDialog } from '../components/ui';
 import { useExpenses } from '../hooks/useExpenses';
 import { useProjects } from '../hooks/useProjects';
 import { Expense } from '../types/database';
@@ -19,12 +22,17 @@ import {
 } from '../lib/utils';
 
 export function Expenses() {
-  const { expenses, loading, error, refetch } = useExpenses();
+  const { expenses, loading, error, refetch, deleteExpense } = useExpenses();
   const { projects } = useProjects();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [projectFilter, setProjectFilter] = useState<string>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>(undefined);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Filtrar gastos
   const filteredExpenses = expenses.filter(expense => {
@@ -48,6 +56,43 @@ export function Expenses() {
     return project ? `${project.custom_id} - ${project.name}` : 'Proyecto no encontrado';
   };
 
+  const handleEditExpense = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setSelectedExpense(undefined);
+    setShowEditModal(false);
+  };
+
+  const handleDeleteClick = (expense: Expense) => {
+    setExpenseToDelete(expense);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!expenseToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteExpense(expenseToDelete.id);
+      setShowDeleteConfirm(false);
+      setExpenseToDelete(null);
+      refetch();
+    } catch (error) {
+      console.error('Error eliminando gasto:', error);
+      alert('Error al eliminar el gasto');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setExpenseToDelete(null);
+  };
+
   const CategoryBadge = ({ category }: { category: string }) => (
     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
       {getCategoryLabel(category)}
@@ -58,13 +103,31 @@ export function Expenses() {
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <div className="flex items-center space-x-3 mb-2">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <Receipt className="h-5 w-5 text-green-600" />
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <Receipt className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">{expense.description}</h3>
+                <p className="text-sm text-gray-500">{getProjectName(expense.project_id)}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">{expense.description}</h3>
-              <p className="text-sm text-gray-500">{getProjectName(expense.project_id)}</p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleEditExpense(expense)}
+                className="text-blue-400 hover:text-blue-600 transition-colors p-2 rounded-md hover:bg-blue-50"
+                title="Editar gasto"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => handleDeleteClick(expense)}
+                className="text-red-400 hover:text-red-600 transition-colors p-2 rounded-md hover:bg-red-50"
+                title="Eliminar gasto"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
           </div>
           
@@ -300,13 +363,38 @@ export function Expenses() {
         )}
       </div>
 
-      {/* Modal para crear/editar gasto */}
+      {/* Modal para crear gasto */}
       <ExpenseModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSuccess={() => {
           refetch();
         }}
+      />
+
+      {/* Modal para editar gasto */}
+      <ExpenseModal
+        isOpen={showEditModal}
+        onClose={handleCloseEditModal}
+        expense={selectedExpense}
+        onSuccess={() => {
+          refetch();
+          handleCloseEditModal();
+        }}
+      />
+
+      {/* Modal de confirmación para eliminar gasto */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Eliminar Gasto"
+        message="¿Estás seguro de eliminar el siguiente gasto?"
+        itemName={expenseToDelete?.description}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+        loading={isDeleting}
       />
     </Layout>
   );

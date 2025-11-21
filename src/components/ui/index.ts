@@ -16,3 +16,4 @@ export {
 } from './Table';
 export { EmptyState, type EmptyStateProps } from './EmptyState';
 export { Tooltip, type TooltipProps } from './Tooltip';
+export { ConfirmDialog } from './ConfirmDialog';

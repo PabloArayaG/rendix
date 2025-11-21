@@ -8,11 +8,13 @@ import {
   TrendingUp,
   TrendingDown,
   Edit,
-  Search
+  Search,
+  Trash2
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { ExpenseModal } from '../components/expenses/ExpenseModal';
 import { ProjectModal } from '../components/projects/ProjectModal';
+import { ConfirmDialog } from '../components/ui';
 import { useProject } from '../hooks/useProjects';
 import { useExpenses } from '../hooks/useExpenses';
 import { EXPENSE_CATEGORIES, EXPENSE_STATUSES } from '../types/database';
@@ -31,13 +33,16 @@ interface ProjectDetailProps {
 
 export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
   const { project, loading: projectLoading, error: projectError } = useProject(projectId);
-  const { expenses, loading: expensesLoading, refetch: refetchExpenses } = useExpenses(projectId);
+  const { expenses, loading: expensesLoading, refetch: refetchExpenses, deleteExpense } = useExpenses(projectId);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEditExpenseModal, setShowEditExpenseModal] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<any>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Filtrar gastos
   const filteredExpenses = expenses.filter(expense => {
@@ -74,6 +79,33 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
   const handleCloseEditExpenseModal = () => {
     setSelectedExpense(undefined);
     setShowEditExpenseModal(false);
+  };
+
+  const handleDeleteClick = (expense: any) => {
+    setExpenseToDelete(expense);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!expenseToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteExpense(expenseToDelete.id);
+      setShowDeleteConfirm(false);
+      setExpenseToDelete(null);
+      refetchExpenses();
+    } catch (error) {
+      console.error('Error eliminando gasto:', error);
+      alert('Error al eliminar el gasto');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setExpenseToDelete(null);
   };
 
   const CategoryBadge = ({ category }: { category: string }) => (
@@ -383,6 +415,13 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                                 >
                                   <Edit className="h-4 w-4" />
                                 </button>
+                                <button
+                                  onClick={() => handleDeleteClick(expense)}
+                                  className="text-red-400 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50"
+                                  title="Eliminar gasto"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -490,6 +529,20 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
           refetchExpenses();
           handleCloseEditExpenseModal();
         }}
+      />
+
+      {/* Modal de confirmación para eliminar gasto */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Eliminar Gasto"
+        message="¿Estás seguro de eliminar el siguiente gasto?"
+        itemName={expenseToDelete?.description}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="danger"
+        loading={isDeleting}
       />
     </Layout>
   );
