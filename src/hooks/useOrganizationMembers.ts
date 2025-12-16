@@ -51,13 +51,13 @@ export const useOrganizationMembers = () => {
         .rpc('get_organization_members_with_emails', { org_id: activeOrganizationId });
 
       if (!rpcError && membersWithEmails) {
-        const finalMembers = membersWithEmails.map((m: any) => ({
+        const finalMembers: OrganizationMemberWithUser[] = membersWithEmails.map((m: any) => ({
           id: m.id,
           organization_id: m.organization_id,
           user_id: m.user_id,
           role: m.role,
           joined_at: m.joined_at,
-          user_email: m.user_email || 'Email no disponible',
+          user_email: (m.user_email as string) || 'Email no disponible',
         }));
 
         setMembers(finalMembers);
@@ -74,18 +74,27 @@ export const useOrganizationMembers = () => {
               emailsData.map((e: any) => [e.user_id, e.email])
             );
             
-            const finalMembers = (data || []).map(member => ({
-              ...member,
+            const finalMembers: OrganizationMemberWithUser[] = (data || []).map(member => ({
+              id: member.id,
+              organization_id: member.organization_id,
+              user_id: member.user_id,
+              role: member.role,
+              joined_at: member.joined_at,
               user_email: emailMap.get(member.user_id) || 'Email no disponible',
             }));
 
             setMembers(finalMembers);
           } else {
             // Último fallback: miembros sin email
-            setMembers((data || []).map(member => ({
-              ...member,
+            const fallbackMembers: OrganizationMemberWithUser[] = (data || []).map(member => ({
+              id: member.id,
+              organization_id: member.organization_id,
+              user_id: member.user_id,
+              role: member.role,
+              joined_at: member.joined_at,
               user_email: 'Email no disponible',
-            })));
+            }));
+            setMembers(fallbackMembers);
           }
         } else {
           setMembers([]);

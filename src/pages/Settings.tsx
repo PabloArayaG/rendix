@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { UserPlus, Trash2, Shield, Users, Building2, AlertCircle } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { Card, CardContent, Button } from '../components/ui';
-import { useOrganizationMembers, OrganizationMemberWithUser } from '../hooks/useOrganizationMembers';
+import { useOrganizationMembers } from '../hooks/useOrganizationMembers';
 import { useAuthStore } from '../store/authStore';
 import { useOrganizations } from '../hooks/useOrganizations';
 import { OrganizationRole, ORGANIZATION_ROLES } from '../types/database';
