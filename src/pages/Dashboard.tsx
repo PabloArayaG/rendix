@@ -311,7 +311,7 @@ export function Dashboard() {
                             </div>
                           </TableCell>
                           <TableCellNumber className="font-semibold">
-                            {formatCurrency(expense.amount)}
+                            {formatCurrency(expense.net_amount)}
                           </TableCellNumber>
                           <TableCell>
                             <div className="flex items-center justify-center gap-2">
