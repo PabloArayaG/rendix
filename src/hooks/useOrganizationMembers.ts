@@ -74,14 +74,17 @@ export const useOrganizationMembers = () => {
               emailsData.map((e: any) => [e.user_id, e.email])
             );
             
-            const finalMembers: OrganizationMemberWithUser[] = (data || []).map(member => ({
-              id: member.id,
-              organization_id: member.organization_id,
-              user_id: member.user_id,
-              role: member.role,
-              joined_at: member.joined_at,
-              user_email: emailMap.get(member.user_id) || 'Email no disponible',
-            }));
+            const finalMembers: OrganizationMemberWithUser[] = (data || []).map(member => {
+              const email = emailMap.get(member.user_id);
+              return {
+                id: member.id,
+                organization_id: member.organization_id,
+                user_id: member.user_id,
+                role: member.role,
+                joined_at: member.joined_at,
+                user_email: (email as string) || 'Email no disponible',
+              };
+            });
 
             setMembers(finalMembers);
           } else {
