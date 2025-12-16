@@ -2,26 +2,7 @@ import { useState, useEffect } from 'react';
 import { Dashboard } from '../pages/Dashboard';
 import { Projects } from '../pages/Projects';
 import { ProjectDetail } from '../pages/ProjectDetail';
-
-// Páginas placeholder para desarrollo
-const PlaceholderPage = ({ title, subtitle }: { title: string; subtitle: string }) => {
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
-        <p className="text-gray-600 mb-6">{subtitle}</p>
-        <p className="text-sm text-gray-500">Esta página estará disponible próximamente</p>
-      </div>
-    </div>
-  );
-};
-
-const Settings = () => (
-  <PlaceholderPage 
-    title="Configuración" 
-    subtitle="Ajusta las preferencias de tu aplicación" 
-  />
-);
+import { Settings } from '../pages/Settings';
 
 export function Router() {
   const [currentPath, setCurrentPath] = useState('/dashboard');
