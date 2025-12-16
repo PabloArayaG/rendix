@@ -8,7 +8,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   ExternalLink,
-  Edit
+  Edit,
+  Building2
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { useDashboard } from '../hooks/useDashboard';
@@ -16,11 +17,15 @@ import { formatCurrency, formatPercentage, formatShortDate, getMarginColor } fro
 import { Card, CardContent, Badge, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableCellNumber, EmptyState } from '../components/ui';
 import { ExpenseModal } from '../components/expenses/ExpenseModal';
 import { Expense } from '../types/database';
+import { useAuthStore } from '../store/authStore';
+import { useOrganizations } from '../hooks/useOrganizations';
 
 export function Dashboard() {
   const { stats, loading, error, refetch } = useDashboard();
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>(undefined);
   const [showEditExpenseModal, setShowEditExpenseModal] = useState(false);
+  const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
+  const { organizations, loading: loadingOrgs } = useOrganizations();
 
   useEffect(() => {
     refetch();
@@ -76,6 +81,32 @@ export function Dashboard() {
             </Card>
           </div>
         </div>
+      </Layout>
+    );
+  }
+
+  // Mostrar mensaje si no hay organización activa
+  if (!loading && !loadingOrgs && !activeOrganizationId) {
+    return (
+      <Layout title="Dashboard" subtitle="Resumen general de tu actividad financiera">
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardContent className="p-8">
+            <div className="flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
+                <Building2 className="h-8 w-8 text-yellow-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-900 mb-2">
+                  No estás añadido en ninguna organización
+                </h3>
+                <p className="text-sm text-yellow-800 max-w-md">
+                  Para comenzar a usar Rendix, necesitas ser agregado a una organización. 
+                  Contacta al administrador de tu equipo para que te agregue a una organización existente.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </Layout>
     );
   }

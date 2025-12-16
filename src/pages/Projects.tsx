@@ -3,7 +3,8 @@ import {
   Plus, 
   Search, 
   MoreHorizontal,
-  Building2
+  Building2,
+  AlertCircle
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { ProjectModal } from '../components/projects/ProjectModal';
@@ -15,6 +16,9 @@ import {
   getStatusColor, 
   getMarginColor 
 } from '../lib/utils';
+import { useAuthStore } from '../store/authStore';
+import { useOrganizations } from '../hooks/useOrganizations';
+import { Card, CardContent } from '../components/ui';
 
 export function Projects() {
   const { projects, loading, error, refetch } = useProjects();
@@ -22,6 +26,8 @@ export function Projects() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | undefined>();
+  const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
+  const { organizations, loading: loadingOrgs } = useOrganizations();
 
   // Filtrar proyectos
   const filteredProjects = projects.filter(project => {
@@ -127,6 +133,32 @@ export function Projects() {
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
+      </Layout>
+    );
+  }
+
+  // Mostrar mensaje si no hay organización activa
+  if (!loading && !loadingOrgs && !activeOrganizationId) {
+    return (
+      <Layout title="Proyectos" subtitle="Gestiona todos tus proyectos de construcción">
+        <Card className="border-yellow-200 bg-yellow-50">
+          <CardContent className="p-8">
+            <div className="flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
+                <Building2 className="h-8 w-8 text-yellow-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-900 mb-2">
+                  No estás añadido en ninguna organización
+                </h3>
+                <p className="text-sm text-yellow-800 max-w-md">
+                  Para ver y gestionar proyectos, necesitas ser agregado a una organización. 
+                  Contacta al administrador de tu equipo para que te agregue a una organización existente.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </Layout>
     );
   }

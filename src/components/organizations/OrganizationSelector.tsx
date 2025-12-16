@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { Building2, ChevronDown, Check } from 'lucide-react';
+import { Building2, ChevronDown, Check, AlertCircle } from 'lucide-react';
 import { useOrganizations } from '../../hooks/useOrganizations';
 import { useAuthStore } from '../../store/authStore';
 
 export function OrganizationSelector() {
-  const { organizations, loading } = useOrganizations();
+  const { organizations, loading, error } = useOrganizations();
   const { activeOrganizationId, setActiveOrganization } = useAuthStore();
 
   // Establecer la primera organización como activa si no hay ninguna seleccionada
@@ -25,8 +25,24 @@ export function OrganizationSelector() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg border border-red-200">
+        <AlertCircle className="w-4 h-4 text-red-600" />
+        <span className="text-sm font-medium text-red-900">Error al cargar organizaciones</span>
+      </div>
+    );
+  }
+
   if (organizations.length === 0) {
-    return null;
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 rounded-lg border border-yellow-200">
+        <AlertCircle className="w-4 h-4 text-yellow-600" />
+        <span className="text-sm font-medium text-yellow-900">
+          No estás añadido en ninguna organización
+        </span>
+      </div>
+    );
   }
 
   // Si solo hay una organización, mostrar sin dropdown
