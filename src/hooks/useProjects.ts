@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase, getCurrentUserId } from '../lib/supabase';
 import { Project, CreateProjectDTO, UpdateProjectDTO, ProjectStats, ProjectStatus } from '../types/database';
+import { useAuthStore } from '../store/authStore';
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
 
   const fetchProjects = async () => {
     try {
@@ -15,10 +17,16 @@ export const useProjects = () => {
       const userId = await getCurrentUserId();
       if (!userId) throw new Error('Usuario no autenticado');
 
+      if (!activeOrganizationId) {
+        setProjects([]);
+        setError('No hay organización activa');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('projects')
         .select('*')
-        .eq('user_id', userId)
+        .eq('organization_id', activeOrganizationId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -38,6 +46,8 @@ export const useProjects = () => {
     
     if (!userId) throw new Error('Usuario no autenticado');
 
+    if (!activeOrganizationId) throw new Error('No hay organización activa');
+
     // Calcular margen proyectado
     const projected_margin = projectData.sale_amount - projectData.projected_cost;
     
@@ -50,6 +60,7 @@ export const useProjects = () => {
       tags: projectData.tags || [],
       metadata: {},
       user_id: userId,
+      organization_id: activeOrganizationId,
     };
     
     console.log('Datos a insertar en Supabase:', insertData); // Debug
@@ -95,7 +106,6 @@ export const useProjects = () => {
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .eq('user_id', userId)
       .select()
       .single();
 
@@ -112,8 +122,7 @@ export const useProjects = () => {
     const { error } = await supabase
       .from('projects')
       .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+      .eq('id', id);
 
     if (error) throw error;
     
@@ -128,7 +137,6 @@ export const useProjects = () => {
       .from('projects')
       .select('*')
       .eq('id', id)
-      .eq('user_id', userId)
       .single();
 
     if (error) {
@@ -143,6 +151,10 @@ export const useProjects = () => {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('Usuario no autenticado');
 
+    if (!activeOrganizationId) {
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('projects')
       .select(`
@@ -156,7 +168,7 @@ export const useProjects = () => {
         status,
         expenses:expenses(count)
       `)
-      .eq('user_id', userId);
+      .eq('organization_id', activeOrganizationId);
 
     if (error) throw error;
 
@@ -194,10 +206,12 @@ export const useProjects = () => {
     const userId = await getCurrentUserId();
     if (!userId) return false;
 
+    if (!activeOrganizationId) return false;
+
     let query = supabase
       .from('projects')
       .select('id')
-      .eq('user_id', userId)
+      .eq('organization_id', activeOrganizationId)
       .eq('custom_id', customId);
 
     if (excludeProjectId) {
@@ -212,8 +226,10 @@ export const useProjects = () => {
   };
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    if (activeOrganizationId) {
+      fetchProjects();
+    }
+  }, [activeOrganizationId]);
 
   return {
     projects,
@@ -250,7 +266,6 @@ export const useProject = (id: string) => {
         .from('projects')
         .select('*')
         .eq('id', id)
-        .eq('user_id', userId)
         .single();
 
       if (error) {

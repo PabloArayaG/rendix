@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase, getCurrentUserId, uploadReceipt, deleteReceipt } from '../lib/supabase';
 import { Expense, CreateExpenseDTO, UpdateExpenseDTO, ExpensesByCategory, ExpenseCategory } from '../types/database';
+import { useAuthStore } from '../store/authStore';
 
 export const useExpenses = (projectId?: string) => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
 
   const fetchExpenses = async () => {
     try {
@@ -15,10 +17,15 @@ export const useExpenses = (projectId?: string) => {
       const userId = await getCurrentUserId();
       if (!userId) throw new Error('Usuario no autenticado');
 
+      if (!activeOrganizationId) {
+        setExpenses([]);
+        return;
+      }
+
       let query = supabase
         .from('expenses')
         .select('*')
-        .eq('user_id', userId)
+        .eq('organization_id', activeOrganizationId)
         .order('date', { ascending: false });
 
       if (projectId) {
@@ -43,12 +50,15 @@ export const useExpenses = (projectId?: string) => {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('Usuario no autenticado');
 
+    if (!activeOrganizationId) throw new Error('No hay organización activa');
+
     // Log de debugging detallado
     const finalData = {
       ...expenseData,
       tags: expenseData.tags || [],
       metadata: {},
       user_id: userId,
+      organization_id: activeOrganizationId,
     };
 
     console.log('🔍 GERARDO DEBUG - Datos enviados a Supabase:', {
@@ -153,7 +163,6 @@ export const useExpenses = (projectId?: string) => {
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .eq('user_id', userId)
       .select()
       .single();
 
@@ -184,8 +193,7 @@ export const useExpenses = (projectId?: string) => {
     const { error } = await supabase
       .from('expenses')
       .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+      .eq('id', id);
 
     if (error) throw error;
     
@@ -198,10 +206,14 @@ export const useExpenses = (projectId?: string) => {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('Usuario no autenticado');
 
+    if (!activeOrganizationId) {
+      return [];
+    }
+
     let query = supabase
       .from('expenses')
       .select('category, amount')
-      .eq('user_id', userId);
+      .eq('organization_id', activeOrganizationId);
 
     if (projectId) {
       query = query.eq('project_id', projectId);
@@ -241,8 +253,10 @@ export const useExpenses = (projectId?: string) => {
   // actualiza automáticamente los costos del proyecto usando net_amount
 
   useEffect(() => {
-    fetchExpenses();
-  }, [projectId]);
+    if (activeOrganizationId) {
+      fetchExpenses();
+    }
+  }, [projectId, activeOrganizationId]);
 
   return {
     expenses,
@@ -276,7 +290,6 @@ export const useExpense = (id: string) => {
           .from('expenses')
           .select('*')
           .eq('id', id)
-          .eq('user_id', userId)
           .single();
 
         if (error) {

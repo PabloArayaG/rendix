@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { supabase, AuthUser } from '../lib/supabase';
 
 interface AuthState {
@@ -6,17 +7,24 @@ interface AuthState {
   loading: boolean;
   initialized: boolean;
   
+  // Organización activa
+  activeOrganizationId: string | null;
+  
   // Actions
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   initialize: () => Promise<void>;
+  setActiveOrganization: (organizationId: string) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  loading: false,
-  initialized: false,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      loading: false,
+      initialized: false,
+      activeOrganizationId: null,
 
   login: async (email: string, password: string) => {
     // NO cambiar loading global para evitar re-renders
@@ -90,13 +98,17 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      set({ user: null });
+      set({ user: null, activeOrganizationId: null });
     } catch (error) {
       console.error('Error en logout:', error);
       throw error;
     } finally {
       set({ loading: false });
     }
+  },
+
+  setActiveOrganization: (organizationId: string) => {
+    set({ activeOrganizationId: organizationId });
   },
 
   initialize: async () => {
@@ -138,4 +150,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ loading: false });
     }
   },
-}));
+}),
+    {
+      name: 'rendix-auth-storage',
+      partialize: (state) => ({ 
+        activeOrganizationId: state.activeOrganizationId 
+      }),
+    }
+  )
+);

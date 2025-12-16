@@ -1,5 +1,6 @@
 import { Bell, Search, User } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { OrganizationSelector } from '../organizations/OrganizationSelector';
 
 interface HeaderProps {
   title: string;
@@ -22,6 +23,8 @@ export function Header({ title, subtitle }: HeaderProps) {
 
         {/* Right section */}
         <div className="flex items-center space-x-4">
+          {/* Organization Selector */}
+          <OrganizationSelector />
           {/* Search */}
           <div className="relative hidden md:block">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

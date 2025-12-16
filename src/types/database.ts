@@ -25,6 +25,36 @@ export type DocumentType = 'boleta' | 'factura';
 
 export type ProjectStatus = 'in_progress' | 'completed';
 
+export type OrganizationRole = 'owner' | 'admin' | 'member' | 'viewer';
+
+// ORGANIZACIÓN
+export interface Organization {
+  id: string; // UUID primary key
+  name: string; // Nombre de la organización
+  slug: string; // URL-friendly name (único)
+  owner_id: string; // ID del propietario
+  logo_url?: string; // URL del logo
+  settings: Record<string, any>; // JSONB para configuraciones
+  created_at: string; // Timestamp automático
+  updated_at: string; // Timestamp automático
+}
+
+// MIEMBRO DE ORGANIZACIÓN
+export interface OrganizationMember {
+  id: string; // UUID primary key
+  organization_id: string; // FK a organizations
+  user_id: string; // FK a auth.users
+  role: OrganizationRole; // Rol del usuario en la organización
+  joined_at: string; // Timestamp de cuando se unió
+}
+
+// ORGANIZACIÓN CON INFORMACIÓN DE USUARIO
+export interface OrganizationWithRole extends Organization {
+  user_role: OrganizationRole;
+  is_owner: boolean;
+  member_count?: number;
+}
+
 export interface Project {
   id: string; // UUID primary key
   custom_id: string; // ID personalizado definido por el usuario (REQUERIDO)
@@ -57,6 +87,7 @@ export interface Project {
   
   // AUDITORÍA
   user_id: string; // UID del usuario que creó (Firebase/Supabase)
+  organization_id: string; // ID de la organización a la que pertenece
   created_at: string; // Timestamp automático
   updated_at: string; // Timestamp automático
 }
@@ -89,6 +120,7 @@ export interface Expense {
   
   // AUDITORÍA
   user_id: string; // UID del usuario que creó
+  organization_id: string; // ID de la organización a la que pertenece
   created_at: string; // Timestamp automático
   updated_at: string; // Timestamp automático
 }
@@ -208,4 +240,11 @@ export const EXPENSE_STATUSES: { value: ExpenseStatus; label: string; color: str
 export const DOCUMENT_TYPES: { value: DocumentType; label: string }[] = [
   { value: 'boleta', label: 'Boleta' },
   { value: 'factura', label: 'Factura' }
+];
+
+export const ORGANIZATION_ROLES: { value: OrganizationRole; label: string; description: string }[] = [
+  { value: 'owner', label: 'Propietario', description: 'Control total de la organización' },
+  { value: 'admin', label: 'Administrador', description: 'Puede gestionar miembros y configuraciones' },
+  { value: 'member', label: 'Miembro', description: 'Puede crear y editar proyectos y gastos' },
+  { value: 'viewer', label: 'Visualizador', description: 'Solo puede ver información' }
 ];

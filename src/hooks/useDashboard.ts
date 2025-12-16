@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase, getCurrentUserId } from '../lib/supabase';
 import { DashboardStats, Expense } from '../types/database';
+import { useAuthStore } from '../store/authStore';
 
 // Tipos para las consultas de dashboard
 interface ProjectSummary {
@@ -36,6 +37,7 @@ export const useDashboard = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
 
   const fetchDashboardStats = async () => {
     try {
@@ -45,11 +47,16 @@ export const useDashboard = () => {
       const userId = await getCurrentUserId();
       if (!userId) throw new Error('Usuario no autenticado');
 
+      if (!activeOrganizationId) {
+        setStats(null);
+        return;
+      }
+
       // Obtener estadísticas de proyectos
       const { data: projects, error: projectsError } = await supabase
         .from('projects')
         .select('status, sale_amount, real_cost, real_margin')
-        .eq('user_id', userId);
+        .eq('organization_id', activeOrganizationId);
 
       if (projectsError) throw projectsError;
 
@@ -60,7 +67,7 @@ export const useDashboard = () => {
           *,
           projects (name, custom_id)
         `)
-        .eq('user_id', userId)
+        .eq('organization_id', activeOrganizationId)
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -98,13 +105,17 @@ export const useDashboard = () => {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('Usuario no autenticado');
 
+    if (!activeOrganizationId) {
+      return [];
+    }
+
     const startDate = new Date();
     startDate.setMonth(startDate.getMonth() - months);
 
     const { data: expenses, error } = await supabase
       .from('expenses')
       .select('amount, date, category')
-      .eq('user_id', userId)
+      .eq('organization_id', activeOrganizationId)
       .gte('date', startDate.toISOString().split('T')[0])
       .order('date');
 
@@ -133,6 +144,10 @@ export const useDashboard = () => {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('Usuario no autenticado');
 
+    if (!activeOrganizationId) {
+      return [];
+    }
+
     const { data: projects, error } = await supabase
       .from('projects')
       .select(`
@@ -146,8 +161,8 @@ export const useDashboard = () => {
         real_margin,
         expenses (count)
       `)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .eq('organization_id', activeOrganizationId)
+      .order('created_at', { ascending: false});
 
     if (error) throw error;
 
@@ -164,8 +179,10 @@ export const useDashboard = () => {
   };
 
   useEffect(() => {
-    fetchDashboardStats();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (activeOrganizationId) {
+      fetchDashboardStats();
+    }
+  }, [activeOrganizationId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     stats,
