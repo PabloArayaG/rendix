@@ -164,15 +164,7 @@ export function useOrganizationMembers(organizationId: string | null) {
 
       // Obtener emails de los usuarios
       if (data && data.length > 0) {
-        const userIds = data.map(m => m.user_id);
-        
-        const { data: usersData, error: usersError } = await supabase
-          .from('auth.users')
-          .select('id, email')
-          .in('id', userIds);
-
-        // Si no podemos acceder a auth.users, intentar con una función
-        // Por ahora solo retornamos los miembros sin email
+        // Si no podemos acceder a auth.users, solo retornamos los miembros sin email
         const membersWithEmail = data.map(member => ({
           ...member,
           email: undefined // TODO: obtener email de otra forma
