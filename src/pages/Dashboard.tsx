@@ -25,7 +25,7 @@ export function Dashboard() {
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>(undefined);
   const [showEditExpenseModal, setShowEditExpenseModal] = useState(false);
   const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
-  const { organizations, loading: loadingOrgs } = useOrganizations();
+  const { loading: loadingOrgs } = useOrganizations();
 
   useEffect(() => {
     refetch();

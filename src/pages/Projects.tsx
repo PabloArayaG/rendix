@@ -3,8 +3,7 @@ import {
   Plus, 
   Search, 
   MoreHorizontal,
-  Building2,
-  AlertCircle
+  Building2
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { ProjectModal } from '../components/projects/ProjectModal';
@@ -27,7 +26,7 @@ export function Projects() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | undefined>();
   const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
-  const { organizations, loading: loadingOrgs } = useOrganizations();
+  const { loading: loadingOrgs } = useOrganizations();
 
   // Filtrar proyectos
   const filteredProjects = projects.filter(project => {
