@@ -196,11 +196,11 @@ export function Projects() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="pl-3 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 min-w-[140px]"
+              className="pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 min-w-[140px] transition-all duration-200 hover:border-orange-400 cursor-pointer"
             >
-              <option value="all">Todos los estados</option>
-              <option value="in_progress">En Proceso</option>
-              <option value="completed">Terminados</option>
+              <option value="all" className="bg-white dark:bg-gray-800">Todos los estados</option>
+              <option value="in_progress" className="bg-white dark:bg-gray-800">En Proceso</option>
+              <option value="completed" className="bg-white dark:bg-gray-800">Terminados</option>
             </select>
             
             <button

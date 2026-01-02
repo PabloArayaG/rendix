@@ -264,39 +264,39 @@ export function Dashboard() {
           {/* Rendimiento Financiero */}
           <Card>
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
                 Rendimiento Financiero
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Margen Total:</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Margen Total:</span>
                   <span className={`font-semibold tabular-nums ${getMarginColor(stats?.margin_percentage || 0)}`}>
                     {formatPercentage(stats?.margin_percentage || 0)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Proyectos En Proceso:</span>
-                  <span className="font-semibold text-gray-900 tabular-nums">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Proyectos En Proceso:</span>
+                  <span className="font-semibold text-gray-900 dark:text-white tabular-nums">
                     {stats?.active_projects || 0}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Proyectos Terminados:</span>
-                  <span className="font-semibold text-gray-900 tabular-nums">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Proyectos Terminados:</span>
+                  <span className="font-semibold text-gray-900 dark:text-white tabular-nums">
                     {stats?.completed_projects || 0}
                   </span>
                 </div>
                 {/* Progress bar */}
-                <div className="pt-4 border-t border-gray-200">
-                  <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
                     <span>Progreso de finalización</span>
                     <span className="tabular-nums">
                       {stats?.total_projects ? Math.round((stats.completed_projects / stats.total_projects) * 100) : 0}%
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      className="bg-orange-500 h-2 rounded-full transition-all duration-300" 
                       style={{ 
                         width: `${stats?.total_projects ? (stats.completed_projects / stats.total_projects) * 100 : 0}%` 
                       }}
@@ -311,10 +311,10 @@ export function Dashboard() {
           <Card className="xl:col-span-2">
             <CardContent className="p-6">
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Gastos Recientes
                 </h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Listado completo de todos los gastos registrados
                 </p>
               </div>
