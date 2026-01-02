@@ -53,8 +53,8 @@ export function ProjectsStatusChart({ activeProjects, completedProjects }: Proje
   };
 
   return (
-    <div className="relative">
-      <ResponsiveContainer width="100%" height={320}>
+    <div className="relative h-[320px]">
+      <ResponsiveContainer width="100%" height={240}>
         <PieChart>
           <defs>
             <linearGradient id="colorEnProceso" x1="0" y1="0" x2="1" y2="1">
@@ -70,8 +70,8 @@ export function ProjectsStatusChart({ activeProjects, completedProjects }: Proje
             data={data}
             cx="50%"
             cy="50%"
-            innerRadius={60}
-            outerRadius={100}
+            innerRadius={50}
+            outerRadius={85}
             paddingAngle={3}
             dataKey="value"
             animationBegin={0}
@@ -96,19 +96,19 @@ export function ProjectsStatusChart({ activeProjects, completedProjects }: Proje
       </div>
       
       {/* Leyenda personalizada */}
-      <div className="mt-6 grid grid-cols-2 gap-4">
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700/30">
-          <div className="w-3 h-3 rounded-full bg-gradient-to-br from-orange-500 to-orange-400"></div>
+      <div className="absolute bottom-0 left-0 right-0 grid grid-cols-2 gap-3">
+        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700/30">
+          <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-orange-500 to-orange-400"></div>
           <div className="flex-1">
-            <p className="text-xs text-gray-600 dark:text-gray-400">En Proceso</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">{activeProjects}</p>
+            <p className="text-[10px] text-gray-600 dark:text-gray-400">En Proceso</p>
+            <p className="text-base font-bold text-gray-900 dark:text-white">{activeProjects}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/30">
-          <div className="w-3 h-3 rounded-full bg-gradient-to-br from-green-500 to-green-400"></div>
+        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/30">
+          <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-green-500 to-green-400"></div>
           <div className="flex-1">
-            <p className="text-xs text-gray-600 dark:text-gray-400">Terminados</p>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">{completedProjects}</p>
+            <p className="text-[10px] text-gray-600 dark:text-gray-400">Terminados</p>
+            <p className="text-base font-bold text-gray-900 dark:text-white">{completedProjects}</p>
           </div>
         </div>
       </div>
