@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { useDashboard } from '../../hooks/useDashboard';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuthStore } from '../../store/authStore';
+import { supabase, getCurrentUserId } from '../../lib/supabase';
 import { formatCurrency } from '../../lib/utils';
 import { TimeRangeSelector, TimeRange, getMonthsFromRange } from './TimeRangeSelector';
 

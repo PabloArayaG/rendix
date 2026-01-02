@@ -321,11 +321,11 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
         {/* Analítica del Proyecto */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <CollapsibleCard title="Distribución de Gastos" defaultExpanded={true}>
-            <ExpensesByCategoryChart projectId={id} />
+            <ExpensesByCategoryChart projectId={projectId} />
           </CollapsibleCard>
 
           <CollapsibleCard title="Tendencia de Gastos" defaultExpanded={true}>
-            <MonthlyExpensesTrendChart projectId={id} />
+            <MonthlyExpensesTrendChart projectId={projectId} />
           </CollapsibleCard>
         </div>
 
