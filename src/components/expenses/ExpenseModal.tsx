@@ -220,19 +220,19 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
   const isEditing = !!expense;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-5 w-5 text-green-600" />
+            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {isEditing ? 'Editar Gasto' : 'Registrar Nuevo Gasto'}
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {isEditing ? 'Modifica la información del gasto' : 'Completa los datos para registrar un nuevo gasto'}
               </p>
             </div>
@@ -261,13 +261,13 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Proyecto *
                 </label>
                 {defaultProjectId ? (
                   // Si hay un proyecto preseleccionado, mostrarlo como readonly
                   <div className="relative">
-                    <div className="w-full px-3 py-2 pl-9 border border-gray-300 rounded-md bg-gray-50 text-gray-700 flex items-center">
+                    <div className="w-full px-3 py-2 pl-9 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 text-gray-700 dark:text-gray-300 flex items-center">
                       <Lock className="absolute left-3 h-4 w-4 text-gray-400" />
                       {(() => {
                         const project = projects.find(p => p.id === defaultProjectId);
@@ -287,7 +287,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
                   // Si no hay proyecto preseleccionado, mostrar selector
                   <select
                     {...register('project_id')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Seleccionar proyecto</option>
                     {projects.map((project) => (
@@ -303,12 +303,12 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Categoría *
                 </label>
                 <select
                   {...register('category')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   {EXPENSE_CATEGORIES.map((category) => (
                     <option key={category.value} value={category.value}>
@@ -322,12 +322,12 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Estado *
                 </label>
                 <select
                   {...register('status')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   {EXPENSE_STATUSES.map((status) => (
                     <option key={status.value} value={status.value}>
@@ -342,13 +342,13 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Descripción *
               </label>
               <input
                 {...register('description')}
                 type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ej: Compra de cemento para cimentación"
               />
               {errors.description && (
@@ -358,7 +358,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Monto Neto (CLP) *
                 </label>
                 <div className="relative">
@@ -378,7 +378,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
                     type="number"
                     step="1"
                     min="0"
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="0"
                   />
                 </div>
@@ -389,7 +389,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     IVA 19% (CLP) *
                   </label>
                   <div className="relative">
@@ -407,7 +407,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
                       type="number"
                       step="1"
                       min="0"
-                      className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="0"
                     />
                   </div>
@@ -417,7 +417,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Total (CLP)
                   </label>
                   <div className="relative">
@@ -430,7 +430,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
                       step="1"
                       min="0"
                       readOnly
-                      className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed"
+                      className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 text-gray-700 dark:text-gray-300 cursor-not-allowed"
                       value={totalAmount}
                     />
                   </div>
@@ -463,7 +463,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
             <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Fecha *
                 </label>
                 <div className="relative">
@@ -473,7 +473,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
                   <input
                     {...register('date')}
                     type="date"
-                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 {errors.date && (
@@ -489,12 +489,12 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Tipo de Documento *
                 </label>
                 <select
                   {...register('document_type')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   {DOCUMENT_TYPES.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -508,38 +508,38 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   {watch('document_type') === 'factura' ? 'Número de Factura' : 'Número de Boleta'}
                 </label>
                 <input
                   {...register('document_number')}
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder={watch('document_type') === 'factura' ? 'Ej: FAC-2024-001' : 'Ej: BOL-2024-001'}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Proveedor
                 </label>
                 <input
                   {...register('supplier')}
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Ej: Ferretería ABC S.L."
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Notas
               </label>
               <textarea
                 {...register('notes')}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Notas adicionales sobre el gasto..."
               />
             </div>
@@ -550,10 +550,10 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
             <h3 className="text-lg font-medium text-gray-900">Comprobante</h3>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Subir Comprobante (Opcional)
               </label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md hover:border-gray-400 transition-colors">
                 <div className="space-y-1 text-center">
                   <Upload className="mx-auto h-12 w-12 text-gray-400" />
                   <div className="flex text-sm text-gray-600">

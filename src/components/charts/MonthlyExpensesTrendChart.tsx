@@ -66,9 +66,17 @@ export function MonthlyExpensesTrendChart() {
       ) : (
         <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="month" />
-        <YAxis tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} />
+        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+        <XAxis 
+          dataKey="month" 
+          tick={{ fill: 'currentColor' }}
+          className="text-gray-600 dark:text-gray-400"
+        />
+        <YAxis 
+          tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
+          tick={{ fill: 'currentColor' }}
+          className="text-gray-600 dark:text-gray-400"
+        />
         <Tooltip 
           formatter={(value) => formatCurrency(value as number)}
           contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px' }}

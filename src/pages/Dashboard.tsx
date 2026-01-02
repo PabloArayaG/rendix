@@ -346,10 +346,10 @@ export function Dashboard() {
                           </TableCell>
                           <TableCell>
                             <div>
-                              <p className="text-sm font-medium text-gray-900 truncate">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                                 {expense.description}
                               </p>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
                                 {expense.category}
                               </p>
                             </div>
@@ -396,22 +396,22 @@ export function Dashboard() {
         {/* Acciones Rápidas - Rediseñadas */}
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
               Acciones Rápidas
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button 
                 onClick={() => window.location.hash = '/projects'}
-                className="flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 group"
+                className="flex items-center p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 group"
               >
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-colors">
-                  <FolderOpen className="h-5 w-5 text-blue-600" />
+                <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mr-4 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/50 transition-colors">
+                  <FolderOpen className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm font-medium text-gray-900 group-hover:text-blue-900">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-orange-900 dark:group-hover:text-orange-300">
                     Nuevo Proyecto
                   </h4>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Crear y configurar un nuevo proyecto
                   </p>
                 </div>
@@ -419,16 +419,16 @@ export function Dashboard() {
               
               <button 
                 onClick={() => window.location.hash = '/projects'}
-                className="flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-400 hover:bg-green-50 transition-all duration-200 group"
+                className="flex items-center p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200 group"
               >
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4 group-hover:bg-green-200 transition-colors">
-                  <Receipt className="h-5 w-5 text-green-600" />
+                <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-4 group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors">
+                  <Receipt className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm font-medium text-gray-900 group-hover:text-green-900">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-green-900 dark:group-hover:text-green-300">
                     Ver Proyectos
                   </h4>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Gestionar proyectos y gastos
                   </p>
                 </div>

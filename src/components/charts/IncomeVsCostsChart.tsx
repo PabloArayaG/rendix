@@ -75,13 +75,15 @@ export function IncomeVsCostsChart({ totalSales, totalCosts, totalMargin }: Inco
         <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" opacity={0.5} />
         <XAxis 
           dataKey="category" 
-          tick={{ fill: '#6B7280', fontSize: 14, fontWeight: 500 }}
-          axisLine={{ stroke: '#E5E7EB' }}
+          tick={{ fill: 'currentColor', fontSize: 14, fontWeight: 500 }}
+          className="text-gray-600 dark:text-gray-400"
+          axisLine={{ stroke: 'currentColor', strokeOpacity: 0.3 }}
         />
         <YAxis 
           tickFormatter={(value) => `$${(value / 1000000).toFixed(0)}M`}
-          tick={{ fill: '#6B7280', fontSize: 12 }}
-          axisLine={{ stroke: '#E5E7EB' }}
+          tick={{ fill: 'currentColor', fontSize: 12 }}
+          className="text-gray-600 dark:text-gray-400"
+          axisLine={{ stroke: 'currentColor', strokeOpacity: 0.3 }}
         />
         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }} />
         <Bar dataKey="value" radius={[8, 8, 0, 0]}>
@@ -92,7 +94,8 @@ export function IncomeVsCostsChart({ totalSales, totalCosts, totalMargin }: Inco
             dataKey="value" 
             position="top" 
             formatter={(value) => `$${((value as number) / 1000000).toFixed(1)}M`}
-            style={{ fill: '#374151', fontSize: 12, fontWeight: 600 }}
+            className="fill-gray-700 dark:fill-gray-300"
+            style={{ fontSize: 12, fontWeight: 600 }}
           />
         </Bar>
       </BarChart>

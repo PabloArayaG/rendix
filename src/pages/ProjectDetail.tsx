@@ -170,7 +170,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
         <div className="flex items-center justify-between">
           <button
             onClick={onBack}
-            className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+            className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-white transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver a Proyectos
@@ -189,7 +189,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
         </div>
 
         {/* Información del proyecto */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
               <div className="flex items-center space-x-4 mb-4">
@@ -197,8 +197,8 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                   <Building2 className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900">{project.name}</h2>
-                  <p className="text-gray-600">{project.client}</p>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{project.name}</h2>
+                  <p className="text-gray-600 dark:text-gray-400">{project.client}</p>
                 </div>
               </div>
               
@@ -209,25 +209,25 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 {project.start_date && (
                   <div>
-                    <span className="text-gray-500">Fecha de inicio:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Fecha de inicio:</span>
                     <span className="ml-2 font-medium">{formatShortDate(project.start_date)}</span>
                   </div>
                 )}
                 {project.end_date && (
                   <div>
-                    <span className="text-gray-500">Fecha de fin:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Fecha de fin:</span>
                     <span className="ml-2 font-medium">{formatShortDate(project.end_date)}</span>
                   </div>
                 )}
                 {project.purchase_order && (
                   <div>
-                    <span className="text-gray-500">OC:</span>
+                    <span className="text-gray-500 dark:text-gray-400">OC:</span>
                     <span className="ml-2 font-medium">{project.purchase_order}</span>
                   </div>
                 )}
                 {project.hes && (
                   <div>
-                    <span className="text-gray-500">HES:</span>
+                    <span className="text-gray-500 dark:text-gray-400">HES:</span>
                     <span className="ml-2 font-medium">{project.hes}</span>
                   </div>
                 )}
@@ -236,11 +236,11 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             
             {/* Progreso visual */}
             <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Progreso del Proyecto</h3>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Progreso del Proyecto</h3>
               <div className="space-y-3">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Gasto vs Venta</span>
+                    <span className="text-gray-600 dark:text-gray-400">Gasto vs Venta</span>
                     <span className="font-medium">{progressPercentage.toFixed(1)}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -258,7 +258,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                   <div className={`text-2xl font-bold ${getMarginColor(marginPercentage)}`}>
                     {marginPercentage.toFixed(1)}%
                   </div>
-                  <div className="text-xs text-gray-600">Margen Real</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">Margen Real</div>
                 </div>
               </div>
             </div>
@@ -267,11 +267,11 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
 
         {/* Resumen financiero */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Venta Neto</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(project.sale_amount)}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Venta Neto</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(project.sale_amount)}</p>
               </div>
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                 <DollarSign className="h-5 w-5 text-green-600" />
@@ -279,11 +279,11 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Costo Neto</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(project.real_cost)}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Costo Neto</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(project.real_cost)}</p>
               </div>
               <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                 <TrendingDown className="h-5 w-5 text-red-600" />
@@ -291,10 +291,10 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Margen Real</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Margen Real</p>
                 <p className={`text-2xl font-bold ${getMarginColor(marginPercentage)}`}>
                   {formatCurrency(project.real_margin)}
                 </p>
@@ -305,11 +305,11 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Gastos</p>
-                <p className="text-2xl font-bold text-gray-900">{expenses.length}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Gastos</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{expenses.length}</p>
               </div>
               <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                 <Receipt className="h-5 w-5 text-purple-600" />
@@ -319,10 +319,10 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
         </div>
 
         {/* Sección de gastos */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Gastos del Proyecto ({expenses.length})
               </h3>
               
@@ -372,10 +372,10 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             {filteredExpenses.length === 0 ? (
               <div className="text-center py-8">
                 <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h4 className="text-lg font-medium text-gray-900 mb-2">
+                <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                   {expenses.length === 0 ? 'No hay gastos registrados' : 'No se encontraron gastos'}
                 </h4>
-                <p className="text-gray-500 mb-4">
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
                   {expenses.length === 0 
                     ? 'Comienza agregando el primer gasto de este proyecto'
                     : 'Intenta cambiar los filtros de búsqueda'
@@ -404,8 +404,8 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
                               <div>
-                                <h4 className="font-medium text-gray-900">{expense.description}</h4>
-                                <p className="text-sm text-gray-500">{formatShortDate(expense.date)}</p>
+                                <h4 className="font-medium text-gray-900 dark:text-white">{expense.description}</h4>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{formatShortDate(expense.date)}</p>
                               </div>
                               <div className="flex items-center gap-2">
                                 {expense.status && <ExpenseStatusBadge status={expense.status} />}
@@ -430,49 +430,49 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                         
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">Monto</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Monto</p>
                             {expense.net_amount && expense.tax_amount ? (
                               <div className="space-y-0.5">
-                                <p className="text-lg font-bold text-gray-900">
+                                <p className="text-lg font-bold text-gray-900 dark:text-white">
                                   {formatCurrency(expense.net_amount)}
                                 </p>
-                                <p className="text-xs text-gray-600">
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
                                   IVA (19%): {formatCurrency(expense.tax_amount)}
                                 </p>
-                                <p className="text-xs text-gray-600">
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
                                   Total: {formatCurrency(expense.amount)}
                                 </p>
                               </div>
                             ) : (
-                              <p className="font-semibold text-gray-900">{formatCurrency(expense.amount)}</p>
+                              <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(expense.amount)}</p>
                             )}
                           </div>
                           {expense.supplier && (
                             <div>
-                              <p className="text-xs text-gray-500">Proveedor</p>
-                              <p className="text-sm text-gray-900">{expense.supplier}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Proveedor</p>
+                              <p className="text-sm text-gray-900 dark:text-white">{expense.supplier}</p>
                             </div>
                           )}
                           {(expense.document_number || expense.invoice_number) && (
                             <div>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-gray-500 dark:text-gray-400">
                                 {expense.document_type === 'factura' ? 'Factura' : 
                                  expense.document_type === 'boleta' ? 'Boleta' : 'Documento'}
                               </p>
-                              <p className="text-sm text-gray-900">
+                              <p className="text-sm text-gray-900 dark:text-white">
                                 {expense.document_number || expense.invoice_number}
                               </p>
                             </div>
                           )}
                           <div>
-                            <p className="text-xs text-gray-500">Categoría</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Categoría</p>
                             <CategoryBadge category={expense.category} />
                           </div>
                         </div>
                         
                         {expense.notes && (
                           <div className="bg-gray-50 rounded-md p-3 mt-3">
-                            <p className="text-sm text-gray-600">{expense.notes}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{expense.notes}</p>
                           </div>
                         )}
                       </div>
