@@ -180,7 +180,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             <StatusBadge status={project.status} />
             <button 
               onClick={() => setShowEditModal(true)}
-              className="flex items-center px-4 py-2 text-gray-700 dark:text-white border border-gray-300 dark:border-orange-500/50 rounded-md hover:bg-gray-50 dark:hover:bg-orange-500/20 dark:hover:border-orange-500 transition-all bg-white dark:bg-gray-800/50"
+              className="flex items-center px-4 py-2 text-gray-700 dark:text-white border border-gray-300 dark:border-orange-500/50 rounded-md hover:bg-gray-50 dark:hover:bg-orange-500/20 dark:hover:border-orange-500 transition-all bg-white dark:bg-gray-900/50"
             >
               <Edit className="h-4 w-4 mr-2" />
               Editar Proyecto
@@ -189,7 +189,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
         </div>
 
         {/* Información del proyecto */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
               <div className="flex items-center space-x-4 mb-4">
@@ -267,7 +267,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
 
         {/* Resumen financiero */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Venta Neto</p>
@@ -279,7 +279,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             </div>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Costo Neto</p>
@@ -291,7 +291,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             </div>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Margen Real</p>
@@ -305,7 +305,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             </div>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Gastos</p>
@@ -319,7 +319,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
         </div>
 
         {/* Sección de gastos */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -355,7 +355,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 hover:border-orange-400 cursor-pointer"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-800 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 hover:border-orange-400 cursor-pointer"
               >
                 <option value="all" className="bg-white dark:bg-gray-900">Todas las categorías</option>
                 {EXPENSE_CATEGORIES.map((category) => (
