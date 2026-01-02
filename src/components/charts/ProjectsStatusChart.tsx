@@ -90,25 +90,27 @@ export function ProjectsStatusChart({ activeProjects, completedProjects }: Proje
       </ResponsiveContainer>
       
       {/* Centro del donut con estadística */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <p className="text-4xl font-bold text-gray-900 dark:text-white">{total}</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Proyectos</p>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ top: '50%', transform: 'translateY(-60%)' }}>
+        <div className="text-center">
+          <p className="text-5xl font-bold text-gray-900 dark:text-white">{total}</p>
+          <p className="text-sm text-gray-400 dark:text-gray-300 mt-1">Proyectos</p>
+        </div>
       </div>
       
       {/* Leyenda personalizada */}
       <div className="absolute bottom-0 left-0 right-0 grid grid-cols-2 gap-3">
-        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700/30">
-          <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-orange-500 to-orange-400"></div>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700/30">
+          <div className="w-3 h-3 rounded-full bg-gradient-to-br from-orange-500 to-orange-400"></div>
           <div className="flex-1">
-            <p className="text-[10px] text-gray-600 dark:text-gray-400">En Proceso</p>
-            <p className="text-base font-bold text-gray-900 dark:text-white">{activeProjects}</p>
+            <p className="text-xs font-medium text-gray-600 dark:text-gray-300">En Proceso</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">{activeProjects}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/30">
-          <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-green-500 to-green-400"></div>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/30">
+          <div className="w-3 h-3 rounded-full bg-gradient-to-br from-green-500 to-green-400"></div>
           <div className="flex-1">
-            <p className="text-[10px] text-gray-600 dark:text-gray-400">Terminados</p>
-            <p className="text-base font-bold text-gray-900 dark:text-white">{completedProjects}</p>
+            <p className="text-xs font-medium text-gray-600 dark:text-gray-300">Terminados</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">{completedProjects}</p>
           </div>
         </div>
       </div>
