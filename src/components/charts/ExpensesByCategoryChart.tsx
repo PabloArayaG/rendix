@@ -67,26 +67,20 @@ export function ExpensesByCategoryChart() {
     }
   }, [activeOrganizationId, timeRange]);
 
-  if (loading) {
-    return (
-      <div className="h-64 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  if (data.length === 0) {
-    return (
-      <div className="h-64 flex items-center justify-center text-gray-500">
-        <p>No hay gastos para mostrar</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />
-      <ResponsiveContainer width="100%" height={300}>
+      
+      {loading ? (
+        <div className="h-64 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      ) : data.length === 0 ? (
+        <div className="h-64 flex items-center justify-center text-gray-500">
+          <p>No hay gastos para mostrar en este período</p>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
         <PieChart>
         <Pie
           data={data}
@@ -106,6 +100,7 @@ export function ExpensesByCategoryChart() {
         <Legend />
       </PieChart>
     </ResponsiveContainer>
+      )}
     </div>
   );
 }
