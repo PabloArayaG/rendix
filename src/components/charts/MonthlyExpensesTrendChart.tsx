@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useDashboard } from '../../hooks/useDashboard';
 import { useAuthStore } from '../../store/authStore';
 import { formatCurrency } from '../../lib/utils';
+import { TimeRangeSelector, TimeRange, getMonthsFromRange } from './TimeRangeSelector';
 
 interface MonthlyData {
   month: string;
@@ -13,6 +14,7 @@ interface MonthlyData {
 export function MonthlyExpensesTrendChart() {
   const [data, setData] = useState<MonthlyData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState<TimeRange>('6months');
   const { getMonthlyStats } = useDashboard();
   const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
 
@@ -22,7 +24,8 @@ export function MonthlyExpensesTrendChart() {
       
       try {
         setLoading(true);
-        const monthlyData = await getMonthlyStats(6); // Últimos 6 meses
+        const months = getMonthsFromRange(timeRange);
+        const monthlyData = await getMonthlyStats(Math.max(1, Math.ceil(months)));
         
         // Formatear datos para el gráfico
         const formattedData = monthlyData.map((item: any) => ({
@@ -40,7 +43,7 @@ export function MonthlyExpensesTrendChart() {
     };
 
     fetchMonthlyData();
-  }, [activeOrganizationId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeOrganizationId, timeRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const formatMonthLabel = (monthStr: string) => {
     const [year, month] = monthStr.split('-');
@@ -65,8 +68,10 @@ export function MonthlyExpensesTrendChart() {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data}>
+    <div className="space-y-4">
+      <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="month" />
         <YAxis tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} />
@@ -86,6 +91,7 @@ export function MonthlyExpensesTrendChart() {
         />
       </LineChart>
     </ResponsiveContainer>
+    </div>
   );
 }
 

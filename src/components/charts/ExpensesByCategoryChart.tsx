@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { supabase, getCurrentUserId } from '../../lib/supabase';
 import { useAuthStore } from '../../store/authStore';
 import { formatCurrency } from '../../lib/utils';
+import { TimeRangeSelector, TimeRange, getDaysFromRange } from './TimeRangeSelector';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
 
@@ -15,6 +16,7 @@ interface CategoryData {
 export function ExpensesByCategoryChart() {
   const [data, setData] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState<TimeRange>('30days');
   const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
 
   useEffect(() => {
@@ -24,10 +26,16 @@ export function ExpensesByCategoryChart() {
         const userId = await getCurrentUserId();
         if (!userId || !activeOrganizationId) return;
 
+        // Calcular fecha de inicio según el rango
+        const daysAgo = getDaysFromRange(timeRange);
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - daysAgo);
+
         const { data: expenses, error } = await supabase
           .from('expenses')
-          .select('category, net_amount')
-          .eq('organization_id', activeOrganizationId);
+          .select('category, net_amount, date')
+          .eq('organization_id', activeOrganizationId)
+          .gte('date', startDate.toISOString().split('T')[0]);
 
         if (error) throw error;
 
@@ -57,7 +65,7 @@ export function ExpensesByCategoryChart() {
     if (activeOrganizationId) {
       fetchCategoryData();
     }
-  }, [activeOrganizationId]);
+  }, [activeOrganizationId, timeRange]);
 
   if (loading) {
     return (
@@ -76,8 +84,10 @@ export function ExpensesByCategoryChart() {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
+    <div className="space-y-4">
+      <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />
+      <ResponsiveContainer width="100%" height={300}>
+        <PieChart>
         <Pie
           data={data}
           cx="50%"
@@ -96,6 +106,7 @@ export function ExpensesByCategoryChart() {
         <Legend />
       </PieChart>
     </ResponsiveContainer>
+    </div>
   );
 }
 
