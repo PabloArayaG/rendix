@@ -188,38 +188,29 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
   const canEdit = !project || canEditProject(project);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Building2 className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {isEditing ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {isEditing ? 'Modifica la información del proyecto' : 'Completa los datos para crear un nuevo proyecto'}
-              </p>
-            </div>
+    <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        {/* Header Minimalista */}
+        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-gray-800">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              {isEditing ? 'Editar Proyecto' : 'Nuevo Proyecto'}
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {isEditing ? 'Actualiza la información del proyecto' : 'Completa los campos a continuación'}
+            </p>
           </div>
-          <Tooltip content="Cerrar modal">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleClose}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </Tooltip>
+          <button
+            onClick={handleClose}
+            className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
-          <form id="project-form" onSubmit={handleSubmit(onSubmit)} className="p-6">
+          <form id="project-form" onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-8">
             {/* Alerts */}
             {error && (
               <Card className="mb-6 border-red-200 bg-red-50">
@@ -250,10 +241,7 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
               {/* Left Column - Basic Info */}
               <Card>
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-6">
-                    <Building2 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Básica</h3>
-                  </div>
+                  <h3 className="text-sm font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-5">Información Básica</h3>
 
                   <div className="space-y-4">
                     {/* ID y Nombre en una fila */}
@@ -353,10 +341,7 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
                 {/* Financial Information */}
                 <Card>
                   <CardContent className="p-6">
-                    <div className="flex items-center gap-2 mb-6">
-                      <DollarSign className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Financiera</h3>
-                    </div>
+                    <h3 className="text-sm font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-5">Información Financiera</h3>
 
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
@@ -478,10 +463,7 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
                 {/* Documents */}
                 <Card>
                   <CardContent className="p-6">
-                    <div className="flex items-center gap-2 mb-6">
-                      <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documentos</h3>
-                    </div>
+                    <h3 className="text-sm font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-5">Documentos</h3>
 
                     <div className="space-y-4">
                       <div>

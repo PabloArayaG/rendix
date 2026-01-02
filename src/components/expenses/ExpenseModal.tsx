@@ -220,35 +220,28 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
   const isEditing = !!expense;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white dark:text-white">
-                {isEditing ? 'Editar Gasto' : 'Registrar Nuevo Gasto'}
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-400">
-                {isEditing ? 'Modifica la información del gasto' : 'Completa los datos para registrar un nuevo gasto'}
-              </p>
-            </div>
+    <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+        {/* Header Minimalista */}
+        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-gray-800">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              {isEditing ? 'Editar Gasto' : 'Nuevo Gasto'}
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {isEditing ? 'Actualiza la información del gasto' : 'Completa los campos a continuación'}
+            </p>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm"
+          <button
             onClick={handleClose}
-            className="h-8 w-8 p-0"
+            className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
-            <X className="h-4 w-4" />
-          </Button>
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
-          <form id="expense-form" onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
+          <form id="expense-form" onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-8">
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <p className="text-red-800 text-sm">{error}</p>
@@ -256,8 +249,8 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
           )}
 
           {/* Información básica */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Información del Gasto</h3>
+          <div className="space-y-5">
+            <h3 className="text-sm font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Información del Gasto</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -441,20 +434,20 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
               </div>
 
               {/* Mostrar cálculo visual */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-blue-900 mb-2">Cálculo de IVA</h4>
-                <div className="grid grid-cols-3 gap-4 text-sm">
+              <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-5">
+                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Resumen de Montos</h4>
+                <div className="grid grid-cols-3 gap-6 text-sm">
                   <div>
-                    <span className="text-blue-700">Neto:</span>
-                    <span className="font-semibold ml-2">{netAmount.toLocaleString('es-CL')}</span>
+                    <span className="text-gray-600 dark:text-gray-400 text-xs">Neto:</span>
+                    <p className="font-semibold text-gray-900 dark:text-white mt-1">${netAmount.toLocaleString('es-CL')}</p>
                   </div>
                   <div>
-                    <span className="text-blue-700">IVA (19%):</span>
-                    <span className="font-semibold ml-2">{taxAmount.toLocaleString('es-CL')}</span>
+                    <span className="text-gray-600 dark:text-gray-400 text-xs">IVA (19%):</span>
+                    <p className="font-semibold text-gray-900 dark:text-white mt-1">${taxAmount.toLocaleString('es-CL')}</p>
                   </div>
                   <div>
-                    <span className="text-blue-700">Total:</span>
-                    <span className="font-semibold ml-2">{totalAmount.toLocaleString('es-CL')}</span>
+                    <span className="text-gray-600 dark:text-gray-400 text-xs">Total:</span>
+                    <p className="font-bold text-orange-600 dark:text-orange-400 mt-1">${totalAmount.toLocaleString('es-CL')}</p>
                   </div>
                 </div>
               </div>
@@ -484,8 +477,8 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
           </div>
 
           {/* Información adicional */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Información Adicional</h3>
+          <div className="space-y-5">
+            <h3 className="text-sm font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Información Adicional</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
