@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useDashboard } from '../../hooks/useDashboard';
+import { useAuthStore } from '../../store/authStore';
 import { formatCurrency } from '../../lib/utils';
 
 interface MonthlyData {
@@ -13,9 +14,12 @@ export function MonthlyExpensesTrendChart() {
   const [data, setData] = useState<MonthlyData[]>([]);
   const [loading, setLoading] = useState(true);
   const { getMonthlyStats } = useDashboard();
+  const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
 
   useEffect(() => {
     const fetchMonthlyData = async () => {
+      if (!activeOrganizationId) return;
+      
       try {
         setLoading(true);
         const monthlyData = await getMonthlyStats(6); // Últimos 6 meses
@@ -36,7 +40,7 @@ export function MonthlyExpensesTrendChart() {
     };
 
     fetchMonthlyData();
-  }, [getMonthlyStats]);
+  }, [activeOrganizationId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const formatMonthLabel = (monthStr: string) => {
     const [year, month] = monthStr.split('-');
