@@ -61,44 +61,44 @@ export function Projects() {
 
     return (
       <div 
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow cursor-pointer"
         onClick={() => handleProjectClick(project.id)}
       >
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-3 mb-2">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Building2 className="h-5 w-5 text-blue-600" />
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
                     {project.custom_id}
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{project.name}</h3>
               </div>
             </div>
             
-            <p className="text-gray-600 mb-3">{project.client}</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-3">{project.client}</p>
             
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <p className="text-sm text-gray-500">Venta Neto</p>
-                <p className="font-semibold text-gray-900">{formatCurrency(project.sale_amount)}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Venta Neto</p>
+                <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(project.sale_amount)}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Costo Neto</p>
-                <p className="font-semibold text-gray-900">{formatCurrency(project.real_cost)}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Costo Neto</p>
+                <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(project.real_cost)}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Margen Real</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Margen Real</p>
                 <p className={`font-semibold ${getMarginColor(marginPercentage)}`}>
                   {formatCurrency(project.real_margin)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">% Margen</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">% Margen</p>
                 <p className={`font-semibold ${getMarginColor(marginPercentage)}`}>
                   {marginPercentage.toFixed(1)}%
                 </p>
@@ -187,7 +187,7 @@ export function Projects() {
                 placeholder="Buscar proyectos, clientes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -215,54 +215,54 @@ export function Projects() {
 
         {/* Estadísticas rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                <Building2 className="h-4 w-4 text-blue-600" />
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-3">
+                <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total</p>
-                <p className="text-xl font-semibold text-gray-900">{projects.length}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total</p>
+                <p className="text-xl font-semibold text-gray-900 dark:text-white">{projects.length}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                <Building2 className="h-4 w-4 text-green-600" />
+              <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-3">
+                <Building2 className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">En Proceso</p>
-                <p className="text-xl font-semibold text-gray-900">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">En Proceso</p>
+                <p className="text-xl font-semibold text-gray-900 dark:text-white">
                   {projects.filter(p => p.status === 'in_progress').length}
                 </p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                <Building2 className="h-4 w-4 text-purple-600" />
+              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mr-3">
+                <Building2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Terminados</p>
-                <p className="text-xl font-semibold text-gray-900">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Terminados</p>
+                <p className="text-xl font-semibold text-gray-900 dark:text-white">
                   {projects.filter(p => p.status === 'completed').length}
                 </p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
-                <Building2 className="h-4 w-4 text-yellow-600" />
+              <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mr-3">
+                <Building2 className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Valor Total</p>
-                <p className="text-xl font-semibold text-gray-900">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Valor Total</p>
+                <p className="text-xl font-semibold text-gray-900 dark:text-white">
                   {formatCurrency(projects.reduce((sum, p) => sum + p.sale_amount, 0))}
                 </p>
               </div>

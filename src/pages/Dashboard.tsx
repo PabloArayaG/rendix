@@ -149,16 +149,16 @@ export function Dashboard() {
     changeType?: 'positive' | 'negative' | 'neutral';
   }) => {
     const iconColors = {
-      blue: 'bg-blue-100 text-blue-600',
-      green: 'bg-green-100 text-green-600',
-      yellow: 'bg-yellow-100 text-yellow-600',
-      purple: 'bg-purple-100 text-purple-600',
+      blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+      green: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+      yellow: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
+      purple: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
     };
 
     const changeColors = {
-      positive: 'text-green-600',
-      negative: 'text-red-600',
-      neutral: 'text-gray-600',
+      positive: 'text-green-600 dark:text-green-400',
+      negative: 'text-red-600 dark:text-red-400',
+      neutral: 'text-gray-600 dark:text-gray-400',
     };
 
     return (
@@ -166,8 +166,8 @@ export function Dashboard() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">{title}</p>
-              <p className="text-2xl font-bold text-gray-900 tabular-nums">{value}</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{title}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{value}</p>
               {change && (
                 <div className="flex items-center mt-2">
                   {changeType === 'positive' ? (
