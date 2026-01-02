@@ -20,7 +20,7 @@ const timeRangeLabels: Record<TimeRange, string> = {
 const timeRangeOptions: TimeRange[] = ['7days', '30days', '3months', '6months', '12months'];
 
 export function TimeRangeSelector({ selected, onChange, showCustom = false }: TimeRangeSelectorProps) {
-  const options = showCustom ? [...timeRangeOptions, 'custom'] : timeRangeOptions;
+  const options: TimeRange[] = showCustom ? [...timeRangeOptions, 'custom' as TimeRange] : timeRangeOptions;
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -29,7 +29,7 @@ export function TimeRangeSelector({ selected, onChange, showCustom = false }: Ti
         <span className="font-medium">Período:</span>
       </div>
       <div className="flex gap-2 flex-wrap">
-        {options.map((range) => (
+        {options.map((range: TimeRange) => (
           <button
             key={range}
             onClick={() => onChange(range)}
