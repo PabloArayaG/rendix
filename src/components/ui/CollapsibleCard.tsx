@@ -1,5 +1,5 @@
 import { useState, ReactNode } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
 
 interface CollapsibleCardProps {
   title: string;
