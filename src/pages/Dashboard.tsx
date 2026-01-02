@@ -19,6 +19,12 @@ import { ExpenseModal } from '../components/expenses/ExpenseModal';
 import { Expense } from '../types/database';
 import { useAuthStore } from '../store/authStore';
 import { useOrganizations } from '../hooks/useOrganizations';
+import { 
+  ProjectsStatusChart, 
+  IncomeVsCostsChart, 
+  ExpensesByCategoryChart, 
+  MonthlyExpensesTrendChart 
+} from '../components/charts';
 
 export function Dashboard() {
   const { stats, loading, error, refetch } = useDashboard();
@@ -213,6 +219,56 @@ export function Dashboard() {
             icon={TrendingUp}
             color="purple"
           />
+        </div>
+
+        {/* Sección de gráficos */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Gráfico: Proyectos por Estado */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Estado de Proyectos
+              </h3>
+              <ProjectsStatusChart 
+                activeProjects={stats?.active_projects || 0}
+                completedProjects={stats?.completed_projects || 0}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Gráfico: Ingresos vs Costos */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Resumen Financiero
+              </h3>
+              <IncomeVsCostsChart 
+                totalSales={stats?.total_sales || 0}
+                totalCosts={stats?.total_costs || 0}
+                totalMargin={stats?.total_margin || 0}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Gráfico: Gastos por Categoría */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Distribución de Gastos
+              </h3>
+              <ExpensesByCategoryChart />
+            </CardContent>
+          </Card>
+
+          {/* Gráfico: Tendencia de Gastos */}
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Tendencia de Gastos (6 meses)
+              </h3>
+              <MonthlyExpensesTrendChart />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Sección de análisis detallado */}

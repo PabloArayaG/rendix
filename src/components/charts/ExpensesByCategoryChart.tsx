@@ -1,0 +1,100 @@
+import { useEffect, useState } from 'react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { supabase, getCurrentUserId } from '../../lib/supabase';
+import { useAuthStore } from '../../store/authStore';
+import { formatCurrency } from '../../lib/utils';
+
+const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
+
+interface CategoryData {
+  name: string;
+  value: number;
+}
+
+export function ExpensesByCategoryChart() {
+  const [data, setData] = useState<CategoryData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
+
+  useEffect(() => {
+    const fetchCategoryData = async () => {
+      try {
+        setLoading(true);
+        const userId = await getCurrentUserId();
+        if (!userId || !activeOrganizationId) return;
+
+        const { data: expenses, error } = await supabase
+          .from('expenses')
+          .select('category, net_amount')
+          .eq('organization_id', activeOrganizationId);
+
+        if (error) throw error;
+
+        // Agrupar por categoría
+        const categoryMap = expenses?.reduce((acc, expense) => {
+          const category = expense.category || 'Sin categoría';
+          if (!acc[category]) {
+            acc[category] = 0;
+          }
+          acc[category] += expense.net_amount;
+          return acc;
+        }, {} as Record<string, number>);
+
+        const chartData = Object.entries(categoryMap || {}).map(([name, value]) => ({
+          name,
+          value,
+        })).sort((a, b) => b.value - a.value);
+
+        setData(chartData);
+      } catch (err) {
+        console.error('Error fetching category data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (activeOrganizationId) {
+      fetchCategoryData();
+    }
+  }, [activeOrganizationId]);
+
+  if (loading) {
+    return (
+      <div className="h-64 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="h-64 flex items-center justify-center text-gray-500">
+        <p>No hay gastos para mostrar</p>
+      </div>
+    );
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          labelLine={false}
+          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+          outerRadius={80}
+          fill="#8884d8"
+          dataKey="value"
+        >
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          ))}
+        </Pie>
+        <Tooltip formatter={(value: number) => formatCurrency(value)} />
+        <Legend />
+      </PieChart>
+    </ResponsiveContainer>
+  );
+}
+
