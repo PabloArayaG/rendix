@@ -526,8 +526,8 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
           </form>
         </div>
 
-        {/* Footer with Actions */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        {/* Footer Sticky */}
+        <div className="sticky bottom-0 flex items-center justify-between px-8 py-5 border-t border-gray-200 dark:border-gray-700/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
           <div className="text-sm text-gray-500 dark:text-gray-400">
             {isEditing && project?.status === 'completed' && (
               <span className="flex items-center gap-1">

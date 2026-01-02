@@ -606,27 +606,25 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
           </form>
         </div>
 
-        {/* Footer with Actions */}
-        <div className="flex items-center justify-end px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center gap-3">
-            <Button 
-              type="button" 
-              variant="secondary" 
-              onClick={handleClose}
-              disabled={loading}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              type="submit" 
-              variant="primary" 
-              loading={loading}
-              disabled={loading}
-              form="expense-form"
-            >
-              {isEditing ? 'Actualizar Gasto' : 'Registrar Gasto'}
-            </Button>
-          </div>
+        {/* Footer Sticky */}
+        <div className="sticky bottom-0 flex items-center justify-end gap-3 px-8 py-5 border-t border-gray-200 dark:border-gray-700/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
+          <Button 
+            type="button" 
+            variant="secondary" 
+            onClick={handleClose}
+            disabled={loading}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            type="submit" 
+            variant="primary" 
+            loading={loading}
+            disabled={loading}
+            form="expense-form"
+          >
+            {isEditing ? 'Actualizar Gasto' : 'Registrar Gasto'}
+          </Button>
         </div>
       </div>
     </div>
