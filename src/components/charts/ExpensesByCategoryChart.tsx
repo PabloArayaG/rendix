@@ -4,6 +4,7 @@ import { supabase, getCurrentUserId } from '../../lib/supabase';
 import { useAuthStore } from '../../store/authStore';
 import { formatCurrency } from '../../lib/utils';
 import { TimeRangeSelector, TimeRange, getDaysFromRange } from './TimeRangeSelector';
+import { EXPENSE_CATEGORIES } from '../../types/database';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
 
@@ -43,7 +44,7 @@ export function ExpensesByCategoryChart() {
         const categoryMap = expenses?.reduce((acc, expense) => {
           const categoryValue = expense.category || 'general';
           // Buscar el label en español
-          const categoryLabel = EXPENSE_CATEGORIES.find(c => c.value === categoryValue)?.label || 'Sin categoría';
+          const categoryLabel = EXPENSE_CATEGORIES.find((c: any) => c.value === categoryValue)?.label || 'Sin categoría';
           
           if (!acc[categoryLabel]) {
             acc[categoryLabel] = 0;
