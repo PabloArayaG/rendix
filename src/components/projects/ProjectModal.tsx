@@ -189,18 +189,18 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
               <Building2 className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {isEditing ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {isEditing ? 'Modifica la información del proyecto' : 'Completa los datos para crear un nuevo proyecto'}
               </p>
             </div>
@@ -251,40 +251,40 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-6">
-                    <Building2 className="h-5 w-5 text-gray-600" />
-                    <h3 className="text-lg font-semibold text-gray-900">Información Básica</h3>
+                    <Building2 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Básica</h3>
                   </div>
 
                   <div className="space-y-4">
                     {/* ID y Nombre en una fila */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           ID del Proyecto *
                         </label>
                         <input
                           {...register('custom_id')}
                           type="text"
                           disabled={isEditing && !canEdit}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Ej: 2024-001"
                         />
                         {errors.custom_id && (
                           <p className="mt-1 text-sm text-red-600">{errors.custom_id.message}</p>
                         )}
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                           Solo letras, números, guiones y puntos
                         </p>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Estado
                         </label>
                         {isEditing ? (
                           <select
                             {...register('status')}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           >
                             {PROJECT_STATUSES.map((status) => (
                               <option key={status.value} value={status.value}>
@@ -301,14 +301,14 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Nombre del Proyecto *
                       </label>
                       <input
                         {...register('name')}
                         type="text"
                         disabled={isEditing && !canEdit}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="Ej: Construcción Edificio ABC"
                       />
                       {errors.name && (
@@ -317,14 +317,14 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Cliente *
                       </label>
                       <input
                         {...register('client')}
                         type="text"
                         disabled={isEditing && !canEdit}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                         placeholder="Ej: Constructora XYZ S.A."
                       />
                       {errors.client && (
@@ -333,14 +333,14 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Descripción
                       </label>
                       <textarea
                         {...register('description')}
                         rows={3}
                         disabled={isEditing && !canEdit}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed resize-none"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed resize-none"
                         placeholder="Descripción detallada del proyecto..."
                       />
                     </div>
@@ -354,19 +354,19 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center gap-2 mb-6">
-                      <DollarSign className="h-5 w-5 text-gray-600" />
-                      <h3 className="text-lg font-semibold text-gray-900">Información Financiera</h3>
+                      <DollarSign className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Financiera</h3>
                     </div>
 
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Monto de Venta (CLP) *
                           </label>
                           <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <span className="text-gray-500 text-sm">$</span>
+                              <span className="text-gray-500 dark:text-gray-400 text-sm">$</span>
                             </div>
                             <input
                               {...register('sale_amount', { valueAsNumber: true })}
@@ -374,7 +374,7 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
                               step="1"
                               min="0"
                               disabled={isEditing && !canEdit}
-                              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed tabular-nums"
+                              className="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed tabular-nums"
                               placeholder="0"
                             />
                           </div>
@@ -384,12 +384,12 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Costo Proyectado (CLP) *
                           </label>
                           <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <span className="text-gray-500 text-sm">$</span>
+                              <span className="text-gray-500 dark:text-gray-400 text-sm">$</span>
                             </div>
                             <input
                               {...register('projected_cost', { valueAsNumber: true })}
@@ -397,7 +397,7 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
                               step="1"
                               min="0"
                               disabled={isEditing && !canEdit}
-                              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed tabular-nums"
+                              className="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed tabular-nums"
                               placeholder="0"
                             />
                           </div>
@@ -440,32 +440,32 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center gap-2 mb-6">
-                      <Calendar className="h-5 w-5 text-gray-600" />
-                      <h3 className="text-lg font-semibold text-gray-900">Fechas</h3>
+                      <Calendar className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Fechas</h3>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Fecha de Inicio
                         </label>
                         <input
                           {...register('start_date')}
                           type="date"
                           disabled={isEditing && !canEdit}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Fecha de Finalización
                         </label>
                         <input
                           {...register('end_date')}
                           type="date"
                           disabled={isEditing && !canEdit}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                         />
                         {errors.end_date && (
                           <p className="mt-1 text-sm text-red-600">{errors.end_date.message}</p>
@@ -479,43 +479,43 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
                 <Card>
                   <CardContent className="p-6">
                     <div className="flex items-center gap-2 mb-6">
-                      <FileText className="h-5 w-5 text-gray-600" />
-                      <h3 className="text-lg font-semibold text-gray-900">Documentos</h3>
+                      <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documentos</h3>
                     </div>
 
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Orden de Compra
                         </label>
                         <input
                           {...register('purchase_order')}
                           type="text"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           placeholder="Ej: OC-2024-001"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           HES (Hoja de Entrada en Servicio)
                         </label>
                         <input
                           {...register('hes')}
                           type="text"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           placeholder="Ej: HES-2024-001"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Factura de Venta
                         </label>
                         <input
                           {...register('sale_invoice')}
                           type="text"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           placeholder="Ej: FV-2024-001"
                         />
                       </div>
@@ -529,13 +529,13 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <FileText className="h-5 w-5 text-gray-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">Notas Adicionales</h3>
+                  <FileText className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notas Adicionales</h3>
                 </div>
                 <textarea
                   {...register('notes')}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   placeholder="Notas adicionales sobre el proyecto..."
                 />
               </CardContent>
@@ -545,8 +545,8 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
         </div>
 
         {/* Footer with Actions */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <div className="text-sm text-gray-500">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             {isEditing && project?.status === 'completed' && (
               <span className="flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4" />
