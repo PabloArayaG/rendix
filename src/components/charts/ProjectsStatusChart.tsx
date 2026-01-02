@@ -34,7 +34,7 @@ export function ProjectsStatusChart({ activeProjects, completedProjects }: Proje
           cx="50%"
           cy="50%"
           labelLine={false}
-          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+          label={({ name, percent }) => `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
           outerRadius={80}
           fill="#8884d8"
           dataKey="value"
@@ -43,7 +43,7 @@ export function ProjectsStatusChart({ activeProjects, completedProjects }: Proje
             <Cell key={`cell-${index}`} fill={COLORS[entry.name as keyof typeof COLORS]} />
           ))}
         </Pie>
-        <Tooltip formatter={(value: number) => `${value} proyecto${value !== 1 ? 's' : ''}`} />
+        <Tooltip formatter={(value) => `${value} proyecto${value !== 1 ? 's' : ''}`} />
         <Legend />
       </PieChart>
     </ResponsiveContainer>

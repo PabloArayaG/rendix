@@ -9,6 +9,7 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
 interface CategoryData {
   name: string;
   value: number;
+  [key: string]: string | number;
 }
 
 export function ExpensesByCategoryChart() {
@@ -82,16 +83,16 @@ export function ExpensesByCategoryChart() {
           cx="50%"
           cy="50%"
           labelLine={false}
-          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+          label={({ name, percent }) => `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
           outerRadius={80}
           fill="#8884d8"
           dataKey="value"
         >
-          {data.map((entry, index) => (
+          {data.map((_entry, index) => (
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
-        <Tooltip formatter={(value: number) => formatCurrency(value)} />
+        <Tooltip formatter={(value) => formatCurrency(value as number)} />
         <Legend />
       </PieChart>
     </ResponsiveContainer>

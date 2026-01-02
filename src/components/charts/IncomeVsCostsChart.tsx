@@ -24,7 +24,7 @@ export function IncomeVsCostsChart({ totalSales, totalCosts, totalMargin }: Inco
         <XAxis dataKey="name" />
         <YAxis tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} />
         <Tooltip 
-          formatter={(value: number) => formatCurrency(value)}
+          formatter={(value) => formatCurrency(value as number)}
           contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px' }}
         />
         <Legend />
