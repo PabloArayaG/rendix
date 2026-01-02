@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { formatCurrency } from '../../lib/utils';
 
 interface IncomeVsCostsChartProps {
@@ -91,7 +91,7 @@ export function IncomeVsCostsChart({ totalSales, totalCosts, totalMargin }: Inco
           <LabelList 
             dataKey="value" 
             position="top" 
-            formatter={(value: number) => `$${(value / 1000000).toFixed(1)}M`}
+            formatter={(value) => `$${((value as number) / 1000000).toFixed(1)}M`}
             style={{ fill: '#374151', fontSize: 12, fontWeight: 600 }}
           />
         </Bar>
