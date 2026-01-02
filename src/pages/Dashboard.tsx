@@ -19,6 +19,7 @@ import { ExpenseModal } from '../components/expenses/ExpenseModal';
 import { Expense } from '../types/database';
 import { useAuthStore } from '../store/authStore';
 import { useOrganizations } from '../hooks/useOrganizations';
+import { useProjects } from '../hooks/useProjects';
 import { 
   ProjectsStatusChart, 
   IncomeVsCostsChart, 
@@ -30,8 +31,10 @@ export function Dashboard() {
   const { stats, loading, error, refetch } = useDashboard();
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>(undefined);
   const [showEditExpenseModal, setShowEditExpenseModal] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
   const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
   const { loading: loadingOrgs } = useOrganizations();
+  const { projects } = useProjects();
 
   useEffect(() => {
     refetch();
@@ -190,32 +193,69 @@ export function Dashboard() {
     );
   };
 
+  // Filtrar stats por proyecto si hay uno seleccionado
+  const filteredStats = selectedProjectId === 'all' ? stats : (() => {
+    const project = projects.find(p => p.id === selectedProjectId);
+    if (!project || !stats) return null;
+    
+    return {
+      ...stats,
+      total_projects: 1,
+      active_projects: project.status === 'in_progress' ? 1 : 0,
+      completed_projects: project.status === 'completed' ? 1 : 0,
+      total_sales: project.sale_amount,
+      total_costs: project.real_cost,
+      total_margin: project.real_margin,
+      margin_percentage: project.sale_amount > 0 ? (project.real_margin / project.sale_amount) * 100 : 0,
+      recent_expenses: stats.recent_expenses.filter(e => (e as any).project_id === selectedProjectId),
+    };
+  })();
+
   return (
     <Layout title="Dashboard" subtitle="Resumen general de tu actividad financiera">
       <div className="space-y-8">
+        {/* Selector de Proyecto */}
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Filtrar por proyecto:
+          </label>
+          <select
+            value={selectedProjectId}
+            onChange={(e) => setSelectedProjectId(e.target.value)}
+            className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 hover:border-orange-400 cursor-pointer min-w-[280px]"
+          >
+            <option value="all" className="bg-white dark:bg-gray-900">📊 Todos los proyectos</option>
+            {projects.map((project) => (
+              <option key={project.id} value={project.id} className="bg-white dark:bg-gray-900">
+                {project.custom_id} - {project.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* KPIs Grid - Jerarquía principal */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <KPICard
             title="Total Proyectos"
-            value={stats?.total_projects.toString() || '0'}
+            value={filteredStats?.total_projects.toString() || '0'}
             icon={FolderOpen}
             color="blue"
           />
           <KPICard
             title="Ingresos Totales"
-            value={formatCurrency(stats?.total_sales || 0)}
+            value={formatCurrency(filteredStats?.total_sales || 0)}
             icon={DollarSign}
             color="green"
           />
           <KPICard
             title="Costos Totales"
-            value={formatCurrency(stats?.total_costs || 0)}
+            value={formatCurrency(filteredStats?.total_costs || 0)}
             icon={Receipt}
             color="yellow"
           />
           <KPICard
             title="Margen Total"
-            value={formatCurrency(stats?.total_margin || 0)}
+            value={formatCurrency(filteredStats?.total_margin || 0)}
             icon={TrendingUp}
             color="purple"
           />
@@ -227,8 +267,8 @@ export function Dashboard() {
           <div key="projects-status-chart">
             <CollapsibleCard title="Estado de Proyectos" defaultExpanded={true}>
               <ProjectsStatusChart 
-                activeProjects={stats?.active_projects || 0}
-                completedProjects={stats?.completed_projects || 0}
+                activeProjects={filteredStats?.active_projects || 0}
+                completedProjects={filteredStats?.completed_projects || 0}
               />
             </CollapsibleCard>
           </div>
@@ -237,9 +277,9 @@ export function Dashboard() {
           <div key="income-costs-chart">
             <CollapsibleCard title="Resumen Financiero" defaultExpanded={true}>
               <IncomeVsCostsChart 
-                totalSales={stats?.total_sales || 0}
-                totalCosts={stats?.total_costs || 0}
-                totalMargin={stats?.total_margin || 0}
+                totalSales={filteredStats?.total_sales || 0}
+                totalCosts={filteredStats?.total_costs || 0}
+                totalMargin={filteredStats?.total_margin || 0}
               />
             </CollapsibleCard>
           </div>
@@ -247,7 +287,7 @@ export function Dashboard() {
           {/* Gráfico: Gastos por Categoría */}
           <div key="expenses-category-chart">
             <CollapsibleCard title="Distribución de Gastos" defaultExpanded={true}>
-              <ExpensesByCategoryChart />
+              <ExpensesByCategoryChart projectId={selectedProjectId} />
             </CollapsibleCard>
           </div>
 

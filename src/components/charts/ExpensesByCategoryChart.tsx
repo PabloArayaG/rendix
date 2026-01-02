@@ -14,7 +14,11 @@ interface CategoryData {
   [key: string]: string | number;
 }
 
-export function ExpensesByCategoryChart() {
+interface ExpensesByCategoryChartProps {
+  projectId?: string;
+}
+
+export function ExpensesByCategoryChart({ projectId }: ExpensesByCategoryChartProps = {}) {
   const [data, setData] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<TimeRange>('30days');
@@ -32,11 +36,17 @@ export function ExpensesByCategoryChart() {
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - daysAgo);
 
-        const { data: expenses, error } = await supabase
+        let query = supabase
           .from('expenses')
           .select('category, net_amount, date')
           .eq('organization_id', activeOrganizationId)
           .gte('date', startDate.toISOString().split('T')[0]);
+
+        if (projectId && projectId !== 'all') {
+          query = query.eq('project_id', projectId);
+        }
+
+        const { data: expenses, error } = await query;
 
         if (error) throw error;
 
@@ -69,7 +79,7 @@ export function ExpensesByCategoryChart() {
     if (activeOrganizationId) {
       fetchCategoryData();
     }
-  }, [activeOrganizationId, timeRange]);
+  }, [activeOrganizationId, timeRange, projectId]);
 
   return (
     <div className="space-y-4">
