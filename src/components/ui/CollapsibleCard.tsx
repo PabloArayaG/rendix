@@ -12,9 +12,9 @@ export function CollapsibleCard({ title, children, defaultExpanded = true }: Col
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
-    <Card>
+    <Card className={isExpanded ? '' : 'overflow-hidden'}>
       <div 
-        className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100"
+        className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${isExpanded ? 'border-b border-gray-100' : ''}`}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
@@ -27,11 +27,11 @@ export function CollapsibleCard({ title, children, defaultExpanded = true }: Col
         </button>
       </div>
       
-      {isExpanded && (
+      <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}`}>
         <CardContent className="p-6">
           {children}
         </CardContent>
-      )}
+      </div>
     </Card>
   );
 }
