@@ -220,10 +220,10 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
   const isEditing = !!expense;
 
   return (
-    <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-black/60 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700/50 w-full max-w-3xl max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header Minimalista */}
-        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-gray-700/50">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
               {isEditing ? 'Editar Gasto' : 'Nuevo Gasto'}
@@ -280,7 +280,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
                   // Si no hay proyecto preseleccionado, mostrar selector
                   <select
                     {...register('project_id')}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-transparent dark:text-white focus:outline-none focus:ring-1 focus:ring-orange-500 dark:focus:ring-orange-400 focus:border-orange-500 transition-all"
                   >
                     <option value="">Seleccionar proyecto</option>
                     {projects.map((project) => (
