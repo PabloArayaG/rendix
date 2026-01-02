@@ -12,7 +12,7 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
  */
 export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = 'default', padding = 'md', children, ...props }, ref) => {
-    const baseStyles = 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm';
+    const baseStyles = 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm';
     
     const variants = {
       default: 'rounded-xl',

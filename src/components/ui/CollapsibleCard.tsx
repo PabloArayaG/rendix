@@ -16,9 +16,9 @@ export function CollapsibleCard({ title, children, defaultExpanded = true }: Col
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl overflow-hidden transition-all duration-300 ease-in-out">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm rounded-xl overflow-hidden transition-all duration-300 ease-in-out">
       <div 
-        className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 ${isExpanded ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}
+        className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 ${isExpanded ? 'border-b border-gray-100 dark:border-gray-800' : ''}`}
         onClick={handleToggle}
       >
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>

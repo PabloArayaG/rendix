@@ -12,7 +12,7 @@ export function Header({ title, subtitle }: HeaderProps) {
   const { user } = useAuthStore();
 
   return (
-    <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-700/60 px-6 py-4 shadow-sm">
+    <header className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-800/60 px-6 py-4 shadow-sm">
       <div className="flex items-center justify-between">
         {/* Title section */}
         <div>
@@ -38,7 +38,7 @@ export function Header({ title, subtitle }: HeaderProps) {
             <input
               type="text"
               placeholder="Buscar proyectos, gastos..."
-              className="block w-64 pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="block w-64 pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 text-sm"
             />
           </div>
 
