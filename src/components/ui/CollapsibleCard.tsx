@@ -12,7 +12,7 @@ export function CollapsibleCard({ title, children, defaultExpanded = true }: Col
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
-    <Card>
+    <Card padding="none">
       <div 
         className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${isExpanded ? 'border-b border-gray-100' : ''}`}
         onClick={() => setIsExpanded(!isExpanded)}
