@@ -39,13 +39,16 @@ export function ExpensesByCategoryChart() {
 
         if (error) throw error;
 
-        // Agrupar por categoría
+        // Agrupar por categoría y traducir a español
         const categoryMap = expenses?.reduce((acc, expense) => {
-          const category = expense.category || 'Sin categoría';
-          if (!acc[category]) {
-            acc[category] = 0;
+          const categoryValue = expense.category || 'general';
+          // Buscar el label en español
+          const categoryLabel = EXPENSE_CATEGORIES.find(c => c.value === categoryValue)?.label || 'Sin categoría';
+          
+          if (!acc[categoryLabel]) {
+            acc[categoryLabel] = 0;
           }
-          acc[category] += expense.net_amount;
+          acc[categoryLabel] += expense.net_amount;
           return acc;
         }, {} as Record<string, number>);
 

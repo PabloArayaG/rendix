@@ -35,13 +35,13 @@ export function IncomeVsCostsChart({ totalSales, totalCosts, totalMargin }: Inco
     if (active && payload && payload.length) {
       const data = payload[0];
       return (
-        <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-          <p className="text-sm font-semibold text-gray-900 mb-2">{data.name}</p>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+          <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">{data.name}</p>
           <p className="text-lg font-bold" style={{ color: data.payload.color }}>
             {formatCurrency(data.value)}
           </p>
           {data.name === 'Margen' && (
-            <p className="text-xs text-gray-600 mt-1">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
               Margen: {marginPercent}%
             </p>
           )}
