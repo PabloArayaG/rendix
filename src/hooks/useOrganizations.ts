@@ -20,49 +20,36 @@ export const useOrganizations = () => {
 
       console.log('Fetching organizations for user:', userId);
 
-      // Obtener organizaciones donde el usuario es miembro
-      const { data: memberships, error: membershipsError } = await supabase
-        .from('organization_members')
-        .select(`
-          role,
-          organization_id,
-          organizations (
-            id,
-            name,
-            slug,
-            owner_id,
-            logo_url,
-            settings,
-            created_at,
-            updated_at
-          )
-        `)
-        .eq('user_id', userId);
+      // Usar función RPC que sabemos que funciona
+      const { data: orgsData, error: rpcError } = await supabase
+        .rpc('get_user_organizations', { user_uuid: userId });
 
-      if (membershipsError) {
-        console.error('Error fetching memberships:', membershipsError);
-        throw membershipsError;
+      if (rpcError) {
+        console.error('Error calling get_user_organizations:', rpcError);
+        throw rpcError;
       }
 
-      console.log('Memberships found:', memberships);
+      console.log('Organizations from RPC:', orgsData);
 
-      if (!memberships || memberships.length === 0) {
+      if (!orgsData || orgsData.length === 0) {
         console.log('No organizations found for user');
         setOrganizations([]);
         return;
       }
 
-      // Mapear las organizaciones con el rol del usuario
-      const orgsWithRole = memberships
-        .filter(m => m.organizations) // Filtrar null/undefined
-        .map(m => {
-          const org = Array.isArray(m.organizations) ? m.organizations[0] : m.organizations;
-          return {
-            ...org,
-            user_role: m.role,
-            is_owner: org.owner_id === userId,
-          } as OrganizationWithRole;
-        });
+      // Mapear al formato esperado
+      const orgsWithRole: OrganizationWithRole[] = orgsData.map((org: any) => ({
+        id: org.org_id,
+        name: org.org_name,
+        slug: org.org_slug,
+        owner_id: '', // No lo necesitamos desde RPC
+        user_role: org.user_role,
+        is_owner: org.is_owner,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        logo_url: null,
+        settings: {}
+      }));
 
       console.log('Organizations with roles:', orgsWithRole);
       setOrganizations(orgsWithRole);
