@@ -318,6 +318,17 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
           </div>
         </div>
 
+        {/* Analítica del Proyecto */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CollapsibleCard title="Distribución de Gastos" defaultExpanded={true}>
+            <ExpensesByCategoryChart projectId={id} />
+          </CollapsibleCard>
+
+          <CollapsibleCard title="Tendencia de Gastos" defaultExpanded={true}>
+            <MonthlyExpensesTrendChart projectId={id} />
+          </CollapsibleCard>
+        </div>
+
         {/* Sección de gastos */}
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">

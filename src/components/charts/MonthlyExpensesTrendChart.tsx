@@ -11,11 +11,14 @@ interface MonthlyData {
   expenses: number;
 }
 
-export function MonthlyExpensesTrendChart() {
+interface MonthlyExpensesTrendChartProps {
+  projectId?: string;
+}
+
+export function MonthlyExpensesTrendChart({ projectId }: MonthlyExpensesTrendChartProps = {}) {
   const [data, setData] = useState<MonthlyData[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<TimeRange>('6months');
-  const { getMonthlyStats } = useDashboard();
   const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
 
   useEffect(() => {
@@ -24,8 +27,43 @@ export function MonthlyExpensesTrendChart() {
       
       try {
         setLoading(true);
+        const userId = await getCurrentUserId();
+        if (!userId) return;
+
         const months = getMonthsFromRange(timeRange);
-        const monthlyData = await getMonthlyStats(Math.max(1, Math.ceil(months)));
+        const startDate = new Date();
+        startDate.setMonth(startDate.getMonth() - Math.max(1, Math.ceil(months)));
+
+        let query = supabase
+          .from('expenses')
+          .select('amount, date')
+          .eq('organization_id', activeOrganizationId)
+          .gte('date', startDate.toISOString().split('T')[0])
+          .order('date');
+
+        if (projectId && projectId !== 'all') {
+          query = query.eq('project_id', projectId);
+        }
+
+        const { data: expenses, error } = await query;
+        if (error) throw error;
+
+        // Agrupar por mes
+        const monthlyMap = (expenses || []).reduce((acc: any, expense: any) => {
+          const month = expense.date.substring(0, 7);
+          if (!acc[month]) {
+            acc[month] = { total: 0, expenses: 0 };
+          }
+          acc[month].total += expense.amount;
+          acc[month].expenses += 1;
+          return acc;
+        }, {});
+
+        const monthlyData = Object.entries(monthlyMap).map(([month, data]: [string, any]) => ({
+          month,
+          total: data.total,
+          expenses: data.expenses,
+        }));
         
         // Formatear datos para el gráfico
         const formattedData = monthlyData.map((item: any) => ({

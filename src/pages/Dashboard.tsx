@@ -294,7 +294,7 @@ export function Dashboard() {
           {/* Gráfico: Tendencia de Gastos */}
           <div key="monthly-trend-chart">
             <CollapsibleCard title="Tendencia de Gastos" defaultExpanded={true}>
-              <MonthlyExpensesTrendChart />
+              <MonthlyExpensesTrendChart projectId={selectedProjectId} />
             </CollapsibleCard>
           </div>
         </div>
