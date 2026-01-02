@@ -119,7 +119,6 @@ export function MonthlyExpensesTrendChart({ projectId }: MonthlyExpensesTrendCha
           formatter={(value) => formatCurrency(value as number)}
           contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '8px' }}
         />
-        <Legend />
         <Line 
           type="monotone" 
           dataKey="total" 
