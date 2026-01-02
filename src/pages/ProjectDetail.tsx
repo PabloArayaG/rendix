@@ -235,15 +235,15 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             </div>
             
             {/* Progreso visual */}
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
               <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Progreso del Proyecto</h3>
               <div className="space-y-3">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-600 dark:text-gray-400">Gasto vs Venta</span>
-                    <span className="font-medium">{progressPercentage.toFixed(1)}%</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{progressPercentage.toFixed(1)}%</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full ${
                         progressPercentage > 90 ? 'bg-red-500' : 

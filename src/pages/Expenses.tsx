@@ -100,7 +100,7 @@ export function Expenses() {
   );
 
   const ExpenseCard = ({ expense }: { expense: Expense }) => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
@@ -109,8 +109,8 @@ export function Expenses() {
                 <Receipt className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">{expense.description}</h3>
-                <p className="text-sm text-gray-500">{getProjectName(expense.project_id)}</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{expense.description}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{getProjectName(expense.project_id)}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -133,37 +133,37 @@ export function Expenses() {
           
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <p className="text-sm text-gray-500 mb-2">Monto</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Monto</p>
               {expense.net_amount && expense.tax_amount ? (
                 <div className="space-y-1">
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {formatCurrency(expense.net_amount)}
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     IVA (19%): {formatCurrency(expense.tax_amount)}
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     Total: {formatCurrency(expense.amount)}
                   </p>
                 </div>
               ) : (
-                <p className="text-xl font-bold text-gray-900">{formatCurrency(expense.amount)}</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(expense.amount)}</p>
               )}
             </div>
             <div>
-              <p className="text-sm text-gray-500">Fecha</p>
-              <p className="font-semibold text-gray-900">{formatShortDate(expense.date)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Fecha</p>
+              <p className="font-semibold text-gray-900 dark:text-white">{formatShortDate(expense.date)}</p>
             </div>
             {expense.supplier && (
               <div>
-                <p className="text-sm text-gray-500">Proveedor</p>
-                <p className="font-semibold text-gray-900">{expense.supplier}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Proveedor</p>
+                <p className="font-semibold text-gray-900 dark:text-white">{expense.supplier}</p>
               </div>
             )}
             {expense.invoice_number && (
               <div>
-                <p className="text-sm text-gray-500">Factura</p>
-                <p className="font-semibold text-gray-900">{expense.invoice_number}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Factura</p>
+                <p className="font-semibold text-gray-900 dark:text-white">{expense.invoice_number}</p>
               </div>
             )}
           </div>
@@ -180,7 +180,7 @@ export function Expenses() {
           
           {expense.notes && (
             <div className="mt-3 p-3 bg-gray-50 rounded-md">
-              <p className="text-sm text-gray-600">{expense.notes}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{expense.notes}</p>
             </div>
           )}
         </div>
@@ -234,7 +234,7 @@ export function Expenses() {
                   placeholder="Buscar gastos, proveedores..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
             </div>
@@ -253,7 +253,7 @@ export function Expenses() {
             <select
               value={projectFilter}
               onChange={(e) => setProjectFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">Todos los proyectos</option>
               {projects.map((project) => (
@@ -266,7 +266,7 @@ export function Expenses() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">Todas las categorías</option>
               {EXPENSE_CATEGORIES.map((category) => (
@@ -280,50 +280,50 @@ export function Expenses() {
 
         {/* Estadísticas rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center">
               <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
                 <Receipt className="h-4 w-4 text-green-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Gastos</p>
-                <p className="text-xl font-semibold text-gray-900">{expenses.length}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Gastos</p>
+                <p className="text-xl font-semibold text-gray-900 dark:text-white">{expenses.length}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center">
               <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                 <DollarSign className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Monto Total</p>
-                <p className="text-xl font-semibold text-gray-900">{formatCurrency(totalAmount)}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Monto Total</p>
+                <p className="text-xl font-semibold text-gray-900 dark:text-white">{formatCurrency(totalAmount)}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center">
               <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
                 <Calendar className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Este Mes</p>
-                <p className="text-xl font-semibold text-gray-900">{formatCurrency(monthlyTotal)}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Este Mes</p>
+                <p className="text-xl font-semibold text-gray-900 dark:text-white">{formatCurrency(monthlyTotal)}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center">
               <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
                 <Tag className="h-4 w-4 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Categorías</p>
-                <p className="text-xl font-semibold text-gray-900">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Categorías</p>
+                <p className="text-xl font-semibold text-gray-900 dark:text-white">
                   {new Set(expenses.map(e => e.category)).size}
                 </p>
               </div>
@@ -335,10 +335,10 @@ export function Expenses() {
         {filteredExpenses.length === 0 ? (
           <div className="text-center py-12">
             <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               {expenses.length === 0 ? 'No hay gastos registrados' : 'No se encontraron gastos'}
             </h3>
-            <p className="text-gray-500 mb-6">
+            <p className="text-gray-500 dark:text-gray-400 mb-6">
               {expenses.length === 0 
                 ? 'Comienza registrando tu primer gasto de proyecto'
                 : 'Intenta cambiar los filtros de búsqueda'
