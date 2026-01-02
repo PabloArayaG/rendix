@@ -90,20 +90,20 @@ export function Settings() {
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <Building2 className="h-5 w-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Información de la Organización</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Información de la Organización</h2>
             </div>
             <div className="space-y-2">
               <div>
-                <span className="text-sm text-gray-600">Nombre:</span>
-                <p className="font-medium text-gray-900">{activeOrg?.name}</p>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Nombre:</span>
+                <p className="font-medium text-gray-900 dark:text-white">{activeOrg?.name}</p>
               </div>
               <div>
-                <span className="text-sm text-gray-600">Tu rol:</span>
-                <p className="font-medium text-gray-900 capitalize">{activeOrg?.user_role}</p>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Tu rol:</span>
+                <p className="font-medium text-gray-900 dark:text-white capitalize">{activeOrg?.user_role}</p>
               </div>
               <div>
-                <span className="text-sm text-gray-600">Total de miembros:</span>
-                <p className="font-medium text-gray-900">{members.length}</p>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Total de miembros:</span>
+                <p className="font-medium text-gray-900 dark:text-white">{members.length}</p>
               </div>
             </div>
           </CardContent>
@@ -115,7 +115,7 @@ export function Settings() {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <Users className="h-5 w-5 text-blue-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Miembros de la Organización</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Miembros de la Organización</h2>
               </div>
               {isAdmin && (
                 <Button
@@ -145,7 +145,7 @@ export function Settings() {
                 <CardContent className="p-4">
                   <form onSubmit={handleAddMember} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Email del usuario
                       </label>
                       <input
@@ -156,13 +156,13 @@ export function Settings() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
-                      <p className="mt-1 text-xs text-gray-500">
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         El usuario debe estar registrado en Rendix
                       </p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Rol
                       </label>
                       <select
@@ -219,7 +219,7 @@ export function Settings() {
                 <p className="text-red-800">{error}</p>
               </div>
             ) : members.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <Users className="h-12 w-12 mx-auto mb-2 text-gray-400" />
                 <p>No hay miembros en esta organización</p>
               </div>
@@ -228,14 +228,14 @@ export function Settings() {
                 {members.map((member) => (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200"
+                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-800"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                         <Shield className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-gray-900 dark:text-white">
                           {member.user_email || 'Email no disponible'}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
