@@ -180,7 +180,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
             <StatusBadge status={project.status} />
             <button 
               onClick={() => setShowEditModal(true)}
-              className="flex items-center px-3 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="flex items-center px-4 py-2 text-gray-700 dark:text-white border border-gray-300 dark:border-orange-500/50 rounded-md hover:bg-gray-50 dark:hover:bg-orange-500/20 dark:hover:border-orange-500 transition-all bg-white dark:bg-gray-800/50"
             >
               <Edit className="h-4 w-4 mr-2" />
               Editar Proyecto
