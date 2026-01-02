@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, Calendar, DollarSign, Building2, FileText, AlertTriangle } from 'lucide-react';
+import { X, Calendar, FileText, AlertTriangle } from 'lucide-react';
 import { useProjects } from '../../hooks/useProjects';
 import { Project, CreateProjectDTO, PROJECT_STATUSES } from '../../types/database';
-import { Button, Card, CardContent, Badge, Tooltip } from '../ui';
+import { Button, Card, CardContent, Badge } from '../ui';
 import { formatDateForInput, parseInputDate } from '../../lib/utils';
 
 const projectSchema = z.object({
