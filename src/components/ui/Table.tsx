@@ -21,14 +21,14 @@ Table.displayName = 'Table';
 
 export const TableHeader = forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
   ({ className, ...props }, ref) => (
-    <thead ref={ref} className={cn('border-b border-gray-200', className)} {...props} />
+    <thead ref={ref} className={cn('border-b border-gray-200 dark:border-gray-800', className)} {...props} />
   )
 );
 TableHeader.displayName = 'TableHeader';
 
 export const TableBody = forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
   ({ className, ...props }, ref) => (
-    <tbody ref={ref} className={cn('divide-y divide-gray-200', className)} {...props} />
+    <tbody ref={ref} className={cn('divide-y divide-gray-200 dark:divide-gray-800', className)} {...props} />
   )
 );
 TableBody.displayName = 'TableBody';
@@ -49,7 +49,7 @@ export const TableRow = forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTM
     <tr
       ref={ref}
       className={cn(
-        'hover:bg-gray-50 transition-colors data-[state=selected]:bg-gray-50',
+        'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors data-[state=selected]:bg-gray-50 dark:data-[state=selected]:bg-gray-800',
         className
       )}
       {...props}
@@ -63,7 +63,7 @@ export const TableHead = forwardRef<HTMLTableCellElement, React.ThHTMLAttributes
     <th
       ref={ref}
       className={cn(
-        'h-12 px-4 text-left align-middle font-medium text-xs text-gray-500 uppercase tracking-wide',
+        'h-12 px-4 text-left align-middle font-medium text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide',
         className
       )}
       {...props}

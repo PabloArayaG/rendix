@@ -260,8 +260,8 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
                 {defaultProjectId ? (
                   // Si hay un proyecto preseleccionado, mostrarlo como readonly
                   <div className="relative">
-                    <div className="w-full px-3 py-2 pl-9 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-md bg-gray-50 text-gray-700 dark:text-gray-300 flex items-center">
-                      <Lock className="absolute left-3 h-4 w-4 text-gray-400" />
+                    <div className="w-full px-3 py-2 pl-9 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 flex items-center">
+                      <Lock className="absolute left-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
                       {(() => {
                         const project = projects.find(p => p.id === defaultProjectId);
                         return project ? `${project.custom_id} - ${project.name}` : 'Proyecto no encontrado';
