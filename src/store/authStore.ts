@@ -10,21 +10,26 @@ interface AuthState {
   // Organización activa
   activeOrganizationId: string | null;
   
+  // Tema
+  isDarkMode: boolean;
+  
   // Actions
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   initialize: () => Promise<void>;
   setActiveOrganization: (organizationId: string) => void;
+  toggleDarkMode: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       loading: false,
       initialized: false,
       activeOrganizationId: null,
+      isDarkMode: false,
 
   login: async (email: string, password: string) => {
     // NO cambiar loading global para evitar re-renders
@@ -111,6 +116,18 @@ export const useAuthStore = create<AuthState>()(
     set({ activeOrganizationId: organizationId });
   },
 
+  toggleDarkMode: () => {
+    const newMode = !get().isDarkMode;
+    set({ isDarkMode: newMode });
+    
+    // Aplicar o quitar la clase 'dark' del document
+    if (newMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  },
+
   initialize: async () => {
     set({ loading: true });
     try {
@@ -154,7 +171,8 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'rendix-auth-storage',
       partialize: (state) => ({ 
-        activeOrganizationId: state.activeOrganizationId 
+        activeOrganizationId: state.activeOrganizationId,
+        isDarkMode: state.isDarkMode
       }),
     }
   )

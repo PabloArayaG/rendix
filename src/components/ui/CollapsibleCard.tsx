@@ -16,15 +16,15 @@ export function CollapsibleCard({ title, children, defaultExpanded = true }: Col
   };
 
   return (
-    <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden transition-all duration-300 ease-in-out">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl overflow-hidden transition-all duration-300 ease-in-out">
       <div 
-        className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-all duration-200 ${isExpanded ? 'border-b border-gray-100' : ''}`}
+        className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 ${isExpanded ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}
         onClick={handleToggle}
       >
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
         <button 
           type="button"
-          className="text-gray-500 hover:text-gray-700 transition-all duration-200 hover:scale-110"
+          className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 hover:scale-110"
           onClick={(e) => {
             e.stopPropagation();
             handleToggle();

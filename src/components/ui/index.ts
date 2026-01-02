@@ -18,3 +18,4 @@ export { EmptyState, type EmptyStateProps } from './EmptyState';
 export { Tooltip, type TooltipProps } from './Tooltip';
 export { ConfirmDialog } from './ConfirmDialog';
 export { CollapsibleCard } from './CollapsibleCard';
+export { ThemeToggle } from './ThemeToggle';
