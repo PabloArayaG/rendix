@@ -224,31 +224,39 @@ export function Dashboard() {
         {/* Sección de gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Gráfico: Proyectos por Estado */}
-          <CollapsibleCard title="Estado de Proyectos" defaultExpanded={true}>
-            <ProjectsStatusChart 
-              activeProjects={stats?.active_projects || 0}
-              completedProjects={stats?.completed_projects || 0}
-            />
-          </CollapsibleCard>
+          <div key="projects-status-chart">
+            <CollapsibleCard title="Estado de Proyectos" defaultExpanded={true}>
+              <ProjectsStatusChart 
+                activeProjects={stats?.active_projects || 0}
+                completedProjects={stats?.completed_projects || 0}
+              />
+            </CollapsibleCard>
+          </div>
 
           {/* Gráfico: Ingresos vs Costos */}
-          <CollapsibleCard title="Resumen Financiero" defaultExpanded={true}>
-            <IncomeVsCostsChart 
-              totalSales={stats?.total_sales || 0}
-              totalCosts={stats?.total_costs || 0}
-              totalMargin={stats?.total_margin || 0}
-            />
-          </CollapsibleCard>
+          <div key="income-costs-chart">
+            <CollapsibleCard title="Resumen Financiero" defaultExpanded={true}>
+              <IncomeVsCostsChart 
+                totalSales={stats?.total_sales || 0}
+                totalCosts={stats?.total_costs || 0}
+                totalMargin={stats?.total_margin || 0}
+              />
+            </CollapsibleCard>
+          </div>
 
           {/* Gráfico: Gastos por Categoría */}
-          <CollapsibleCard title="Distribución de Gastos" defaultExpanded={true}>
-            <ExpensesByCategoryChart />
-          </CollapsibleCard>
+          <div key="expenses-category-chart">
+            <CollapsibleCard title="Distribución de Gastos" defaultExpanded={true}>
+              <ExpensesByCategoryChart />
+            </CollapsibleCard>
+          </div>
 
           {/* Gráfico: Tendencia de Gastos */}
-          <CollapsibleCard title="Tendencia de Gastos" defaultExpanded={true}>
-            <MonthlyExpensesTrendChart />
-          </CollapsibleCard>
+          <div key="monthly-trend-chart">
+            <CollapsibleCard title="Tendencia de Gastos" defaultExpanded={true}>
+              <MonthlyExpensesTrendChart />
+            </CollapsibleCard>
+          </div>
         </div>
 
         {/* Sección de análisis detallado */}
