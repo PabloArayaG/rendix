@@ -85,20 +85,20 @@ export function ProjectsStatusChart({ activeProjects, completedProjects }: Proje
             data={data}
             cx="50%"
             cy="50%"
-            innerRadius={60}
-            outerRadius={95}
-            paddingAngle={5}
+            innerRadius={70}
+            outerRadius={90}
+            paddingAngle={2}
             dataKey="value"
             animationBegin={0}
             animationDuration={800}
-            fill="none"
           >
             {data.map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
-                fill="transparent"
+                fill={COLORS[entry.name as keyof typeof COLORS]}
+                fillOpacity={0.15}
                 stroke={COLORS[entry.name as keyof typeof COLORS]}
-                strokeWidth={8}
+                strokeWidth={2}
               />
             ))}
           </Pie>
