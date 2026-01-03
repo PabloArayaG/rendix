@@ -66,10 +66,24 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
           return acc;
         }, {} as Record<string, number>);
 
-        const chartData = Object.entries(categoryMap || {}).map(([name, value]) => ({
-          name,
-          value,
-        })).sort((a, b) => b.value - a.value);
+        // Ordenar por valor y agrupar categorías pequeñas
+        const sortedData = Object.entries(categoryMap || {})
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value);
+
+        // Tomar top 5 categorías y agrupar el resto en "Otros"
+        const topCategories = sortedData.slice(0, 5);
+        const otherCategories = sortedData.slice(5);
+        
+        const chartData = [...topCategories];
+        
+        // Si hay más categorías, agruparlas en "Otros"
+        if (otherCategories.length > 0) {
+          const othersTotal = otherCategories.reduce((sum, cat) => sum + cat.value, 0);
+          if (othersTotal > 0) {
+            chartData.push({ name: 'Otros', value: othersTotal });
+          }
+        }
 
         setData(chartData);
       } catch (err) {
@@ -117,7 +131,7 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
                       x={x} 
                       y={y} 
                       fill="currentColor" 
-                      className="text-gray-900 dark:text-gray-200 text-sm font-semibold"
+                      className="text-gray-900 dark:text-gray-200 text-[11px] font-medium"
                       textAnchor={x > cx ? 'start' : 'end'} 
                       dominantBaseline="central"
                     >
