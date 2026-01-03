@@ -16,9 +16,10 @@ interface CategoryData {
 
 interface ExpensesByCategoryChartProps {
   projectId?: string;
+  compact?: boolean;
 }
 
-export function ExpensesByCategoryChart({ projectId }: ExpensesByCategoryChartProps = {}) {
+export function ExpensesByCategoryChart({ projectId, compact = false }: ExpensesByCategoryChartProps = {}) {
   const [data, setData] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<TimeRange>('30days');
@@ -83,7 +84,7 @@ export function ExpensesByCategoryChart({ projectId }: ExpensesByCategoryChartPr
 
   return (
     <div className="space-y-4">
-      <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />
+      {!compact && <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />}
       
       {loading ? (
         <div className="h-64 flex items-center justify-center">

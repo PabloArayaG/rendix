@@ -13,9 +13,10 @@ interface MonthlyData {
 
 interface MonthlyExpensesTrendChartProps {
   projectId?: string;
+  compact?: boolean;
 }
 
-export function MonthlyExpensesTrendChart({ projectId }: MonthlyExpensesTrendChartProps = {}) {
+export function MonthlyExpensesTrendChart({ projectId, compact = false }: MonthlyExpensesTrendChartProps = {}) {
   const [data, setData] = useState<MonthlyData[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<TimeRange>('6months');
@@ -91,7 +92,7 @@ export function MonthlyExpensesTrendChart({ projectId }: MonthlyExpensesTrendCha
 
   return (
     <div className="space-y-4">
-      <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />
+      {!compact && <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />}
       
       {loading ? (
         <div className="h-64 flex items-center justify-center">
