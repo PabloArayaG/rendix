@@ -58,7 +58,7 @@ export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
   };
 
   const SidebarContent = () => (
-    <div className="h-full flex flex-col bg-gradient-to-b from-blue-600 to-blue-700 dark:from-gray-900 dark:to-gray-800 shadow-xl">
+    <div className="h-full flex flex-col bg-gradient-to-b from-blue-600 to-blue-700 dark:from-black dark:to-gray-950 shadow-xl border-r dark:border-gray-900">
       {/* Header */}
       <div className="p-4 border-b border-blue-500/20">
         <div className="flex items-center justify-between">
