@@ -22,13 +22,23 @@ export function AuthPage() {
   return (
     <div className="min-h-screen flex overflow-hidden">
       {/* Lado izquierdo: Formulario */}
-      <div className="w-full lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-950 dark:to-black flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          {isLogin ? (
-            <LoginForm onToggleMode={toggleMode} />
-          ) : (
-            <RegisterForm onToggleMode={toggleMode} />
-          )}
+      <div className="w-full lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-950 dark:to-black flex flex-col">
+        {/* Banner superior */}
+        <div className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-800 dark:to-indigo-900 py-2 px-4 text-center">
+          <p className="text-white text-xs font-medium">
+            Bienvenido a RENDIX - Sistema profesional de gestión financiera para tus proyectos de construcción
+          </p>
+        </div>
+        
+        {/* Formulario centrado */}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="w-full max-w-md">
+            {isLogin ? (
+              <LoginForm onToggleMode={toggleMode} />
+            ) : (
+              <RegisterForm onToggleMode={toggleMode} />
+            )}
+          </div>
         </div>
       </div>
 
@@ -42,18 +52,8 @@ export function AuthPage() {
           backgroundRepeat: 'no-repeat'
         }}
       >
-        {/* Overlay para mejor contraste */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-blue-600/30"></div>
-        
-        {/* Contenido opcional sobre la imagen */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center p-12 text-white">
-          <div className="max-w-lg text-center">
-            <h2 className="text-5xl font-bold mb-6">Bienvenido a RENDIX</h2>
-            <p className="text-xl text-white/90 leading-relaxed">
-              Sistema profesional de gestión financiera para tus proyectos de construcción
-            </p>
-          </div>
-        </div>
+        {/* Overlay sutil para darle profundidad */}
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900/10 to-blue-900/10"></div>
       </div>
     </div>
   );
