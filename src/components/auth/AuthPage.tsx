@@ -20,8 +20,20 @@ export function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-black dark:to-gray-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div 
+      className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:bg-black flex items-center justify-center p-4 relative"
+      style={{
+        backgroundImage: 'var(--auth-bg-image)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Overlay oscuro para mejor legibilidad en dark mode */}
+      <div className="hidden dark:block absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      
+      {/* Contenido */}
+      <div className="relative z-10 w-full max-w-md">
         {isLogin ? (
           <LoginForm onToggleMode={toggleMode} />
         ) : (
