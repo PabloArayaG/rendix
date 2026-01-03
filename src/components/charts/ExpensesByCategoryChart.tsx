@@ -95,38 +95,39 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
           <p>No hay gastos para mostrar en este período</p>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="50%"
-          labelLine={false}
-          label={(props: any) => {
-            const { cx, cy, midAngle, outerRadius, name, percent } = props;
-            if (!midAngle) return null;
-            const RADIAN = Math.PI / 180;
-            const radius = outerRadius + 25;
-            const x = cx + radius * Math.cos(-midAngle * RADIAN);
-            const y = cy + radius * Math.sin(-midAngle * RADIAN);
-            
-            return (
-              <text 
-                x={x} 
-                y={y} 
-                fill="currentColor" 
-                className="text-gray-900 dark:text-gray-200 text-sm font-semibold"
-                textAnchor={x > cx ? 'start' : 'end'} 
-                dominantBaseline="central"
+        <div className={compact ? 'h-full' : ''}>
+          <ResponsiveContainer width="100%" height={compact ? '100%' : 300}>
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={compact ? false : (props: any) => {
+                  const { cx, cy, midAngle, outerRadius, name, percent } = props;
+                  if (!midAngle) return null;
+                  const RADIAN = Math.PI / 180;
+                  const radius = outerRadius + 25;
+                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                  
+                  return (
+                    <text 
+                      x={x} 
+                      y={y} 
+                      fill="currentColor" 
+                      className="text-gray-900 dark:text-gray-200 text-sm font-semibold"
+                      textAnchor={x > cx ? 'start' : 'end'} 
+                      dominantBaseline="central"
+                    >
+                      {`${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                    </text>
+                  );
+                }}
+                outerRadius={compact ? 60 : 80}
+                fill="none"
+                dataKey="value"
               >
-                {`${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
-              </text>
-            );
-          }}
-          outerRadius={80}
-          fill="none"
-          dataKey="value"
-        >
           {data.map((_entry, index) => (
             <Cell 
               key={`cell-${index}`} 
@@ -136,11 +137,12 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
               strokeWidth={2}
             />
           ))}
-        </Pie>
-        <Tooltip formatter={(value) => formatCurrency(value as number)} />
-        <Legend />
-      </PieChart>
-    </ResponsiveContainer>
+              </Pie>
+              <Tooltip formatter={(value) => formatCurrency(value as number)} />
+              {!compact && <Legend />}
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       )}
     </div>
   );
