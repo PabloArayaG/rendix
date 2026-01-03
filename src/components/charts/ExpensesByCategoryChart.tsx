@@ -141,7 +141,6 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
               {!compact && <Legend />}
             </PieChart>
           </ResponsiveContainer>
-        </div>
       )}
       
       {/* Leyenda compacta para modo compact */}
