@@ -101,7 +101,26 @@ export function ExpensesByCategoryChart({ projectId }: ExpensesByCategoryChartPr
           cx="50%"
           cy="50%"
           labelLine={false}
-          label={({ name, percent }) => `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
+          label={(props) => {
+            const { cx, cy, midAngle, outerRadius, name, percent } = props;
+            const RADIAN = Math.PI / 180;
+            const radius = outerRadius + 25;
+            const x = cx + radius * Math.cos(-midAngle * RADIAN);
+            const y = cy + radius * Math.sin(-midAngle * RADIAN);
+            
+            return (
+              <text 
+                x={x} 
+                y={y} 
+                fill="currentColor" 
+                className="text-gray-900 dark:text-gray-200 text-sm font-semibold"
+                textAnchor={x > cx ? 'start' : 'end'} 
+                dominantBaseline="central"
+              >
+                {`${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
+              </text>
+            );
+          }}
           outerRadius={80}
           fill="none"
           dataKey="value"
