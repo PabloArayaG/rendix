@@ -197,8 +197,8 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
               <div className="flex items-center space-x-4 mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Building2 className="h-6 w-6 text-blue-600" />
+                <div className="w-12 h-12 flex items-center justify-center">
+                  <Building2 className="h-6 w-6 text-gray-400 dark:text-gray-500" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{project.name}</h2>
@@ -277,8 +277,8 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Venta Neto</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(project.sale_amount)}</p>
               </div>
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-green-600" />
+              <div className="w-10 h-10 flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
             </div>
           </div>
@@ -289,8 +289,8 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Costo Neto</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(project.real_cost)}</p>
               </div>
-              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                <TrendingDown className="h-5 w-5 text-red-600" />
+              <div className="w-10 h-10 flex items-center justify-center">
+                <TrendingDown className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
             </div>
           </div>
@@ -303,8 +303,8 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                   {formatCurrency(project.real_margin)}
                 </p>
               </div>
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-blue-600" />
+              <div className="w-10 h-10 flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
             </div>
           </div>
@@ -315,8 +315,8 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Gastos</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{expenses.length}</p>
               </div>
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Receipt className="h-5 w-5 text-purple-600" />
+              <div className="w-10 h-10 flex items-center justify-center">
+                <Receipt className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
             </div>
           </div>
@@ -405,8 +405,8 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
-                          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                            <Receipt className="h-4 w-4 text-green-600" />
+                          <div className="w-8 h-8 flex items-center justify-center">
+                            <Receipt className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
@@ -418,14 +418,14 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                                 {expense.status && <ExpenseStatusBadge status={expense.status} />}
                                 <button
                                   onClick={() => handleEditExpense(expense)}
-                                  className="text-blue-400 hover:text-blue-600 transition-colors p-1 rounded-md hover:bg-blue-50"
+                                  className="text-blue-400 hover:text-gray-400 dark:text-gray-500 transition-colors p-1 rounded-md hover:bg-blue-50"
                                   title="Editar gasto"
                                 >
                                   <Edit className="h-4 w-4" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteClick(expense)}
-                                  className="text-red-400 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50"
+                                  className="text-red-400 hover:text-gray-400 dark:text-gray-500 transition-colors p-1 rounded-md hover:bg-red-50"
                                   title="Eliminar gasto"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -488,7 +488,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                         <div className="flex items-center ml-4">
                           <button
                             onClick={() => window.open(expense.receipt_url, '_blank')}
-                            className="text-blue-600 hover:text-blue-800 transition-colors p-1 rounded-md hover:bg-blue-50"
+                            className="text-gray-400 dark:text-gray-500 hover:text-blue-800 transition-colors p-1 rounded-md hover:bg-blue-50"
                             title="Ver comprobante"
                           >
                             <Receipt className="h-4 w-4" />
