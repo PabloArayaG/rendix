@@ -40,12 +40,3 @@ export const getCategoryColor = (category: string): string => {
   return colors[category] || colors['general'];
 };
 
-// Componente Badge para categorías
-export const CategoryBadge = ({ category }: { category: string }) => {
-  return (
-    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full border ${getCategoryColor(category)}`}>
-      {category}
-    </span>
-  );
-};
-
