@@ -39,7 +39,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const isCollapsed = false; // Sidebar always expanded
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { user, logout } = useAuthStore();
 
