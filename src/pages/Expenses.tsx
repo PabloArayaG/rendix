@@ -20,6 +20,7 @@ import {
   formatCurrency, 
   formatShortDate
 } from '../lib/utils';
+import { getCategoryColor } from '../lib/categoryColors';
 
 export function Expenses() {
   const { expenses, loading, error, refetch, deleteExpense } = useExpenses();
@@ -94,7 +95,7 @@ export function Expenses() {
   };
 
   const CategoryBadge = ({ category }: { category: string }) => (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full border ${getCategoryColor(category)}`}>
       {getCategoryLabel(category)}
     </span>
   );
