@@ -31,7 +31,8 @@ export function MonthlyExpensesTrendChart({ projectId, compact = false }: Monthl
         const userId = await getCurrentUserId();
         if (!userId) return;
 
-        const months = getMonthsFromRange(timeRange);
+        // En modo compacto, usar período fijo de 6 meses
+        const months = compact ? 6 : getMonthsFromRange(timeRange);
         const startDate = new Date();
         startDate.setMonth(startDate.getMonth() - Math.max(1, Math.ceil(months)));
 

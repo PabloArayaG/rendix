@@ -32,16 +32,18 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
         const userId = await getCurrentUserId();
         if (!userId || !activeOrganizationId) return;
 
-        // Calcular fecha de inicio según el rango
-        const daysAgo = getDaysFromRange(timeRange);
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - daysAgo);
-
         let query = supabase
           .from('expenses')
           .select('category, net_amount, date')
-          .eq('organization_id', activeOrganizationId)
-          .gte('date', startDate.toISOString().split('T')[0]);
+          .eq('organization_id', activeOrganizationId);
+
+        // Solo aplicar filtro de fecha si NO está en modo compacto
+        if (!compact) {
+          const daysAgo = getDaysFromRange(timeRange);
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - daysAgo);
+          query = query.gte('date', startDate.toISOString().split('T')[0]);
+        }
 
         if (projectId && projectId !== 'all') {
           query = query.eq('project_id', projectId);
