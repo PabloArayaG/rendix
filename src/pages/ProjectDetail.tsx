@@ -506,19 +506,19 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
 
           {/* Panel de Analytics (derecha) */}
           <div className="space-y-4">
-            <CollapsibleCard title="Analytics del Proyecto" defaultExpanded={true}>
-              <div className="space-y-6">
+            <CollapsibleCard title="Analítica del Proyecto" defaultExpanded={true}>
+              <div className="space-y-8">
                 {/* Distribución de Gastos - Compacta */}
                 <div>
-                  <h4 className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Distribución de Gastos</h4>
-                  <div className="h-48">
+                  <h4 className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Distribución de Gastos</h4>
+                  <div className="h-64">
                     <ExpensesByCategoryChart projectId={projectId} />
                   </div>
                 </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-800 pt-4">
-                  <h4 className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Tendencia de Gastos</h4>
-                  <div className="h-48">
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-6">
+                  <h4 className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Tendencia de Gastos</h4>
+                  <div className="h-64">
                     <MonthlyExpensesTrendChart projectId={projectId} />
                   </div>
                 </div>
