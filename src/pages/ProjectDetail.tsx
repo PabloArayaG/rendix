@@ -322,19 +322,11 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
           </div>
         </div>
 
-        {/* Analítica del Proyecto */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <CollapsibleCard title="Distribución de Gastos" defaultExpanded={true}>
-            <ExpensesByCategoryChart projectId={projectId} />
-          </CollapsibleCard>
-
-          <CollapsibleCard title="Tendencia de Gastos" defaultExpanded={true}>
-            <MonthlyExpensesTrendChart projectId={projectId} />
-          </CollapsibleCard>
-        </div>
-
-        {/* Sección de gastos */}
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
+        {/* Layout: Gastos (izquierda) + Analytics (derecha) */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Sección principal de gastos (2 columnas) */}
+          <div className="xl:col-span-2">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -508,6 +500,30 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+          </div>
+
+          {/* Panel de Analytics (derecha) */}
+          <div className="space-y-4">
+            <CollapsibleCard title="Analytics del Proyecto" defaultExpanded={true}>
+              <div className="space-y-6">
+                {/* Distribución de Gastos - Compacta */}
+                <div>
+                  <h4 className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Distribución de Gastos</h4>
+                  <div className="h-48">
+                    <ExpensesByCategoryChart projectId={projectId} />
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 dark:border-gray-800 pt-4">
+                  <h4 className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Tendencia de Gastos</h4>
+                  <div className="h-48">
+                    <MonthlyExpensesTrendChart projectId={projectId} />
+                  </div>
+                </div>
+              </div>
+            </CollapsibleCard>
           </div>
         </div>
       </div>
