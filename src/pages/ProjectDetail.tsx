@@ -478,7 +478,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                         </div>
                         
                         {expense.notes && (
-                          <div className="bg-gray-50 rounded-md p-3 mt-3">
+                          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-3 mt-3 border border-gray-200 dark:border-gray-700/50">
                             <p className="text-sm text-gray-600 dark:text-gray-400">{expense.notes}</p>
                           </div>
                         )}
