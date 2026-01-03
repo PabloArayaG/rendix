@@ -60,7 +60,7 @@ export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
   const SidebarContent = () => (
     <div className="h-full flex flex-col bg-gradient-to-b from-blue-600 to-blue-700 dark:from-black dark:to-gray-950 shadow-xl border-r dark:border-gray-900">
       {/* Header */}
-      <div className="p-4 border-b border-blue-500/20">
+      <div className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
