@@ -68,7 +68,7 @@ export function LoginForm({ onToggleMode }: LoginFormProps) {
               {...register('email')}
               type="email"
               id="email"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="tu@email.com"
             />
             {errors.email && (
@@ -85,7 +85,7 @@ export function LoginForm({ onToggleMode }: LoginFormProps) {
                 {...register('password')}
                 type={showPassword ? 'text' : 'password'}
                 id="password"
-                className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="••••••••"
               />
               <button
