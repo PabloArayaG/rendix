@@ -101,8 +101,9 @@ export function ExpensesByCategoryChart({ projectId }: ExpensesByCategoryChartPr
           cx="50%"
           cy="50%"
           labelLine={false}
-          label={(props) => {
+          label={(props: any) => {
             const { cx, cy, midAngle, outerRadius, name, percent } = props;
+            if (!midAngle) return null;
             const RADIAN = Math.PI / 180;
             const radius = outerRadius + 25;
             const x = cx + radius * Math.cos(-midAngle * RADIAN);
