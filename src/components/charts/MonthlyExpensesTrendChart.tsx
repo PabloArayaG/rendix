@@ -103,7 +103,7 @@ export function MonthlyExpensesTrendChart({ projectId, compact = false }: Monthl
           <p>No hay datos de tendencia para mostrar en este período</p>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={compact ? '100%' : 300}>
+        <ResponsiveContainer width="100%" height={compact ? 180 : 300}>
         <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
         <XAxis 

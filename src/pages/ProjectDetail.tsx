@@ -511,16 +511,12 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                 {/* Distribución de Gastos - Compacta */}
                 <div>
                   <h4 className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Distribución de Gastos</h4>
-                  <div className="h-56">
-                    <ExpensesByCategoryChart projectId={projectId} compact={true} />
-                  </div>
+                  <ExpensesByCategoryChart projectId={projectId} compact={true} />
                 </div>
 
                 <div className="border-t border-gray-200 dark:border-gray-800 pt-6">
                   <h4 className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Tendencia (últimos 6 meses)</h4>
-                  <div className="h-48">
-                    <MonthlyExpensesTrendChart projectId={projectId} compact={true} />
-                  </div>
+                  <MonthlyExpensesTrendChart projectId={projectId} compact={true} />
                 </div>
               </div>
             </CollapsibleCard>

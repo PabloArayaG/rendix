@@ -95,8 +95,7 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
           <p>No hay gastos para mostrar en este período</p>
         </div>
       ) : (
-        <div className={compact ? 'h-full' : ''}>
-          <ResponsiveContainer width="100%" height={compact ? '100%' : 300}>
+        <ResponsiveContainer width="100%" height={compact ? 200 : 300}>
             <PieChart>
               <Pie
                 data={data}
@@ -142,7 +141,6 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
               {!compact && <Legend />}
             </PieChart>
           </ResponsiveContainer>
-        </div>
       )}
     </div>
   );
