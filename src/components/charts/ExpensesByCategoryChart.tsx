@@ -103,11 +103,17 @@ export function ExpensesByCategoryChart({ projectId }: ExpensesByCategoryChartPr
           labelLine={false}
           label={({ name, percent }) => `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
           outerRadius={80}
-          fill="#8884d8"
+          fill="none"
           dataKey="value"
         >
           {data.map((_entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            <Cell 
+              key={`cell-${index}`} 
+              fill={COLORS[index % COLORS.length]}
+              fillOpacity={0.2}
+              stroke={COLORS[index % COLORS.length]}
+              strokeWidth={2}
+            />
           ))}
         </Pie>
         <Tooltip formatter={(value) => formatCurrency(value as number)} />

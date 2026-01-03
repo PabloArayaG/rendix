@@ -96,25 +96,27 @@ export function ProjectsStatusChart({ activeProjects, completedProjects }: Proje
                 <stop offset="100%" stopColor="#34D399" stopOpacity={0.8}/>
               </linearGradient>
             </defs>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={95}
-              paddingAngle={3}
-              dataKey="value"
-              animationBegin={0}
-              animationDuration={800}
-            >
-              {data.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={GRADIENTS[entry.name as keyof typeof GRADIENTS]}
-                  stroke="none"
-                />
-              ))}
-            </Pie>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            innerRadius={60}
+            outerRadius={95}
+            paddingAngle={5}
+            dataKey="value"
+            animationBegin={0}
+            animationDuration={800}
+            fill="none"
+          >
+            {data.map((entry, index) => (
+              <Cell 
+                key={`cell-${index}`} 
+                fill="transparent"
+                stroke={COLORS[entry.name as keyof typeof COLORS]}
+                strokeWidth={8}
+              />
+            ))}
+          </Pie>
             <Tooltip content={<CustomTooltip />} />
           </PieChart>
         </ResponsiveContainer>

@@ -88,7 +88,13 @@ export function IncomeVsCostsChart({ totalSales, totalCosts, totalMargin }: Inco
         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }} />
         <Bar dataKey="value" radius={[8, 8, 0, 0]}>
           {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.gradient} />
+            <Cell 
+              key={`cell-${index}`} 
+              fill={entry.color}
+              fillOpacity={0.15}
+              stroke={entry.color}
+              strokeWidth={2}
+            />
           ))}
           <LabelList 
             dataKey="value" 
