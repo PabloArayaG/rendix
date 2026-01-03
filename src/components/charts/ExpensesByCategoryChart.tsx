@@ -141,26 +141,27 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
               {!compact && <Legend />}
             </PieChart>
           </ResponsiveContainer>
-          
-          {/* Leyenda compacta para modo compact */}
-          {compact && data.length > 0 && (
-            <div className="mt-3 space-y-1">
-              {data.slice(0, 5).map((entry, index) => (
-                <div key={index} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-2 h-2 rounded-full" 
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                    ></div>
-                    <span className="text-gray-600 dark:text-gray-400">{entry.name}</span>
-                  </div>
-                  <span className="text-gray-900 dark:text-white font-medium">
-                    {formatCurrency(entry.value)}
-                  </span>
-                </div>
-              ))}
+        </div>
+      )}
+      
+      {/* Leyenda compacta para modo compact */}
+      {compact && !loading && data.length > 0 && (
+        <div className="mt-3 space-y-1">
+          {data.slice(0, 5).map((entry, index) => (
+            <div key={index} className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-2 h-2 rounded-full" 
+                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                ></div>
+                <span className="text-gray-600 dark:text-gray-400">{entry.name}</span>
+              </div>
+              <span className="text-gray-900 dark:text-white font-medium">
+                {formatCurrency(entry.value)}
+              </span>
             </div>
-          )}
+          ))}
+        </div>
       )}
     </div>
   );
