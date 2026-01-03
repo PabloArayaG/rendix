@@ -36,7 +36,7 @@ export function AuthPage() {
       <div 
         className="hidden lg:block lg:w-1/2 relative bg-black"
         style={{
-          backgroundImage: 'url(/background-rendix.jpg)',
+          backgroundImage: 'url(/3d-illustration-green-sprout-with-golden-coins.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
