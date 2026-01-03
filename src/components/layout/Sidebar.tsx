@@ -74,13 +74,13 @@ export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
             )}
           </div>
           
-          {/* Desktop collapse button */}
-          <button
+          {/* Desktop collapse button - DISABLED */}
+          {/* <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="hidden lg:block p-1 hover:bg-white/10 rounded transition-colors"
           >
             <Menu className="h-4 w-4 text-white/80" />
-          </button>
+          </button> */}
 
           {/* Mobile close button */}
           <button
