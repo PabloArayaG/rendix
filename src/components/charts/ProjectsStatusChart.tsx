@@ -10,11 +10,6 @@ const COLORS = {
   'Terminados': '#10B981', // green-500
 };
 
-const GRADIENTS = {
-  'En Proceso': 'url(#colorEnProceso)',
-  'Terminados': 'url(#colorTerminados)',
-};
-
 export function ProjectsStatusChart({ activeProjects, completedProjects }: ProjectsStatusChartProps) {
   const data = [
     { name: 'En Proceso', value: activeProjects, color: COLORS['En Proceso'] },
@@ -86,17 +81,7 @@ export function ProjectsStatusChart({ activeProjects, completedProjects }: Proje
       <div className="w-64 h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <defs>
-              <linearGradient id="colorEnProceso" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#F97316" stopOpacity={0.9}/>
-                <stop offset="100%" stopColor="#FB923C" stopOpacity={0.8}/>
-              </linearGradient>
-              <linearGradient id="colorTerminados" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#10B981" stopOpacity={0.9}/>
-                <stop offset="100%" stopColor="#34D399" stopOpacity={0.8}/>
-              </linearGradient>
-            </defs>
-          <Pie
+            <Pie
             data={data}
             cx="50%"
             cy="50%"
