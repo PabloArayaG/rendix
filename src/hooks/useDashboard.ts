@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { supabase, getCurrentUserId } from '../lib/supabase';
-import { DashboardStats, Expense } from '../types/database';
+import { Expense } from '../types/database';
 import { useAuthStore } from '../store/authStore';
 
-// Tipos para las consultas de dashboard
-interface ProjectSummary {
+export interface ProjectSummary {
   status: string;
   sale_amount: number;
   real_cost: number;
   real_margin: number;
+  created_at: string;
 }
 
-interface ExpenseWithProject extends Expense {
+export interface ExpenseWithProject extends Expense {
   projects?: { name: string; custom_id: string };
 }
 
@@ -34,12 +34,13 @@ interface ProjectWithExpenses {
 }
 
 export const useDashboard = () => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [rawProjects, setRawProjects] = useState<ProjectSummary[]>([]);
+  const [rawExpenses, setRawExpenses] = useState<ExpenseWithProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
 
-  const fetchDashboardStats = async () => {
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -48,19 +49,18 @@ export const useDashboard = () => {
       if (!userId) throw new Error('Usuario no autenticado');
 
       if (!activeOrganizationId) {
-        setStats(null);
+        setRawProjects([]);
+        setRawExpenses([]);
         return;
       }
 
-      // Obtener estadísticas de proyectos
       const { data: projects, error: projectsError } = await supabase
         .from('projects')
-        .select('status, sale_amount, real_cost, real_margin')
+        .select('status, sale_amount, real_cost, real_margin, created_at')
         .eq('organization_id', activeOrganizationId);
 
       if (projectsError) throw projectsError;
 
-      // Obtener gastos recientes
       const { data: recentExpenses, error: expensesError } = await supabase
         .from('expenses')
         .select(`
@@ -69,31 +69,12 @@ export const useDashboard = () => {
         `)
         .eq('organization_id', activeOrganizationId)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(50);
 
       if (expensesError) throw expensesError;
 
-      // Calcular estadísticas
-      const projectsData = projects as ProjectSummary[] || [];
-      const totalProjects = projectsData.length;
-      const activeProjects = projectsData.filter(p => p.status === 'in_progress' || p.status === 'active').length;
-      const completedProjects = projectsData.filter(p => p.status === 'completed').length;
-      
-      const totalSales = projectsData.reduce((sum, p) => sum + p.sale_amount, 0);
-      const totalCosts = projectsData.reduce((sum, p) => sum + p.real_cost, 0);
-      const totalMargin = projectsData.reduce((sum, p) => sum + p.real_margin, 0);
-      const marginPercentage = totalSales > 0 ? (totalMargin / totalSales) * 100 : 0;
-
-      setStats({
-        total_projects: totalProjects,
-        active_projects: activeProjects,
-        completed_projects: completedProjects,
-        total_sales: totalSales,
-        total_costs: totalCosts,
-        total_margin: totalMargin,
-        margin_percentage: marginPercentage,
-        recent_expenses: recentExpenses as ExpenseWithProject[] || [],
-      });
+      setRawProjects(projects as ProjectSummary[] || []);
+      setRawExpenses(recentExpenses as ExpenseWithProject[] || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
@@ -121,10 +102,9 @@ export const useDashboard = () => {
 
     if (error) throw error;
 
-    // Agrupar por mes
     const expensesData = expenses as MonthlyExpense[] || [];
     const monthlyData = expensesData.reduce((acc, expense) => {
-      const month = expense.date.substring(0, 7); // YYYY-MM
+      const month = expense.date.substring(0, 7);
       if (!acc[month]) {
         acc[month] = { total: 0, expenses: 0 };
       }
@@ -180,15 +160,16 @@ export const useDashboard = () => {
 
   useEffect(() => {
     if (activeOrganizationId) {
-      fetchDashboardStats();
+      fetchDashboardData();
     }
   }, [activeOrganizationId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
-    stats,
+    rawProjects,
+    rawExpenses,
     loading,
     error,
-    refetch: fetchDashboardStats,
+    refetch: fetchDashboardData,
     getMonthlyStats,
     getProjectsOverview,
   };

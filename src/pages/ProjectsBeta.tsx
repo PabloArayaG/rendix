@@ -22,7 +22,7 @@ import { useAuthStore } from '../store/authStore';
 import { useOrganizations } from '../hooks/useOrganizations';
 import { Card, CardContent } from '../components/ui';
 
-export function Projects() {
+export function ProjectsBeta() {
   const { projects, loading, error, refetch, deleteProject } = useProjects();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -82,12 +82,13 @@ export function Projects() {
 
   const handleViewDetail = (projectId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    window.location.hash = `/projects/${projectId}`;
+    window.location.hash = `/projects-beta/${projectId}`;
   };
 
   const getMarginPct = (p: Project) =>
     p.sale_amount > 0 ? (p.real_margin / p.sale_amount) * 100 : 0;
 
+  // Totales de la fila filtrada
   const totalSales = filteredProjects.reduce((s, p) => s + p.sale_amount, 0);
   const totalCosts = filteredProjects.reduce((s, p) => s + p.real_cost, 0);
   const totalMargin = filteredProjects.reduce((s, p) => s + p.real_margin, 0);
@@ -100,7 +101,7 @@ export function Projects() {
 
   if (loading) {
     return (
-      <Layout title="Proyectos" subtitle="Vista compacta de proyectos">
+      <Layout title="Proyectos Beta" subtitle="Vista compacta de proyectos">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
         </div>
@@ -110,7 +111,7 @@ export function Projects() {
 
   if (!loading && !loadingOrgs && !activeOrganizationId) {
     return (
-      <Layout title="Proyectos" subtitle="Vista compacta de proyectos">
+      <Layout title="Proyectos Beta" subtitle="Vista compacta de proyectos">
         <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="p-8">
             <div className="flex flex-col items-center justify-center text-center space-y-4">
@@ -125,7 +126,7 @@ export function Projects() {
 
   if (error) {
     return (
-      <Layout title="Proyectos" subtitle="Vista compacta de proyectos">
+      <Layout title="Proyectos Beta" subtitle="Vista compacta de proyectos">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">Error: {error}</p>
         </div>
@@ -134,11 +135,12 @@ export function Projects() {
   }
 
   return (
-    <Layout title="Proyectos" subtitle="Haz clic en una fila para expandir detalles">
+    <Layout title="Proyectos Beta" subtitle="Vista compacta · haz clic en una fila para expandir detalles">
       <div className="space-y-4">
 
         {/* Toolbar */}
-        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between" data-tour="projects-toolbar">
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          {/* Búsqueda */}
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
@@ -151,6 +153,7 @@ export function Projects() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Segmented control estado */}
             <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               {[
                 { value: 'all', label: 'Todos' },
@@ -182,7 +185,6 @@ export function Projects() {
             <button
               onClick={() => setShowCreateModal(true)}
               className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm transition-colors text-sm font-medium"
-              data-tour="new-project-btn"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nuevo Proyecto
@@ -191,7 +193,8 @@ export function Projects() {
         </div>
 
         {/* Tabla */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm" data-tour="projects-table">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
+          {/* Header de la tabla */}
           <div className="grid grid-cols-[24px_1fr_140px_130px_130px_110px_110px_90px] gap-x-4 px-4 py-3 bg-gray-50 dark:bg-gray-800/60 border-b border-gray-200 dark:border-gray-700 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
             <div />
             <div>Proyecto</div>
@@ -227,11 +230,13 @@ export function Projects() {
                 const isPositive = project.real_margin >= 0;
 
                 return (
-                  <div key={project.id} data-project-id={project.id}>
+                  <div key={project.id}>
+                    {/* Fila principal */}
                     <div
                       className="grid grid-cols-[24px_1fr_140px_130px_130px_110px_110px_90px] gap-x-4 px-4 py-3 items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
                       onClick={e => handleViewDetail(project.id, e)}
                     >
+                      {/* Toggle chevron — solo este expande, no navega */}
                       <div
                         className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                         onClick={e => { e.stopPropagation(); toggleRow(project.id); }}
@@ -242,6 +247,7 @@ export function Projects() {
                         }
                       </div>
 
+                      {/* Nombre + ID + cliente */}
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 shrink-0">
@@ -254,18 +260,22 @@ export function Projects() {
                         <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{project.client}</p>
                       </div>
 
+                      {/* Estado */}
                       <div>
                         <StatusBadge status={project.status} />
                       </div>
 
+                      {/* Venta Neta */}
                       <div className="text-right text-sm font-medium text-gray-900 dark:text-white tabular-nums">
                         {formatCurrency(project.sale_amount)}
                       </div>
 
+                      {/* Costo Real */}
                       <div className="text-right text-sm text-gray-700 dark:text-gray-300 tabular-nums">
                         {formatCurrency(project.real_cost)}
                       </div>
 
+                      {/* Margen */}
                       <div className={`text-right text-sm font-semibold tabular-nums flex items-center justify-end gap-1 opacity-30 group-hover:opacity-100 transition-opacity ${getMarginColor(marginPct)}`}>
                         {isPositive
                           ? <TrendingUp className="h-3.5 w-3.5 shrink-0" />
@@ -274,10 +284,12 @@ export function Projects() {
                         {formatCurrency(project.real_margin)}
                       </div>
 
+                      {/* % Margen */}
                       <div className={`text-right text-sm font-bold tabular-nums opacity-30 group-hover:opacity-100 transition-opacity ${getMarginColor(marginPct)}`}>
                         {marginPct.toFixed(1)}%
                       </div>
 
+                      {/* Acciones */}
                       <div className="flex items-center justify-center gap-1 opacity-30 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={e => handleEdit(project, e)}
@@ -300,6 +312,7 @@ export function Projects() {
                     {isExpanded && (
                       <div className="bg-gray-50 dark:bg-gray-800/30 border-t border-gray-100 dark:border-gray-700/50 px-12 py-5">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                          {/* Financiero proyectado */}
                           <div>
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Proyectado</p>
                             <div className="space-y-1.5">
@@ -314,6 +327,7 @@ export function Projects() {
                             </div>
                           </div>
 
+                          {/* Documentos */}
                           <div>
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Documentos</p>
                             <div className="space-y-1.5">
@@ -341,6 +355,7 @@ export function Projects() {
                             </div>
                           </div>
 
+                          {/* Fechas */}
                           <div>
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Fechas</p>
                             <div className="space-y-1.5">
@@ -362,6 +377,7 @@ export function Projects() {
                             </div>
                           </div>
 
+                          {/* Acciones rápidas */}
                           <div>
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Acciones</p>
                             <div className="flex flex-col gap-2">
@@ -383,6 +399,7 @@ export function Projects() {
                           </div>
                         </div>
 
+                        {/* Notas */}
                         {project.notes && (
                           <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Notas</p>
@@ -397,6 +414,7 @@ export function Projects() {
             </div>
           )}
 
+          {/* Footer con totales */}
           {filteredProjects.length > 0 && (
             <div className="grid grid-cols-[24px_1fr_140px_130px_130px_110px_110px_90px] gap-x-4 px-4 py-3 bg-gray-50 dark:bg-gray-800/60 border-t border-gray-200 dark:border-gray-700">
               <div />
@@ -423,12 +441,14 @@ export function Projects() {
         </div>
       </div>
 
+      {/* Modal crear */}
       <ProjectModalBeta
         isOpen={showCreateModal}
         onClose={() => { setShowCreateModal(false); setSelectedProject(undefined); }}
         onSuccess={() => { refetch(); setShowCreateModal(false); }}
       />
 
+      {/* Modal editar */}
       <ProjectModalBeta
         isOpen={showEditModal}
         onClose={() => { setShowEditModal(false); setSelectedProject(undefined); }}
@@ -436,6 +456,7 @@ export function Projects() {
         onSuccess={() => { refetch(); setShowEditModal(false); setSelectedProject(undefined); }}
       />
 
+      {/* Confirm eliminar */}
       <ConfirmDialog
         isOpen={showDeleteConfirm}
         onClose={() => { setShowDeleteConfirm(false); setProjectToDelete(null); }}

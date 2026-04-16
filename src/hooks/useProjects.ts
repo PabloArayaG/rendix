@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
-import { supabase, getCurrentUserId } from '../lib/supabase';
+import { supabase, getCurrentUserId, uploadProjectDocument } from '../lib/supabase';
 import { Project, CreateProjectDTO, UpdateProjectDTO, ProjectStats, ProjectStatus } from '../types/database';
+
+export interface ProjectDocumentFiles {
+  purchase_order?: File | null;
+  hes?: File | null;
+  sale_invoice?: File | null;
+}
 import { useAuthStore } from '../store/authStore';
 
 export const useProjects = () => {
@@ -38,19 +44,13 @@ export const useProjects = () => {
     }
   };
 
-  const createProject = async (projectData: CreateProjectDTO): Promise<Project> => {
-    console.log('useProjects.createProject - Iniciando...'); // Debug
-    
+  const createProject = async (projectData: CreateProjectDTO, files?: ProjectDocumentFiles): Promise<Project> => {
     const userId = await getCurrentUserId();
-    console.log('User ID obtenido:', userId); // Debug
-    
     if (!userId) throw new Error('Usuario no autenticado');
-
     if (!activeOrganizationId) throw new Error('No hay organización activa');
 
-    // Calcular margen proyectado
     const projected_margin = projectData.sale_amount - projectData.projected_cost;
-    
+
     const insertData = {
       ...projectData,
       projected_margin,
@@ -62,8 +62,6 @@ export const useProjects = () => {
       user_id: userId,
       organization_id: activeOrganizationId,
     };
-    
-    console.log('Datos a insertar en Supabase:', insertData); // Debug
 
     const { data, error } = await supabase
       .from('projects')
@@ -71,23 +69,33 @@ export const useProjects = () => {
       .select()
       .single();
 
-    console.log('Respuesta de Supabase:', { data, error }); // Debug
+    if (error) throw error;
 
-    if (error) {
-      console.error('Error de Supabase:', error); // Debug
-      throw error;
+    // Subir documentos si existen
+    if (files && Object.values(files).some(Boolean)) {
+      const docUpdates: Partial<UpdateProjectDTO> = {};
+      const docTypes = ['purchase_order', 'hes', 'sale_invoice'] as const;
+      for (const docType of docTypes) {
+        const file = files[docType];
+        if (file) {
+          const result = await uploadProjectDocument(file, data.id, docType);
+          docUpdates[`${docType}_url` as keyof UpdateProjectDTO] = result.url as any;
+          docUpdates[`${docType}_filename` as keyof UpdateProjectDTO] = result.filename as any;
+        }
+      }
+      if (Object.keys(docUpdates).length > 0) {
+        await supabase.from('projects').update(docUpdates).eq('id', data.id);
+      }
     }
-    
-    console.log('Proyecto creado exitosamente, refrescando lista...'); // Debug
-    await fetchProjects(); // Refrescar la lista
+
+    await fetchProjects();
     return data;
   };
 
-  const updateProject = async (id: string, projectData: UpdateProjectDTO): Promise<Project> => {
+  const updateProject = async (id: string, projectData: UpdateProjectDTO, files?: ProjectDocumentFiles): Promise<Project> => {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('Usuario no autenticado');
 
-    // Si se actualizan los montos, recalcular margen proyectado
     let updateData = { ...projectData };
     if (projectData.sale_amount !== undefined || projectData.projected_cost !== undefined) {
       const current = projects.find(p => p.id === id);
@@ -99,19 +107,28 @@ export const useProjects = () => {
       }
     }
 
+    // Subir documentos nuevos si existen
+    if (files) {
+      const docTypes = ['purchase_order', 'hes', 'sale_invoice'] as const;
+      for (const docType of docTypes) {
+        const file = files[docType];
+        if (file) {
+          const result = await uploadProjectDocument(file, id, docType);
+          (updateData as any)[`${docType}_url`] = result.url;
+          (updateData as any)[`${docType}_filename`] = result.filename;
+        }
+      }
+    }
+
     const { data, error } = await supabase
       .from('projects')
-      .update({
-        ...updateData,
-        updated_at: new Date().toISOString(),
-      })
+      .update({ ...updateData, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
-    
-    await fetchProjects(); // Refrescar la lista
+    await fetchProjects();
     return data;
   };
 

@@ -1,7 +1,12 @@
-import { Bell, Search, User } from 'lucide-react';
+import { Bell, User, HelpCircle } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { OrganizationSelector } from '../organizations/OrganizationSelector';
 import { ThemeToggle } from '../ui/ThemeToggle';
+
+function startTour() {
+  localStorage.removeItem('rendix_tour_completed_v1');
+  window.dispatchEvent(new CustomEvent('rendix:start-tour'));
+}
 
 interface HeaderProps {
   title: string;
@@ -29,18 +34,16 @@ export function Header({ title, subtitle }: HeaderProps) {
           
           {/* Theme Toggle */}
           <ThemeToggle />
-          
-          {/* Search */}
-          <div className="relative hidden md:block">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Buscar proyectos, gastos..."
-              className="block w-64 pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 text-sm"
-            />
-          </div>
+
+          {/* Help / Tour button */}
+          <button
+            onClick={startTour}
+            title="Ver tutorial de la aplicación"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40 border border-orange-200 dark:border-orange-800/50 transition-colors text-sm font-medium"
+          >
+            <HelpCircle className="h-4 w-4 shrink-0" />
+            <span className="hidden sm:inline">Tutorial</span>
+          </button>
 
           {/* Notifications */}
           <button className="relative p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">

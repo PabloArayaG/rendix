@@ -80,6 +80,13 @@ export interface Project {
   hes?: string; // Hoja de Entrada en Servicio
   invoice?: string; // Número de Factura emitida
   sale_invoice?: string; // Número de Factura de Venta al cliente
+  // URLs de archivos adjuntos por documento
+  purchase_order_url?: string;
+  purchase_order_filename?: string;
+  hes_url?: string;
+  hes_filename?: string;
+  sale_invoice_url?: string;
+  sale_invoice_filename?: string;
   
   // METADATOS
   tags: string[]; // Array de etiquetas
@@ -139,6 +146,12 @@ export interface CreateProjectDTO {
   purchase_order?: string;
   hes?: string;
   sale_invoice?: string;
+  purchase_order_url?: string;
+  purchase_order_filename?: string;
+  hes_url?: string;
+  hes_filename?: string;
+  sale_invoice_url?: string;
+  sale_invoice_filename?: string;
   tags?: string[];
   notes?: string;
 }

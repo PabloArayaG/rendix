@@ -6,7 +6,7 @@ import {
   LogOut, 
   Menu,
   X,
-  Building2
+  Building2,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
@@ -15,7 +15,6 @@ interface SidebarItem {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   href: string;
-  badge?: string;
 }
 
 const sidebarItems: SidebarItem[] = [
@@ -93,7 +92,7 @@ export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2" data-tour="sidebar-nav">
         {sidebarItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentPath === item.href || currentPath.startsWith(item.href + '/');
@@ -110,14 +109,7 @@ export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
             >
               <Icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-blue-200'}`} />
               {!isCollapsed && (
-                <>
-                  <span className="font-medium">{item.label}</span>
-                  {item.badge && (
-                    <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
-                </>
+                <span className="font-medium">{item.label}</span>
               )}
             </button>
           );
@@ -138,6 +130,7 @@ export function Sidebar({ currentPath, onNavigate }: SidebarProps) {
         <div className="space-y-2">
           <button
             onClick={() => handleNavigation('/settings')}
+            data-tour="sidebar-settings"
             className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-all duration-200 ${
               currentPath === '/settings'
                 ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'

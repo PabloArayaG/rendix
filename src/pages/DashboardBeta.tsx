@@ -14,9 +14,7 @@ import {
   CalendarRange,
   X,
   ChevronRight,
-  Minus,
-  ChevronDown,
-  Check,
+  Minus
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { useDashboard } from '../hooks/useDashboard';
@@ -29,6 +27,7 @@ import { ExpenseModal } from '../components/expenses/ExpenseModal';
 import { Expense } from '../types/database';
 import { IncomeVsCostsChart, MonthlyExpensesTrendChart, ExpensesByCategoryChart } from '../components/charts';
 
+/* ─── helpers ─────────────────────────────────────────────────────────────── */
 const CATEGORY_LABELS: Record<string, string> = {
   materials: 'Materiales', labor: 'Mano de obra', equipment: 'Equipos',
   transport: 'Transporte', services: 'Servicios', permits: 'Permisos',
@@ -38,13 +37,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   accommodation: 'Alojamiento', fuel: 'Combustible', other: 'Otros', general: 'General',
 };
 
-export function Dashboard() {
+/* ─── Component ────────────────────────────────────────────────────────────── */
+export function DashboardBeta() {
   const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
   const [dateRange, setDateRange] = useState<{ from: string; to: string } | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
-  const [projectDropOpen, setProjectDropOpen]     = useState(false);
-  const projectDropRef                            = useRef<HTMLDivElement>(null);
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>();
   const [showEditExpenseModal, setShowEditExpenseModal] = useState(false);
   const datePickerRef = useRef<HTMLDivElement>(null);
@@ -59,6 +57,7 @@ export function Dashboard() {
     return Array.from({ length: 4 }, (_, i) => cur - i);
   }, []);
 
+  /* ── stats derivados (filtrado local instantáneo) ── */
   const stats = useMemo(() => {
     if (rawProjects.length === 0 && rawExpenses.length === 0) return null;
 
@@ -84,6 +83,7 @@ export function Dashboard() {
     const totalMargin = proj.reduce((s, p) => s + p.real_margin, 0);
     const marginPercentage = totalSales > 0 ? (totalMargin / totalSales) * 100 : 0;
 
+    // Top gastos por categoría
     const byCat: Record<string, number> = {};
     exp.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + e.amount; });
     const topCategories = Object.entries(byCat)
@@ -104,6 +104,7 @@ export function Dashboard() {
     };
   }, [rawProjects, rawExpenses, selectedYear, dateRange]);
 
+  /* ── filtro por proyecto ── */
   const filteredStats = useMemo(() => {
     if (selectedProjectId === 'all') return stats;
     const project = projects.find(p => p.id === selectedProjectId);
@@ -122,6 +123,7 @@ export function Dashboard() {
     };
   }, [stats, selectedProjectId, projects]);
 
+  /* ── top proyectos por margen ── */
   const topProjects = useMemo(() => {
     return [...projects]
       .filter(p => p.sale_amount > 0)
@@ -132,6 +134,7 @@ export function Dashboard() {
 
   useEffect(() => { refetch(); }, []); // eslint-disable-line
 
+  /* cerrar date picker al hacer clic afuera */
   useEffect(() => {
     const fn = (e: MouseEvent) => {
       if (datePickerRef.current && !datePickerRef.current.contains(e.target as Node))
@@ -141,21 +144,13 @@ export function Dashboard() {
     return () => document.removeEventListener('mousedown', fn);
   }, [showDatePicker]);
 
-  useEffect(() => {
-    const fn = (e: MouseEvent) => {
-      if (projectDropRef.current && !projectDropRef.current.contains(e.target as Node))
-        setProjectDropOpen(false);
-    };
-    if (projectDropOpen) document.addEventListener('mousedown', fn);
-    return () => document.removeEventListener('mousedown', fn);
-  }, [projectDropOpen]);
-
   const handleEditExpense = (expense: Expense) => { setSelectedExpense(expense); setShowEditExpenseModal(true); };
   const handleCloseEdit = () => { setSelectedExpense(undefined); setShowEditExpenseModal(false); };
 
+  /* ─── estados de carga/error ─────────────────────────────────────── */
   if (loading) {
     return (
-      <Layout title="Dashboard" subtitle="Cargando datos...">
+      <Layout title="Dashboard Beta" subtitle="Vista mejorada · cargando datos...">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="h-28 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
@@ -172,7 +167,7 @@ export function Dashboard() {
 
   if (!loading && !loadingOrgs && !activeOrganizationId) {
     return (
-      <Layout title="Dashboard" subtitle="">
+      <Layout title="Dashboard Beta" subtitle="">
         <div className="rounded-2xl border border-yellow-200 bg-yellow-50 dark:bg-yellow-900/10 p-10 text-center">
           <Building2 className="h-10 w-10 text-yellow-500 mx-auto mb-3" />
           <p className="text-yellow-800 dark:text-yellow-300 font-medium">No estás añadido en ninguna organización.</p>
@@ -183,7 +178,7 @@ export function Dashboard() {
 
   if (error) {
     return (
-      <Layout title="Dashboard" subtitle="">
+      <Layout title="Dashboard Beta" subtitle="">
         <div className="rounded-2xl border border-red-200 bg-red-50 dark:bg-red-900/10 p-6 flex items-center gap-3">
           <AlertCircle className="h-5 w-5 text-red-500 shrink-0" />
           <p className="text-red-700 dark:text-red-300">{error}</p>
@@ -197,12 +192,14 @@ export function Dashboard() {
     ? Math.round((filteredStats.completed_projects / filteredStats.total_projects) * 100)
     : 0;
 
+  /* ─── render ─────────────────────────────────────────────────────── */
   return (
-    <Layout title="Dashboard" subtitle="Resumen financiero de tu operación">
+    <Layout title="Dashboard Beta" subtitle="Resumen financiero de tu operación">
       <div className="space-y-6">
 
-        {/* Filtros */}
-        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center" data-tour="dashboard-filters">
+        {/* ── Filtros ──────────────────────────────────────────────── */}
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          {/* Años */}
           <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl p-1 gap-0.5">
             <button
               onClick={() => { setSelectedYear(undefined); setDateRange(null); }}
@@ -229,6 +226,7 @@ export function Dashboard() {
             ))}
           </div>
 
+          {/* Calendario */}
           <div className="relative" ref={datePickerRef}>
             <button
               onClick={() => setShowDatePicker(!showDatePicker)}
@@ -284,102 +282,87 @@ export function Dashboard() {
             </span>
           )}
 
-          <div ref={projectDropRef} className="relative ml-auto">
-            <button
-              onClick={() => setProjectDropOpen(o => !o)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white min-w-[220px] transition-colors
-                ${projectDropOpen ? 'ring-2 ring-orange-500 border-transparent' : 'border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500'}`}
-            >
-              <FolderOpen className="h-4 w-4 text-gray-400 shrink-0" />
-              <span className="flex-1 text-left truncate">
-                {selectedProjectId === 'all'
-                  ? 'Todos los proyectos'
-                  : projects.find(p => p.id === selectedProjectId)?.name ?? 'Proyecto'}
-              </span>
-              <ChevronDown className={`h-4 w-4 text-gray-400 shrink-0 transition-transform ${projectDropOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {projectDropOpen && (
-              <div className="absolute right-0 z-50 mt-1 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden">
-                <div className="max-h-64 overflow-y-auto py-1">
-                  {[{ id: 'all', custom_id: '', name: 'Todos los proyectos' }, ...projects].map(p => (
-                    <button
-                      key={p.id}
-                      onClick={() => { setSelectedProjectId(p.id); setProjectDropOpen(false); }}
-                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors
-                        ${selectedProjectId === p.id ? 'bg-orange-50 dark:bg-orange-900/20 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-                    >
-                      {p.custom_id && (
-                        <span className="shrink-0 text-xs font-medium px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
-                          {p.custom_id}
-                        </span>
-                      )}
-                      <span className="truncate">{p.name}</span>
-                      {selectedProjectId === p.id && <Check className="h-3.5 w-3.5 text-orange-500 ml-auto shrink-0" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Selector proyecto */}
+          <select
+            value={selectedProjectId}
+            onChange={e => setSelectedProjectId(e.target.value)}
+            className="ml-auto px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer min-w-[220px]"
+          >
+            <option value="all">Todos los proyectos</option>
+            {projects.map(p => (
+              <option key={p.id} value={p.id}>{p.custom_id} – {p.name}</option>
+            ))}
+          </select>
         </div>
 
-        {/* KPI cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" data-tour="dashboard-kpis">
-          <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <FolderOpen className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Proyectos</p>
-            </div>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white tabular-nums">{filteredStats?.total_projects ?? 0}</p>
-            <div className="flex items-center gap-3 mt-2 text-xs text-gray-400 dark:text-gray-500">
+        {/* ── KPI cards ────────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Proyectos */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 p-5 text-white shadow-md">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full" />
+            <div className="absolute -right-1 -bottom-6 w-16 h-16 bg-white/10 rounded-full" />
+            <FolderOpen className="h-6 w-6 opacity-80 mb-3" />
+            <p className="text-xs font-medium uppercase tracking-wide opacity-80">Proyectos</p>
+            <p className="text-3xl font-bold mt-1 tabular-nums">{filteredStats?.total_projects ?? 0}</p>
+            <div className="flex items-center gap-3 mt-2 text-xs opacity-80">
               <span>{filteredStats?.active_projects ?? 0} activos</span>
               <span>·</span>
               <span>{filteredStats?.completed_projects ?? 0} terminados</span>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Ingresos</p>
-            </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{formatCurrency(filteredStats?.total_sales ?? 0)}</p>
-            <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">Venta neta total</p>
+          {/* Ingresos */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-5 text-white shadow-md">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full" />
+            <div className="absolute -right-1 -bottom-6 w-16 h-16 bg-white/10 rounded-full" />
+            <DollarSign className="h-6 w-6 opacity-80 mb-3" />
+            <p className="text-xs font-medium uppercase tracking-wide opacity-80">Ingresos</p>
+            <p className="text-2xl font-bold mt-1 tabular-nums">{formatCurrency(filteredStats?.total_sales ?? 0)}</p>
+            <p className="mt-2 text-xs opacity-80">Venta neta total</p>
           </div>
 
-          <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Receipt className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Costos</p>
-            </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">{formatCurrency(filteredStats?.total_costs ?? 0)}</p>
-            <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">Costo real acumulado</p>
+          {/* Costos */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 p-5 text-white shadow-md">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full" />
+            <div className="absolute -right-1 -bottom-6 w-16 h-16 bg-white/10 rounded-full" />
+            <Receipt className="h-6 w-6 opacity-80 mb-3" />
+            <p className="text-xs font-medium uppercase tracking-wide opacity-80">Costos</p>
+            <p className="text-2xl font-bold mt-1 tabular-nums">{formatCurrency(filteredStats?.total_costs ?? 0)}</p>
+            <p className="mt-2 text-xs opacity-80">Costo real acumulado</p>
           </div>
 
-          <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm p-5">
-            <div className="flex items-center gap-2 mb-3">
-              {marginPct >= 10
-                ? <TrendingUp className={`h-4 w-4 ${marginPct >= 20 ? 'text-emerald-500' : 'text-amber-500'}`} />
-                : <TrendingDown className="h-4 w-4 text-red-500" />
-              }
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Margen</p>
-            </div>
-            <p className={`text-2xl font-bold tabular-nums ${getMarginColor(marginPct)}`}>{formatCurrency(filteredStats?.total_margin ?? 0)}</p>
+          {/* Margen */}
+          <div className={`relative overflow-hidden rounded-2xl p-5 text-white shadow-md ${
+            marginPct >= 20
+              ? 'bg-gradient-to-br from-violet-500 to-violet-600'
+              : marginPct >= 10
+              ? 'bg-gradient-to-br from-orange-500 to-orange-600'
+              : 'bg-gradient-to-br from-red-500 to-red-600'
+          }`}>
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full" />
+            <div className="absolute -right-1 -bottom-6 w-16 h-16 bg-white/10 rounded-full" />
+            {marginPct >= 10
+              ? <TrendingUp className="h-6 w-6 opacity-80 mb-3" />
+              : <TrendingDown className="h-6 w-6 opacity-80 mb-3" />
+            }
+            <p className="text-xs font-medium uppercase tracking-wide opacity-80">Margen</p>
+            <p className="text-2xl font-bold mt-1 tabular-nums">{formatCurrency(filteredStats?.total_margin ?? 0)}</p>
             <div className="flex items-center gap-2 mt-2">
-              <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
+              <div className="flex-1 bg-white/20 rounded-full h-1.5">
                 <div
-                  className={`h-1.5 rounded-full transition-all ${marginPct >= 20 ? 'bg-emerald-500' : marginPct >= 10 ? 'bg-amber-500' : 'bg-red-500'}`}
+                  className="bg-white h-1.5 rounded-full transition-all"
                   style={{ width: `${Math.max(0, Math.min(100, marginPct))}%` }}
                 />
               </div>
-              <span className={`text-xs font-bold tabular-nums ${getMarginColor(marginPct)}`}>{formatPercentage(marginPct)}</span>
+              <span className="text-xs font-bold opacity-90 tabular-nums">{formatPercentage(marginPct)}</span>
             </div>
           </div>
         </div>
 
-        {/* Fila principal */}
+        {/* ── Fila principal ───────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+          {/* Resumen financiero (ocupa 2 cols) */}
           <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Resumen Financiero</h3>
             <IncomeVsCostsChart
@@ -389,7 +372,9 @@ export function Dashboard() {
             />
           </div>
 
+          {/* Panel lateral: salud + progreso */}
           <div className="space-y-4">
+            {/* Salud financiera */}
             <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Salud Financiera</h3>
               <div className="space-y-3">
@@ -419,6 +404,7 @@ export function Dashboard() {
               </div>
             </div>
 
+            {/* Top proyectos */}
             <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Top proyectos por margen</h3>
               <div className="space-y-2">
@@ -447,13 +433,16 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Segunda fila */}
+        {/* ── Segunda fila ─────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+          {/* Tendencia */}
           <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Tendencia de Gastos</h3>
             <MonthlyExpensesTrendChart projectId={selectedProjectId} />
           </div>
 
+          {/* Top categorías */}
           <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Top categorías de gasto</h3>
             {!stats?.topCategories?.length ? (
@@ -484,8 +473,8 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Gastos recientes */}
-        <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden" data-tour="dashboard-expenses">
+        {/* ── Gastos recientes ─────────────────────────────────────── */}
+        <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Gastos Recientes</h3>
@@ -500,6 +489,7 @@ export function Dashboard() {
             </div>
           ) : (
             <div className="divide-y divide-gray-50 dark:divide-gray-800">
+              {/* Header */}
               <div className="grid grid-cols-[1fr_120px_100px_90px_60px] gap-x-4 px-5 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide bg-gray-50 dark:bg-gray-800/50">
                 <div>Descripción</div>
                 <div>Proyecto</div>
@@ -553,7 +543,7 @@ export function Dashboard() {
           )}
         </div>
 
-        {/* Indicadores de tendencia */}
+        {/* ── Indicadores de tendencia ──────────────────────────────── */}
         <div className="grid grid-cols-3 gap-4">
           {[
             {

@@ -84,3 +84,32 @@ export const deleteReceipt = async (filePath: string) => {
 
   if (error) throw error;
 };
+
+export const uploadProjectDocument = async (
+  file: File,
+  projectId: string,
+  docType: 'purchase_order' | 'hes' | 'sale_invoice'
+) => {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${docType}_${Date.now()}.${fileExt}`;
+  const filePath = `projects/${projectId}/${fileName}`;
+
+  const { data, error } = await supabase.storage
+    .from('receipts')
+    .upload(filePath, file, { upsert: true });
+
+  if (error) throw error;
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('receipts')
+    .getPublicUrl(filePath);
+
+  return { path: data.path, url: publicUrl, filename: file.name };
+};
+
+export const deleteProjectDocument = async (filePath: string) => {
+  const { error } = await supabase.storage
+    .from('receipts')
+    .remove([filePath]);
+  if (error) throw error;
+};
