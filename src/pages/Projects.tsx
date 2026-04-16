@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Plus,
   Search,
@@ -11,6 +11,10 @@ import {
   Edit,
   Trash2,
   Eye,
+  CalendarRange,
+  ArrowUpDown,
+  X,
+  Check,
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { ProjectModalBeta } from '../components/projects/ProjectModalBeta';
@@ -22,10 +26,27 @@ import { useAuthStore } from '../store/authStore';
 import { useOrganizations } from '../hooks/useOrganizations';
 import { Card, CardContent } from '../components/ui';
 
+type SortField = 'date_desc' | 'date_asc' | 'margin_desc' | 'margin_asc' | 'name_asc';
+
+const SORT_OPTIONS: { value: SortField; label: string }[] = [
+  { value: 'date_desc',   label: 'Más recientes primero'  },
+  { value: 'date_asc',    label: 'Más antiguos primero'   },
+  { value: 'margin_desc', label: 'Mayor margen primero'   },
+  { value: 'margin_asc',  label: 'Menor margen primero'   },
+  { value: 'name_asc',    label: 'Nombre A → Z'           },
+];
+
 export function Projects() {
   const { projects, loading, error, refetch, deleteProject } = useProjects();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm]     = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [sortBy, setSortBy]             = useState<SortField>('date_desc');
+  const [dateFrom, setDateFrom]         = useState('');
+  const [dateTo, setDateTo]             = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showSortDrop, setShowSortDrop]     = useState(false);
+  const datePickerRef = useRef<HTMLDivElement>(null);
+  const sortDropRef   = useRef<HTMLDivElement>(null);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | undefined>();
@@ -36,14 +57,51 @@ export function Projects() {
   const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
   const { loading: loadingOrgs } = useOrganizations();
 
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch =
-      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.custom_id?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  useEffect(() => {
+    const fn = (e: MouseEvent) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(e.target as Node))
+        setShowDatePicker(false);
+    };
+    if (showDatePicker) document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, [showDatePicker]);
+
+  useEffect(() => {
+    const fn = (e: MouseEvent) => {
+      if (sortDropRef.current && !sortDropRef.current.contains(e.target as Node))
+        setShowSortDrop(false);
+    };
+    if (showSortDrop) document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, [showSortDrop]);
+
+  const hasDateFilter = dateFrom || dateTo;
+
+  const filteredProjects = projects
+    .filter(project => {
+      const matchesSearch =
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.custom_id?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
+      const projectDate = (project.start_date || project.created_at || '').substring(0, 10);
+      const matchesFrom = !dateFrom || projectDate >= dateFrom;
+      const matchesTo   = !dateTo   || projectDate <= dateTo;
+      return matchesSearch && matchesStatus && matchesFrom && matchesTo;
+    })
+    .sort((a, b) => {
+      const getMarginPct = (p: Project) => p.sale_amount > 0 ? p.real_margin / p.sale_amount : 0;
+      const dateA = (a.start_date || a.created_at || '');
+      const dateB = (b.start_date || b.created_at || '');
+      switch (sortBy) {
+        case 'date_desc':   return dateB.localeCompare(dateA);
+        case 'date_asc':    return dateA.localeCompare(dateB);
+        case 'margin_desc': return getMarginPct(b) - getMarginPct(a);
+        case 'margin_asc':  return getMarginPct(a) - getMarginPct(b);
+        case 'name_asc':    return a.name.localeCompare(b.name);
+        default:            return 0;
+      }
+    });
 
   const toggleRow = (id: string) => {
     setExpandedRows(prev => {
@@ -138,24 +196,37 @@ export function Projects() {
       <div className="space-y-4">
 
         {/* Toolbar */}
-        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between" data-tour="projects-toolbar">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar por nombre, cliente o ID..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
-            />
+        <div className="flex flex-col gap-3" data-tour="projects-toolbar">
+          {/* Fila 1: búsqueda + botón nuevo */}
+          <div className="flex gap-3 items-center">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por nombre, cliente o ID..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+              />
+            </div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm transition-colors text-sm font-medium shrink-0"
+              data-tour="new-project-btn"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Proyecto
+            </button>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Fila 2: filtros + ordenamiento */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Estado */}
             <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               {[
-                { value: 'all', label: 'Todos' },
+                { value: 'all',         label: 'Todos'      },
                 { value: 'in_progress', label: 'En Proceso' },
-                { value: 'completed', label: 'Terminados' },
+                { value: 'completed',   label: 'Terminados' },
               ].map(opt => {
                 const count = opt.value === 'all'
                   ? projects.length
@@ -179,15 +250,89 @@ export function Projects() {
               })}
             </div>
 
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm transition-colors text-sm font-medium"
-              data-tour="new-project-btn"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo Proyecto
-            </button>
+            {/* Filtro por fecha */}
+            <div ref={datePickerRef} className="relative">
+              <button
+                onClick={() => setShowDatePicker(o => !o)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  hasDateFilter
+                    ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700 text-orange-600 dark:text-orange-400'
+                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400'
+                }`}
+              >
+                <CalendarRange className="h-4 w-4" />
+                {hasDateFilter ? `${dateFrom || '…'} → ${dateTo || '…'}` : 'Por fecha'}
+                {hasDateFilter && (
+                  <span
+                    onClick={e => { e.stopPropagation(); setDateFrom(''); setDateTo(''); }}
+                    className="ml-1 hover:text-red-500 transition-colors cursor-pointer"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </span>
+                )}
+              </button>
+              {showDatePicker && (
+                <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 w-64">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Filtrar por fecha de inicio</p>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">Desde</label>
+                      <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">Hasta</label>
+                      <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                        className="w-full px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
+                    </div>
+                    <button onClick={() => setShowDatePicker(false)}
+                      className="w-full py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors">
+                      Aplicar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Ordenamiento */}
+            <div ref={sortDropRef} className="relative ml-auto">
+              <button
+                onClick={() => setShowSortDrop(o => !o)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-600 dark:text-gray-400 hover:border-gray-400 transition-colors"
+              >
+                <ArrowUpDown className="h-4 w-4" />
+                {SORT_OPTIONS.find(o => o.value === sortBy)?.label}
+              </button>
+              {showSortDrop && (
+                <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden w-52">
+                  <div className="py-1">
+                    {SORT_OPTIONS.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => { setSortBy(opt.value); setShowSortDrop(false); }}
+                        className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${
+                          sortBy === opt.value
+                            ? 'bg-orange-50 dark:bg-orange-900/20 text-gray-900 dark:text-white'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                        }`}
+                      >
+                        <span className="flex-1">{opt.label}</span>
+                        {sortBy === opt.value && <Check className="h-3.5 w-3.5 text-orange-500 shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Chip de fecha activa */}
+          {hasDateFilter && (
+            <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+              Mostrando proyectos con inicio entre {dateFrom || '…'} y {dateTo || '…'}
+              {' '}· {filteredProjects.length} resultado{filteredProjects.length !== 1 ? 's' : ''}
+            </p>
+          )}
         </div>
 
         {/* Tabla */}
