@@ -5,10 +5,10 @@ import { useAuthStore } from '../../store/authStore';
 import { formatCurrency } from '../../lib/utils';
 import { TimeRangeSelector, TimeRange, getDaysFromRange } from './TimeRangeSelector';
 import { EXPENSE_CATEGORIES } from '../../types/database';
-
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
+import { getCategoryChartColor } from '../../lib/categoryColors';
 
 interface CategoryData {
+  category: string;
   name: string;
   value: number;
   [key: string]: string | number;
@@ -53,39 +53,26 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
 
         if (error) throw error;
 
-        // Agrupar por categoría y traducir a español
+        // Agrupar por el valor estable de categoría para conservar su color.
         const categoryMap = expenses?.reduce((acc, expense) => {
           const categoryValue = expense.category || 'general';
-          // Buscar el label en español
-          const categoryLabel = EXPENSE_CATEGORIES.find((c: any) => c.value === categoryValue)?.label || 'Sin categoría';
-          
-          if (!acc[categoryLabel]) {
-            acc[categoryLabel] = 0;
+          if (!acc[categoryValue]) {
+            acc[categoryValue] = 0;
           }
-          acc[categoryLabel] += expense.net_amount;
+          acc[categoryValue] += expense.net_amount;
           return acc;
         }, {} as Record<string, number>);
 
-        // Ordenar por valor y agrupar categorías pequeñas
+        // Mostrar todas las categorías, ordenadas de mayor a menor.
         const sortedData = Object.entries(categoryMap || {})
-          .map(([name, value]) => ({ name, value }))
+          .map(([category, value]) => ({
+            category,
+            name: EXPENSE_CATEGORIES.find((c: any) => c.value === category)?.label || 'Sin categoría',
+            value,
+          }))
           .sort((a, b) => b.value - a.value);
 
-        // Tomar top 5 categorías y agrupar el resto en "Otros"
-        const topCategories = sortedData.slice(0, 5);
-        const otherCategories = sortedData.slice(5);
-        
-        const chartData = [...topCategories];
-        
-        // Si hay más categorías, agruparlas en "Otros"
-        if (otherCategories.length > 0) {
-          const othersTotal = otherCategories.reduce((sum, cat) => sum + cat.value, 0);
-          if (othersTotal > 0) {
-            chartData.push({ name: 'Otros', value: othersTotal });
-          }
-        }
-
-        setData(chartData);
+        setData(sortedData);
       } catch (err) {
         console.error('Error fetching category data:', err);
       } finally {
@@ -96,7 +83,7 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
     if (activeOrganizationId) {
       fetchCategoryData();
     }
-  }, [activeOrganizationId, timeRange, projectId]);
+  }, [activeOrganizationId, timeRange, projectId, compact]);
 
   return (
     <div className="space-y-4">
@@ -143,12 +130,12 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
                 fill="none"
                 dataKey="value"
               >
-          {data.map((_entry, index) => (
+          {data.map((entry) => (
             <Cell 
-              key={`cell-${index}`} 
-              fill={COLORS[index % COLORS.length]}
+              key={entry.category}
+              fill={getCategoryChartColor(entry.category)}
               fillOpacity={0.2}
-              stroke={COLORS[index % COLORS.length]}
+              stroke={getCategoryChartColor(entry.category)}
               strokeWidth={2}
             />
           ))}
@@ -162,12 +149,12 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
       {/* Leyenda compacta para modo compact */}
       {compact && !loading && data.length > 0 && (
         <div className="mt-3 space-y-1">
-          {data.slice(0, 5).map((entry, index) => (
-            <div key={index} className="flex items-center justify-between text-xs">
+          {data.map((entry) => (
+            <div key={entry.category} className="flex items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
                 <div 
                   className="w-2 h-2 rounded-full" 
-                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  style={{ backgroundColor: getCategoryChartColor(entry.category) }}
                 ></div>
                 <span className="text-gray-600 dark:text-gray-400">{entry.name}</span>
               </div>

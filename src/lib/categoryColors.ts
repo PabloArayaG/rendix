@@ -40,3 +40,17 @@ export const getCategoryColor = (category: string): string => {
   return colors[category] || colors['general'];
 };
 
+// Equivalentes sólidos de los badges para gráficos y leyendas.
+export const getCategoryChartColor = (category: string): string => {
+  const colors: Record<string, string> = {
+    materials: '#f59e0b', labor: '#3b82f6', equipment: '#a855f7',
+    transport: '#06b6d4', fuel: '#ef4444', services: '#6366f1',
+    subcontractors: '#8b5cf6', permits: '#64748b', administration: '#6b7280',
+    insurance: '#10b981', utilities: '#eab308', supplies: '#f97316',
+    tools: '#71717a', safety: '#f43f5e', salary: '#22c55e',
+    food: '#ec4899', accommodation: '#d946ef', other: '#737373', general: '#78716c',
+  };
+
+  return colors[category] || colors.general;
+};
+
