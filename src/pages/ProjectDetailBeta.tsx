@@ -54,6 +54,7 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState<any>(null);
   const [isDeleting, setIsDeleting]           = useState(false);
+  const [expenseSummaryView, setExpenseSummaryView] = useState<'summary' | 'categories'>('summary');
 
   const filteredExpenses = useMemo(() => expenses.filter(e => {
     const matchSearch = e.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,6 +67,12 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
   const totalNet   = filteredExpenses.reduce((s, e) => s + (e.net_amount || 0), 0);
   const totalIva   = filteredExpenses.reduce((s, e) => s + (e.tax_amount || 0), 0);
   const totalBruto = filteredExpenses.reduce((s, e) => s + e.amount, 0);
+
+  const projectTotals = useMemo(() => expenses.reduce((totals, expense) => ({
+    net: totals.net + (expense.net_amount || 0),
+    iva: totals.iva + (expense.tax_amount || 0),
+    total: totals.total + (expense.amount || 0),
+  }), { net: 0, iva: 0, total: 0 }), [expenses]);
 
   const marginPct = project && project.sale_amount > 0
     ? (project.real_margin / project.sale_amount) * 100 : 0;
@@ -577,8 +584,47 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
           {/* Analytics */}
           <div className="space-y-4">
             <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
-              <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Por Categoría</h4>
-              <ExpensesByCategoryChart projectId={projectId} compact />
+              <div className="flex items-center justify-between gap-3 mb-5">
+                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Gastos del proyecto</h4>
+                <div className="inline-flex rounded-lg bg-gray-100 dark:bg-gray-800 p-1 text-xs font-medium">
+                  <button
+                    type="button"
+                    onClick={() => setExpenseSummaryView('summary')}
+                    className={`rounded-md px-2.5 py-1.5 transition-colors ${expenseSummaryView === 'summary' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
+                  >
+                    Resumen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExpenseSummaryView('categories')}
+                    className={`rounded-md px-2.5 py-1.5 transition-colors ${expenseSummaryView === 'categories' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400'}`}
+                  >
+                    Categorías
+                  </button>
+                </div>
+              </div>
+
+              {expenseSummaryView === 'summary' ? (
+                <div className="py-5">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Total neto</p>
+                  <p className="mt-1 text-3xl font-bold tracking-tight text-gray-900 dark:text-white tabular-nums">
+                    {formatCurrency(projectTotals.net)}
+                  </p>
+                  <div className="mt-6 grid grid-cols-2 gap-4 border-t border-gray-100 dark:border-gray-800 pt-4">
+                    <div>
+                      <p className="text-xs text-gray-400">IVA</p>
+                      <p className="mt-1 text-base font-semibold text-gray-700 dark:text-gray-200 tabular-nums">{formatCurrency(projectTotals.iva)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-400">Total</p>
+                      <p className="mt-1 text-base font-semibold text-orange-600 dark:text-orange-400 tabular-nums">{formatCurrency(projectTotals.total)}</p>
+                    </div>
+                  </div>
+                  <p className="mt-5 text-xs text-gray-400">{expenses.length} {expenses.length === 1 ? 'gasto registrado' : 'gastos registrados'}</p>
+                </div>
+              ) : (
+                <ExpensesByCategoryChart projectId={projectId} compact />
+              )}
             </div>
             <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
               <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Tendencia Mensual</h4>
