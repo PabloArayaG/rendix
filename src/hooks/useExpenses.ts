@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase, getCurrentUserId, uploadReceipt, deleteReceipt } from '../lib/supabase';
 import { Expense, CreateExpenseDTO, UpdateExpenseDTO, ExpensesByCategory, ExpenseCategory } from '../types/database';
 import { useAuthStore } from '../store/authStore';
+
+const notifyExpensesChanged = () => {
+  window.dispatchEvent(new CustomEvent('rendix:expenses-changed'));
+};
 
 export const useExpenses = (projectId?: string) => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -9,7 +13,7 @@ export const useExpenses = (projectId?: string) => {
   const [error, setError] = useState<string | null>(null);
   const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
 
-  const fetchExpenses = async () => {
+  const fetchExpenses = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -41,7 +45,7 @@ export const useExpenses = (projectId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeOrganizationId, projectId]);
 
   const createExpense = async (
     expenseData: CreateExpenseDTO, 
@@ -52,7 +56,6 @@ export const useExpenses = (projectId?: string) => {
 
     if (!activeOrganizationId) throw new Error('No hay organización activa');
 
-    // Log de debugging detallado
     const finalData = {
       ...expenseData,
       tags: expenseData.tags || [],
@@ -61,18 +64,6 @@ export const useExpenses = (projectId?: string) => {
       organization_id: activeOrganizationId,
     };
 
-    console.log('🔍 GERARDO DEBUG - Datos enviados a Supabase:', {
-      finalData,
-      dataTypes: {
-        net_amount: typeof finalData.net_amount,
-        tax_amount: typeof finalData.tax_amount,
-        amount: typeof finalData.amount,
-        date: typeof finalData.date,
-        project_id: typeof finalData.project_id,
-        user_id: typeof finalData.user_id,
-      }
-    });
-
     // Crear el gasto primero
     const { data: expense, error } = await supabase
       .from('expenses')
@@ -80,17 +71,7 @@ export const useExpenses = (projectId?: string) => {
       .select()
       .single();
 
-    if (error) {
-      console.error('🔍 GERARDO DEBUG - Error de Supabase:', {
-        error,
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        sentData: finalData,
-      });
-      throw error;
-    }
+    if (error) throw error;
 
     // Subir comprobante si existe
     if (receiptFile) {
@@ -112,6 +93,7 @@ export const useExpenses = (projectId?: string) => {
         
         // El trigger de Supabase actualiza automáticamente los costos
         await fetchExpenses();
+        notifyExpensesChanged();
         return updatedExpense;
       } catch (receiptError) {
         // Si falla la subida del comprobante, eliminar el gasto creado
@@ -122,6 +104,7 @@ export const useExpenses = (projectId?: string) => {
 
     // El trigger de Supabase actualiza automáticamente los costos
     await fetchExpenses();
+    notifyExpensesChanged();
     return expense;
   };
 
@@ -136,15 +119,14 @@ export const useExpenses = (projectId?: string) => {
     const currentExpense = expenses.find(e => e.id === id);
     if (!currentExpense) throw new Error('Gasto no encontrado');
 
-    let updateData = { ...expenseData };
+    const updateData = { ...expenseData };
 
     // Manejar archivo de comprobante
     if (receiptFile) {
       // Eliminar comprobante anterior si existe
       if (currentExpense.receipt_url) {
         try {
-          const oldPath = currentExpense.receipt_url.split('/').slice(-3).join('/');
-          await deleteReceipt(oldPath);
+          await deleteReceipt(currentExpense.receipt_url);
         } catch (deleteError) {
           console.warn('Error eliminando comprobante anterior:', deleteError);
         }
@@ -170,6 +152,7 @@ export const useExpenses = (projectId?: string) => {
     
     // El trigger de Supabase actualiza automáticamente los costos
     await fetchExpenses();
+    notifyExpensesChanged();
     return data;
   };
 
@@ -183,8 +166,7 @@ export const useExpenses = (projectId?: string) => {
     // Eliminar comprobante si existe
     if (expense.receipt_url) {
       try {
-        const filePath = expense.receipt_url.split('/').slice(-3).join('/');
-        await deleteReceipt(filePath);
+        await deleteReceipt(expense.receipt_url);
       } catch (deleteError) {
         console.warn('Error eliminando comprobante:', deleteError);
       }
@@ -200,6 +182,7 @@ export const useExpenses = (projectId?: string) => {
     // El trigger de Supabase ya actualiza automáticamente los costos del proyecto
     // No necesitamos llamar a updateProjectCosts manualmente
     await fetchExpenses();
+    notifyExpensesChanged();
   };
 
   const getExpensesByCategory = async (projectId?: string): Promise<ExpensesByCategory[]> => {
@@ -212,7 +195,7 @@ export const useExpenses = (projectId?: string) => {
 
     let query = supabase
       .from('expenses')
-      .select('category, amount')
+      .select('category, net_amount')
       .eq('organization_id', activeOrganizationId);
 
     if (projectId) {
@@ -225,7 +208,7 @@ export const useExpenses = (projectId?: string) => {
     // Agrupar por categoría
     interface CategorySummary {
       category: string;
-      amount: number;
+      net_amount: number;
     }
     
     const expenseData = data as CategorySummary[] || [];
@@ -234,7 +217,7 @@ export const useExpenses = (projectId?: string) => {
       if (!acc[category]) {
         acc[category] = { total_amount: 0, expense_count: 0 };
       }
-      acc[category].total_amount += expense.amount;
+      acc[category].total_amount += expense.net_amount || 0;
       acc[category].expense_count += 1;
       return acc;
     }, {} as Record<string, { total_amount: number; expense_count: number }>);
@@ -256,7 +239,7 @@ export const useExpenses = (projectId?: string) => {
     if (activeOrganizationId) {
       fetchExpenses();
     }
-  }, [projectId, activeOrganizationId]);
+  }, [activeOrganizationId, fetchExpenses]);
 
   return {
     expenses,

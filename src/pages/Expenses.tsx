@@ -4,6 +4,7 @@ import {
   Search, 
   Receipt,
   Calendar,
+  CalendarClock,
   DollarSign,
   Tag,
   Edit,
@@ -21,6 +22,10 @@ import {
   formatShortDate
 } from '../lib/utils';
 import { getCategoryColor } from '../lib/categoryColors';
+import { openStorageFile } from '../lib/supabase';
+import { getCreditAlertClasses, getCreditAlertStatus } from '../lib/creditAlerts';
+
+type CreditFilter = 'all' | 'credit' | 'due-soon' | 'overdue';
 
 export function Expenses() {
   const { expenses, loading, error, refetch, deleteExpense } = useExpenses();
@@ -28,6 +33,7 @@ export function Expenses() {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [projectFilter, setProjectFilter] = useState<string>('all');
+  const [creditFilter, setCreditFilter] = useState<CreditFilter>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>(undefined);
@@ -43,8 +49,13 @@ export function Expenses() {
     
     const matchesCategory = categoryFilter === 'all' || expense.category === categoryFilter;
     const matchesProject = projectFilter === 'all' || expense.project_id === projectFilter;
+    const creditAlert = getCreditAlertStatus(expense);
+    const matchesCredit = creditFilter === 'all'
+      || (creditFilter === 'credit' && expense.status === 'credit')
+      || (creditFilter === 'due-soon' && !!creditAlert && ['urgent', 'upcoming'].includes(creditAlert.level))
+      || (creditFilter === 'overdue' && creditAlert?.level === 'overdue');
     
-    return matchesSearch && matchesCategory && matchesProject;
+    return matchesSearch && matchesCategory && matchesProject && matchesCredit;
   });
 
   const getCategoryLabel = (category: string) => {
@@ -100,8 +111,11 @@ export function Expenses() {
     </span>
   );
 
-  const ExpenseCard = ({ expense }: { expense: Expense }) => (
-    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6 hover:shadow-md transition-shadow">
+  const ExpenseCard = ({ expense }: { expense: Expense }) => {
+    const creditAlert = getCreditAlertStatus(expense);
+
+    return (
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
@@ -170,12 +184,24 @@ export function Expenses() {
           </div>
           
           <div className="flex items-center justify-between">
-            <CategoryBadge category={expense.category} />
+            <div className="flex flex-wrap items-center gap-2">
+              <CategoryBadge category={expense.category} />
+              {creditAlert && (
+                <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full border ${getCreditAlertClasses(creditAlert.level)}`}>
+                  <CalendarClock className="h-3.5 w-3.5" />
+                  {creditAlert.label}
+                </span>
+              )}
+            </div>
             {expense.receipt_url && (
-              <div className="flex items-center text-sm text-blue-600">
+              <button
+                type="button"
+                onClick={() => { void openStorageFile(expense.receipt_url!); }}
+                className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+              >
                 <Receipt className="h-4 w-4 mr-1" />
-                Comprobante
-              </div>
+                Ver comprobante
+              </button>
             )}
           </div>
           
@@ -186,8 +212,9 @@ export function Expenses() {
           )}
         </div>
       </div>
-    </div>
-  );
+      </div>
+    );
+  };
 
   if (loading) {
     return (
@@ -209,7 +236,7 @@ export function Expenses() {
     );
   }
 
-  const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.net_amount, 0);
   const monthlyTotal = filteredExpenses
     .filter(expense => {
       const expenseDate = new Date(expense.date);
@@ -217,7 +244,7 @@ export function Expenses() {
       return expenseDate.getMonth() === currentDate.getMonth() && 
              expenseDate.getFullYear() === currentDate.getFullYear();
     })
-    .reduce((sum, expense) => sum + expense.amount, 0);
+    .reduce((sum, expense) => sum + expense.net_amount, 0);
 
   return (
     <Layout title="Gastos" subtitle="Gestiona todos los gastos de tus proyectos">
@@ -263,6 +290,17 @@ export function Expenses() {
                 </option>
               ))}
             </select>
+
+            <select
+              value={creditFilter}
+              onChange={(e) => setCreditFilter(e.target.value as CreditFilter)}
+              className="px-3 py-2 border border-gray-300 dark:border-gray-800 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            >
+              <option value="all">Todos los estados</option>
+              <option value="credit">Solo créditos</option>
+              <option value="due-soon">Vencen en 30 días</option>
+              <option value="overdue">Créditos vencidos</option>
+            </select>
             
             <select
               value={categoryFilter}
@@ -299,7 +337,7 @@ export function Expenses() {
                 <DollarSign className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Monto Total</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Monto Neto Filtrado</p>
                 <p className="text-xl font-semibold text-gray-900 dark:text-white">{formatCurrency(totalAmount)}</p>
               </div>
             </div>
@@ -311,7 +349,7 @@ export function Expenses() {
                 <Calendar className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Este Mes</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Neto Este Mes</p>
                 <p className="text-xl font-semibold text-gray-900 dark:text-white">{formatCurrency(monthlyTotal)}</p>
               </div>
             </div>

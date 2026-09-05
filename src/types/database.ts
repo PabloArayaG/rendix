@@ -35,7 +35,7 @@ export interface Organization {
   slug: string; // URL-friendly name (único)
   owner_id: string; // ID del propietario
   logo_url?: string; // URL del logo
-  settings: Record<string, any>; // JSONB para configuraciones
+  settings: Record<string, unknown>; // JSONB para configuraciones
   created_at: string; // Timestamp automático
   updated_at: string; // Timestamp automático
 }
@@ -91,7 +91,7 @@ export interface Project {
   // METADATOS
   tags: string[]; // Array de etiquetas
   notes?: string; // Notas adicionales
-  metadata: Record<string, any>; // JSONB para datos extra
+  metadata: Record<string, unknown>; // JSONB para datos extra
   
   // AUDITORÍA
   user_id: string; // UID del usuario que creó (Firebase/Supabase)
@@ -111,6 +111,7 @@ export interface Expense {
   tax_amount: number; // IVA 19% (DECIMAL, >= 0, REQUERIDO)
   category: ExpenseCategory; // Categoría (ver enum abajo)
   date: string; // Fecha del gasto (DATE, default HOY)
+  credit_due_date?: string | null; // Fecha de vencimiento cuando el estado es Crédito
   
   // INFORMACIÓN ADICIONAL
   status: ExpenseStatus; // Estado del gasto (Provisión, Pagado, Crédito, Anticipo)
@@ -124,7 +125,7 @@ export interface Expense {
   
   // METADATOS
   tags: string[]; // Array de etiquetas
-  metadata: Record<string, any>; // JSONB para datos extra
+  metadata: Record<string, unknown>; // JSONB para datos extra
   
   // AUDITORÍA
   user_id: string; // UID del usuario que creó
@@ -171,6 +172,7 @@ export interface CreateExpenseDTO {
   tax_amount: number;
   category: ExpenseCategory;
   date: string;
+  credit_due_date?: string | null;
   status: ExpenseStatus;
   document_type: DocumentType;
   document_number?: string;

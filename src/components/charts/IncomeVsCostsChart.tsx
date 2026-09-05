@@ -7,6 +7,17 @@ interface IncomeVsCostsChartProps {
   totalMargin: number;
 }
 
+interface ChartTooltipEntry {
+  name?: string;
+  value: number;
+  payload: { color: string };
+}
+
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: ChartTooltipEntry[];
+}
+
 export function IncomeVsCostsChart({ totalSales, totalCosts, totalMargin }: IncomeVsCostsChartProps) {
   const data = [
     {
@@ -31,7 +42,7 @@ export function IncomeVsCostsChart({ totalSales, totalCosts, totalMargin }: Inco
 
   const marginPercent = totalSales > 0 ? ((totalMargin / totalSales) * 100).toFixed(1) : '0';
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0];
       return (

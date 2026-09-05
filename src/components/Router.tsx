@@ -3,6 +3,8 @@ import { Dashboard } from '../pages/Dashboard';
 import { Projects } from '../pages/Projects';
 import { ProjectDetailBeta } from '../pages/ProjectDetailBeta';
 import { Settings } from '../pages/Settings';
+import { Expenses } from '../pages/Expenses';
+import { ResetPassword } from '../pages/ResetPassword';
 
 export function Router() {
   const [currentPath, setCurrentPath] = useState('/dashboard');
@@ -43,8 +45,12 @@ export function Router() {
         return <Dashboard />;
       case '/projects':
         return <Projects />;
+      case '/expenses':
+        return <Expenses />;
       case '/settings':
         return <Settings />;
+      case '/reset-password':
+        return <ResetPassword />;
       default:
         return <Dashboard />;
     }

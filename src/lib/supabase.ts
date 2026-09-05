@@ -1,21 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Variables de entorno para Supabase
-// Compatible con Vite (desarrollo) y Next.js/Vercel (producción)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_SUPABASE_URL : undefined);
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined);
-
-// DEBUG: Log temporal para verificar qué URL está usando
-console.log('🔍 SUPABASE DEBUG:', {
-  url: supabaseUrl,
-  environment: import.meta.env.MODE || (typeof process !== 'undefined' ? process.env.NODE_ENV : 'unknown'),
-  isStaging: supabaseUrl?.includes('lkqjqvzddqsvgyxkvjcf'),
-  hasViteEnv: !!import.meta.env.VITE_SUPABASE_URL,
-  hasNextEnv: typeof process !== 'undefined' ? !!process.env.NEXT_PUBLIC_SUPABASE_URL : false
-});
+// Variables de entorno de Vite para Supabase.
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (desarrollo) or NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (producción)');
+  throw new Error('Faltan VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY');
 }
 
 // Cliente de Supabase con configuración optimizada
@@ -54,6 +44,55 @@ export const getCurrentUserId = async (): Promise<string | null> => {
 };
 
 // Storage helpers
+export const getStoragePath = (storedPathOrUrl: string): string => {
+  let decoded = storedPathOrUrl;
+  try {
+    decoded = decodeURIComponent(storedPathOrUrl);
+  } catch {
+    // Mantener el valor original si una URL histórica contiene un '%' inválido.
+  }
+  const markers = [
+    '/storage/v1/object/public/receipts/',
+    '/storage/v1/object/sign/receipts/',
+  ];
+
+  for (const marker of markers) {
+    const markerIndex = decoded.indexOf(marker);
+    if (markerIndex >= 0) {
+      return decoded.substring(markerIndex + marker.length).split('?')[0];
+    }
+  }
+
+  return decoded.replace(/^\/+/, '').split('?')[0];
+};
+
+export const getSignedStorageUrl = async (storedPathOrUrl: string): Promise<string> => {
+  const filePath = getStoragePath(storedPathOrUrl);
+  const { data, error } = await supabase.storage
+    .from('receipts')
+    .createSignedUrl(filePath, 60);
+
+  if (error) throw error;
+  return data.signedUrl;
+};
+
+export const openStorageFile = async (storedPathOrUrl: string): Promise<void> => {
+  const previewWindow = window.open('about:blank', '_blank');
+
+  try {
+    const signedUrl = await getSignedStorageUrl(storedPathOrUrl);
+    if (previewWindow) {
+      previewWindow.opener = null;
+      previewWindow.location.href = signedUrl;
+    } else {
+      window.open(signedUrl, '_blank', 'noopener,noreferrer');
+    }
+  } catch (error) {
+    previewWindow?.close();
+    window.alert(error instanceof Error ? error.message : 'No se pudo abrir el archivo');
+  }
+};
+
 export const uploadReceipt = async (file: File, projectId: string, expenseId: string) => {
   const fileExt = file.name.split('.').pop();
   const fileName = `${expenseId}_${Date.now()}.${fileExt}`;
@@ -65,22 +104,17 @@ export const uploadReceipt = async (file: File, projectId: string, expenseId: st
 
   if (error) throw error;
 
-  // Obtener URL pública
-  const { data: { publicUrl } } = supabase.storage
-    .from('receipts')
-    .getPublicUrl(filePath);
-
   return {
     path: data.path,
-    url: publicUrl,
+    url: data.path,
     filename: file.name
   };
 };
 
-export const deleteReceipt = async (filePath: string) => {
+export const deleteReceipt = async (storedPathOrUrl: string) => {
   const { error } = await supabase.storage
     .from('receipts')
-    .remove([filePath]);
+    .remove([getStoragePath(storedPathOrUrl)]);
 
   if (error) throw error;
 };
@@ -100,16 +134,12 @@ export const uploadProjectDocument = async (
 
   if (error) throw error;
 
-  const { data: { publicUrl } } = supabase.storage
-    .from('receipts')
-    .getPublicUrl(filePath);
-
-  return { path: data.path, url: publicUrl, filename: file.name };
+  return { path: data.path, url: data.path, filename: file.name };
 };
 
-export const deleteProjectDocument = async (filePath: string) => {
+export const deleteProjectDocument = async (storedPathOrUrl: string) => {
   const { error } = await supabase.storage
     .from('receipts')
-    .remove([filePath]);
+    .remove([getStoragePath(storedPathOrUrl)]);
   if (error) throw error;
 };

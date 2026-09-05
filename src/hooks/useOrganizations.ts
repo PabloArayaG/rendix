@@ -1,24 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase, getCurrentUserId } from '../lib/supabase';
-import { OrganizationWithRole } from '../types/database';
+import { OrganizationRole, OrganizationWithRole } from '../types/database';
+
+interface OrganizationRpcRow {
+  org_id: string;
+  org_name: string;
+  org_slug: string;
+  user_role: OrganizationRole;
+  is_owner: boolean;
+}
 
 export const useOrganizations = () => {
   const [organizations, setOrganizations] = useState<OrganizationWithRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchOrganizations = async () => {
+  const fetchOrganizations = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
       const userId = await getCurrentUserId();
       if (!userId) {
-        console.log('No user ID found');
         throw new Error('Usuario no autenticado');
       }
-
-      console.log('Fetching organizations for user:', userId);
 
       // Usar función RPC que sabemos que funciona
       const { data: orgsData, error: rpcError } = await supabase
@@ -29,16 +34,13 @@ export const useOrganizations = () => {
         throw rpcError;
       }
 
-      console.log('Organizations from RPC:', orgsData);
-
       if (!orgsData || orgsData.length === 0) {
-        console.log('No organizations found for user');
         setOrganizations([]);
         return;
       }
 
       // Mapear al formato esperado
-      const orgsWithRole: OrganizationWithRole[] = orgsData.map((org: any) => ({
+      const orgsWithRole: OrganizationWithRole[] = (orgsData as OrganizationRpcRow[]).map(org => ({
         id: org.org_id,
         name: org.org_name,
         slug: org.org_slug,
@@ -47,11 +49,10 @@ export const useOrganizations = () => {
         is_owner: org.is_owner,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        logo_url: null,
+        logo_url: undefined,
         settings: {}
       }));
 
-      console.log('Organizations with roles:', orgsWithRole);
       setOrganizations(orgsWithRole);
     } catch (err) {
       console.error('Error in fetchOrganizations:', err);
@@ -59,11 +60,11 @@ export const useOrganizations = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchOrganizations();
-  }, []);
+  }, [fetchOrganizations]);
 
   return {
     organizations,

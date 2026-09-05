@@ -109,12 +109,12 @@ La app usa navegacion por **hash** (`window.location.hash`), sin libreria de rut
 | `#/dashboard` | `Dashboard` | Panel principal con KPIs y graficos |
 | `#/projects` | `Projects` | Listado de proyectos |
 | `#/projects/:id` | `ProjectDetail` | Detalle de un proyecto con sus gastos |
+| `#/expenses` | `Expenses` | Listado global, filtros y vencimientos de créditos |
 | `#/settings` | `Settings` | Configuracion de organizacion y miembros |
+| `#/reset-password` | `ResetPassword` | Establecer una nueva contraseña desde recuperación |
 | Cualquier otra | `Dashboard` | Fallback al dashboard |
 
-La barra lateral (Sidebar) muestra los enlaces a Dashboard, Proyectos y Configuracion.
-
-> **Nota:** Existe `src/pages/Expenses.tsx` (listado global de gastos) pero actualmente no esta registrada en el Router ni en el Sidebar.
+La barra lateral (Sidebar) muestra los enlaces a Dashboard, Proyectos, Gastos y Configuracion.
 
 ---
 
@@ -184,6 +184,7 @@ La app soporta multiples organizaciones por usuario.
 - Rendimiento financiero por proyecto
 - Ultimos 10 gastos con acceso rapido a edicion
 - Filtro por proyecto individual
+- Panel y campana de alertas para créditos vencidos o próximos a vencer
 
 ### Proyectos (`/projects`)
 
@@ -201,6 +202,13 @@ La app soporta multiples organizaciones por usuario.
 - Graficos: gastos por categoria y tendencia mensual (modo compacto)
 - CRUD completo de gastos desde el detalle
 - Edicion del proyecto
+
+### Gastos (`/expenses`)
+
+- Listado global con búsqueda y filtros por proyecto y categoría
+- Filtros para créditos, vencimientos dentro de 30 días y créditos vencidos
+- Alertas visuales por fecha de vencimiento
+- CRUD de gastos y acceso seguro a comprobantes
 
 ### Configuracion (`/settings`)
 
@@ -361,7 +369,7 @@ Constraint UNIQUE en (`organization_id`, `user_id`).
 ### Calculos Automaticos
 
 - `projected_margin = sale_amount - projected_cost`
-- `real_cost = SUM(expenses.amount)` por proyecto
+- `real_cost = SUM(expenses.net_amount)` por proyecto
 - `real_margin = sale_amount - real_cost`
 - Recalculo automatico via triggers al insertar/actualizar/eliminar gastos
 
@@ -444,7 +452,8 @@ Todos los graficos usan Recharts y soportan modo `compact` para vistas embebidas
 
 - Bucket: `receipts` en Supabase Storage
 - Ruta de archivos: `receipts/{projectId}/{expenseId}_{timestamp}.{ext}`
-- Operaciones: subida, descarga (URL publica), eliminacion
+- Operaciones: subida, visualización mediante URL firmada temporal y eliminacion
+- El bucket debe permanecer privado y autorizar por organización/proyecto
 - Validacion de tipo y tamano de archivo en frontend
 - Limpieza automatica al actualizar o eliminar gastos
 
@@ -472,22 +481,20 @@ VITE_SUPABASE_ANON_KEY=tu-anon-key
 ### Staging (Vercel Preview)
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://lkqjqvzddqsvgyxkvjcf.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
+VITE_SUPABASE_URL=https://tu-staging.supabase.co
+VITE_SUPABASE_ANON_KEY=tu-anon-key
 PUBLIC_APP_URL=https://staging.getrendix.com
 ```
 
 ### Produccion (Vercel Production)
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://rendix-prod.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
+VITE_SUPABASE_URL=https://tu-produccion.supabase.co
+VITE_SUPABASE_ANON_KEY=tu-anon-key
 PUBLIC_APP_URL=https://app.getrendix.com
 ```
 
-> **Nota:** El cliente Supabase en codigo soporta ambos prefijos (`VITE_*` para desarrollo local con Vite y `NEXT_PUBLIC_*` para Vercel).
+> **Nota:** El cliente Vite solo lee variables con prefijo `VITE_`. La service role nunca debe exponerse al frontend; se reserva para scripts administrativos ejecutados fuera del navegador.
 
 ---
 
@@ -539,13 +546,10 @@ Todos los archivos SQL estan en `/migrations/`:
 
 ## Pendientes Conocidos (TODO)
 
-- [ ] Ruta `#/expenses` no esta registrada en el Router ni en el Sidebar (el archivo `Expenses.tsx` existe)
-- [ ] Pantalla para establecer nueva contraseña tras el enlace de recuperacion (`#/reset-password`)
-- [ ] Verificar que los roles (admin, member, viewer) esten aplicados con RLS en BD, no solo en UI
+- [ ] Aplicar y verificar en Supabase online las migraciones descritas en `migrations/APPLY_PENDING_CHANGES.md`
+- [ ] Validar recuperación de contraseña con un enlace real cuando haya acceso de prueba
 - [ ] Menu "mas opciones" en tarjetas de proyecto (referenciado en codigo pero no implementado)
-- [ ] Exportacion a PDF/Excel (documentada pero no implementada)
-- [ ] Alinear convenciones de variables de entorno (`VITE_*` vs `NEXT_PUBLIC_*`)
-- [ ] El `package.json` aun tiene `name: "solid-pro"` en vez de `"rendix"`
+- [ ] Exportacion a Excel
 
 ---
 

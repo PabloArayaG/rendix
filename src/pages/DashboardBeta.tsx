@@ -26,6 +26,7 @@ import { getCategoryColor } from '../lib/categoryColors';
 import { ExpenseModal } from '../components/expenses/ExpenseModal';
 import { Expense } from '../types/database';
 import { IncomeVsCostsChart, MonthlyExpensesTrendChart, ExpensesByCategoryChart } from '../components/charts';
+import { openStorageFile } from '../lib/supabase';
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
 const CATEGORY_LABELS: Record<string, string> = {
@@ -118,7 +119,7 @@ export function DashboardBeta() {
       total_costs: project.real_cost,
       total_margin: project.real_margin,
       margin_percentage: project.sale_amount > 0 ? (project.real_margin / project.sale_amount) * 100 : 0,
-      recent_expenses: stats.recent_expenses.filter(e => (e as any).project_id === selectedProjectId),
+      recent_expenses: stats.recent_expenses.filter(e => e.project_id === selectedProjectId),
       topCategories: stats.topCategories,
     };
   }, [stats, selectedProjectId, projects]);
@@ -509,9 +510,9 @@ export function DashboardBeta() {
                     </span>
                   </div>
                   <div>
-                    {(expense as any).projects ? (
+                    {expense.projects ? (
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
-                        {(expense as any).projects.custom_id}
+                        {expense.projects.custom_id}
                       </span>
                     ) : <Minus className="h-3 w-3 text-gray-300" />}
                   </div>
@@ -529,7 +530,7 @@ export function DashboardBeta() {
                     </button>
                     {expense.receipt_url && (
                       <button
-                        onClick={() => window.open(expense.receipt_url!, '_blank')}
+                        onClick={() => { void openStorageFile(expense.receipt_url!); }}
                         className="p-1.5 text-gray-300 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                         title="Ver comprobante"
                       >

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, PieLabelRenderProps } from 'recharts';
 import { supabase, getCurrentUserId } from '../../lib/supabase';
 import { useAuthStore } from '../../store/authStore';
 import { formatCurrency } from '../../lib/utils';
-import { TimeRangeSelector, TimeRange, getDaysFromRange } from './TimeRangeSelector';
+import { TimeRangeSelector } from './TimeRangeSelector';
+import { TimeRange, getDaysFromRange } from '../../lib/timeRanges';
 import { EXPENSE_CATEGORIES } from '../../types/database';
 import { getCategoryChartColor } from '../../lib/categoryColors';
 
@@ -67,7 +68,7 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
         const sortedData = Object.entries(categoryMap || {})
           .map(([category, value]) => ({
             category,
-            name: EXPENSE_CATEGORIES.find((c: any) => c.value === category)?.label || 'Sin categoría',
+            name: EXPENSE_CATEGORIES.find(c => c.value === category)?.label || 'Sin categoría',
             value,
           }))
           .sort((a, b) => b.value - a.value);
@@ -105,13 +106,15 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={compact ? false : (props: any) => {
+                label={compact ? false : (props: PieLabelRenderProps) => {
                   const { cx, cy, midAngle, outerRadius, name, percent } = props;
-                  if (!midAngle) return null;
+                  if (midAngle === undefined) return null;
                   const RADIAN = Math.PI / 180;
-                  const radius = outerRadius + 25;
-                  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                  const centerX = Number(cx);
+                  const centerY = Number(cy);
+                  const radius = Number(outerRadius) + 25;
+                  const x = centerX + radius * Math.cos(-midAngle * RADIAN);
+                  const y = centerY + radius * Math.sin(-midAngle * RADIAN);
                   
                   return (
                     <text 
@@ -119,10 +122,10 @@ export function ExpensesByCategoryChart({ projectId, compact = false }: Expenses
                       y={y} 
                       fill="currentColor" 
                       className="text-gray-900 dark:text-gray-200 text-[11px] font-medium"
-                      textAnchor={x > cx ? 'start' : 'end'} 
+                      textAnchor={x > centerX ? 'start' : 'end'}
                       dominantBaseline="central"
                     >
-                      {`${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                      {`${String(name)}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
                     </text>
                   );
                 }}

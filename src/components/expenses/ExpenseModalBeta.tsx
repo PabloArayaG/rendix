@@ -14,6 +14,7 @@ import {
 } from '../../types/database';
 import { formatCurrency, formatDateForInput, normalizeExpenseData } from '../../lib/utils';
 import { getCategoryColor } from '../../lib/categoryColors';
+import { openStorageFile } from '../../lib/supabase';
 
 /* ── Constantes ─────────────────────────────────────────────────────────── */
 const MAX_AMOUNT = 9999999999999.99;
@@ -27,12 +28,29 @@ const expenseSchema = z.object({
   amount:          z.number().min(MIN_AMOUNT).max(MAX_AMOUNT),
   category:        z.string().min(1, 'La categoría es requerida'),
   date:            z.string().min(1, 'La fecha es requerida'),
+  credit_due_date: z.string().optional(),
   status:          z.enum(['provision', 'paid', 'credit', 'advance']),
   document_type:   z.enum(['boleta', 'factura']),
   document_number: z.string().optional(),
   supplier:        z.string().optional(),
   invoice_number:  z.string().optional(),
   notes:           z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.status === 'credit' && !data.credit_due_date) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['credit_due_date'],
+      message: 'La fecha de vencimiento es requerida para un crédito',
+    });
+  }
+
+  if (data.status === 'credit' && data.credit_due_date && data.credit_due_date < data.date) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['credit_due_date'],
+      message: 'El vencimiento no puede ser anterior a la fecha del gasto',
+    });
+  }
 });
 
 type ExpenseFormData = z.infer<typeof expenseSchema>;
@@ -101,6 +119,7 @@ export function ExpenseModalBeta({ isOpen, onClose, expense, onSuccess, defaultP
         project_id: defaultProjectId || '',
         description: '', net_amount: 0, tax_amount: 0, amount: 0,
         category: 'general', date: formatDateForInput(new Date()),
+        credit_due_date: '',
         status: 'provision', document_type: 'boleta',
         document_number: '', supplier: '', invoice_number: '', notes: '',
       },
@@ -146,6 +165,7 @@ export function ExpenseModalBeta({ isOpen, onClose, expense, onSuccess, defaultP
         project_id: expense.project_id, description: expense.description,
         net_amount: net, tax_amount: tax, amount: expense.amount,
         category: expense.category, date: formatDateForInput(expense.date),
+        credit_due_date: expense.credit_due_date ? formatDateForInput(expense.credit_due_date) : '',
         status: expense.status || 'provision', document_type: expense.document_type || 'boleta',
         document_number: expense.document_number || '', supplier: expense.supplier || '',
         invoice_number: expense.invoice_number || '', notes: expense.notes || '',
@@ -154,7 +174,7 @@ export function ExpenseModalBeta({ isOpen, onClose, expense, onSuccess, defaultP
       reset({
         project_id: defaultProjectId || '', description: '',
         net_amount: 0, tax_amount: 0, amount: 0, category: 'general',
-        date: formatDateForInput(new Date()), status: 'provision',
+        date: formatDateForInput(new Date()), credit_due_date: '', status: 'provision',
         document_type: 'boleta', document_number: '', supplier: '',
         invoice_number: '', notes: '',
       });
@@ -172,8 +192,9 @@ export function ExpenseModalBeta({ isOpen, onClose, expense, onSuccess, defaultP
         project_id: data.project_id, description: data.description,
         net_amount: data.net_amount, tax_amount: data.tax_amount,
         amount: data.amount,
-        category: data.category as any, date: data.date,
-        status: data.status as any, document_type: data.document_type as any,
+        category: data.category as CreateExpenseDTO['category'], date: data.date,
+        credit_due_date: data.status === 'credit' ? data.credit_due_date : null,
+        status: data.status, document_type: data.document_type,
         document_number: data.document_number || undefined,
         supplier: data.supplier || undefined,
         invoice_number: data.invoice_number || undefined,
@@ -529,6 +550,23 @@ export function ExpenseModalBeta({ isOpen, onClose, expense, onSuccess, defaultP
                     <FieldError msg={errors.status?.message} />
                   </div>
 
+                  {status === 'credit' && (
+                    <div className="rounded-xl border border-orange-200 dark:border-orange-800 bg-orange-50/60 dark:bg-orange-900/10 p-3">
+                      <label className="block text-xs font-semibold text-orange-700 dark:text-orange-300 uppercase tracking-wide mb-1.5">
+                        <Calendar className="inline h-3.5 w-3.5 mr-1" />
+                        Vencimiento del crédito *
+                      </label>
+                      <input
+                        {...register('credit_due_date')}
+                        type="date"
+                        min={watchAll.date}
+                        className={inputCls(!!errors.credit_due_date)}
+                      />
+                      <FieldError msg={errors.credit_due_date?.message} />
+                      <p className="mt-1.5 text-xs text-orange-600 dark:text-orange-400">Se avisará desde 30 días antes del vencimiento.</p>
+                    </div>
+                  )}
+
                   {/* Proveedor */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Proveedor</label>
@@ -617,7 +655,7 @@ export function ExpenseModalBeta({ isOpen, onClose, expense, onSuccess, defaultP
                           <FileText className="h-4 w-4 shrink-0" />
                           <span className="truncate">Actual: {expense.receipt_filename}</span>
                         </div>
-                        <button type="button" onClick={() => window.open(expense.receipt_url!, '_blank')} className="text-blue-500 text-xs underline">Ver</button>
+                        <button type="button" onClick={() => { void openStorageFile(expense.receipt_url!); }} className="text-blue-500 text-xs underline">Ver</button>
                       </div>
                     )}
                   </div>

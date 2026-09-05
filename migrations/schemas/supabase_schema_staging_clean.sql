@@ -63,6 +63,7 @@ CREATE TABLE expenses (
     tax_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00 CHECK (tax_amount >= 0),
     category VARCHAR(100) DEFAULT 'general',
     date DATE NOT NULL DEFAULT CURRENT_DATE,
+    credit_due_date DATE,
     
     -- Información adicional (TIPOS CORRECTOS)
     status VARCHAR(50) DEFAULT 'provision' CHECK (status IN ('provision', 'paid', 'credit', 'advance')),
@@ -281,7 +282,7 @@ CREATE POLICY "Users can delete their own expenses" ON expenses
 
 -- 13. CONFIGURAR STORAGE
 INSERT INTO storage.buckets (id, name, public) 
-VALUES ('receipts', 'receipts', true)
+VALUES ('receipts', 'receipts', false)
 ON CONFLICT (id) DO NOTHING;
 
 -- Políticas de storage (eliminar existentes primero)

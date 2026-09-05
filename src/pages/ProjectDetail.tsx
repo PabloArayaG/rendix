@@ -20,8 +20,9 @@ import { ExpensesByCategoryChart } from '../components/charts/ExpensesByCategory
 import { MonthlyExpensesTrendChart } from '../components/charts/MonthlyExpensesTrendChart';
 import { useProject } from '../hooks/useProjects';
 import { useExpenses } from '../hooks/useExpenses';
-import { EXPENSE_CATEGORIES, EXPENSE_STATUSES } from '../types/database';
+import { Expense, EXPENSE_CATEGORIES, EXPENSE_STATUSES } from '../types/database';
 import { getCategoryColor } from '../lib/categoryColors';
+import { openStorageFile } from '../lib/supabase';
 import { 
   formatCurrency, 
   formatShortDate, 
@@ -41,11 +42,11 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEditExpenseModal, setShowEditExpenseModal] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState<any>(undefined);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [expenseToDelete, setExpenseToDelete] = useState<any>(null);
+  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Filtrar gastos
@@ -75,7 +76,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
     return stat?.label || status;
   };
 
-  const handleEditExpense = (expense: any) => {
+  const handleEditExpense = (expense: Expense) => {
     setSelectedExpense(expense);
     setShowEditExpenseModal(true);
   };
@@ -85,7 +86,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
     setShowEditExpenseModal(false);
   };
 
-  const handleDeleteClick = (expense: any) => {
+  const handleDeleteClick = (expense: Expense) => {
     setExpenseToDelete(expense);
     setShowDeleteConfirm(true);
   };
@@ -487,7 +488,7 @@ export function ProjectDetail({ projectId, onBack }: ProjectDetailProps) {
                       {expense.receipt_url && (
                         <div className="flex items-center ml-4">
                           <button
-                            onClick={() => window.open(expense.receipt_url, '_blank')}
+                            onClick={() => { void openStorageFile(expense.receipt_url!); }}
                             className="text-gray-400 dark:text-gray-500 hover:text-blue-800 transition-colors p-1 rounded-md hover:bg-blue-50"
                             title="Ver comprobante"
                           >

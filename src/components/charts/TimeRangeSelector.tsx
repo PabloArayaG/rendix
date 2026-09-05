@@ -1,6 +1,5 @@
 import { Calendar } from 'lucide-react';
-
-export type TimeRange = '7days' | '30days' | '3months' | '6months' | '12months' | 'custom';
+import { TimeRange } from '../../lib/timeRanges';
 
 interface TimeRangeSelectorProps {
   selected: TimeRange;
@@ -20,7 +19,7 @@ const timeRangeLabels: Record<TimeRange, string> = {
 const timeRangeOptions: TimeRange[] = ['7days', '30days', '3months', '6months', '12months'];
 
 export function TimeRangeSelector({ selected, onChange, showCustom = false }: TimeRangeSelectorProps) {
-  const options: TimeRange[] = showCustom ? [...timeRangeOptions, 'custom' as TimeRange] : timeRangeOptions;
+  const options: TimeRange[] = showCustom ? [...timeRangeOptions, 'custom'] : timeRangeOptions;
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
@@ -48,39 +47,5 @@ export function TimeRangeSelector({ selected, onChange, showCustom = false }: Ti
       </div>
     </div>
   );
-}
-
-export function getMonthsFromRange(range: TimeRange): number {
-  switch (range) {
-    case '7days':
-      return 0.25; // ~1 semana
-    case '30days':
-      return 1;
-    case '3months':
-      return 3;
-    case '6months':
-      return 6;
-    case '12months':
-      return 12;
-    default:
-      return 6;
-  }
-}
-
-export function getDaysFromRange(range: TimeRange): number {
-  switch (range) {
-    case '7days':
-      return 7;
-    case '30days':
-      return 30;
-    case '3months':
-      return 90;
-    case '6months':
-      return 180;
-    case '12months':
-      return 365;
-    default:
-      return 180;
-  }
 }
 

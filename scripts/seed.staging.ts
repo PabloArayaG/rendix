@@ -6,6 +6,10 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+interface IdentifiedRecord {
+  id: string;
+}
+
 // Configuración para staging
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -194,7 +198,7 @@ async function createUsers() {
   return createdUsers;
 }
 
-async function createProjects(users: any[]) {
+async function createProjects(users: IdentifiedRecord[]) {
   console.log('🏗️ Creando proyectos dummy...');
   
   const createdProjects = [];
@@ -228,7 +232,7 @@ async function createProjects(users: any[]) {
   return createdProjects;
 }
 
-async function createExpenses(projects: any[], users: any[]) {
+async function createExpenses(projects: IdentifiedRecord[], users: IdentifiedRecord[]) {
   console.log('💰 Creando gastos dummy...');
   
   let expenseIndex = 0;
@@ -245,7 +249,7 @@ async function createExpenses(projects: any[], users: any[]) {
       
       const expenseData = DUMMY_EXPENSES[expenseIndex];
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('expenses')
         .insert({
           ...expenseData,
@@ -253,9 +257,7 @@ async function createExpenses(projects: any[], users: any[]) {
           user_id: user.id,
           tags: [],
           metadata: {}
-        })
-        .select()
-        .single();
+        });
       
       if (error) {
         console.error(`❌ Error creando gasto ${expenseData.description}:`, error.message);

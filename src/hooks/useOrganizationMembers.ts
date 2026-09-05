@@ -12,6 +12,20 @@ export interface OrganizationMemberWithUser {
   user_email: string;
 }
 
+interface OrganizationMemberRpcRow {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  role: OrganizationRole;
+  joined_at: string;
+  user_email?: string;
+}
+
+interface UserEmailRpcRow {
+  user_id: string;
+  email: string;
+}
+
 export const useOrganizationMembers = () => {
   const [members, setMembers] = useState<OrganizationMemberWithUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,7 +65,7 @@ export const useOrganizationMembers = () => {
         .rpc('get_organization_members_with_emails', { org_id: activeOrganizationId });
 
       if (!rpcError && membersWithEmails) {
-        const finalMembers: OrganizationMemberWithUser[] = membersWithEmails.map((m: any) => ({
+        const finalMembers: OrganizationMemberWithUser[] = (membersWithEmails as OrganizationMemberRpcRow[]).map(m => ({
           id: m.id,
           organization_id: m.organization_id,
           user_id: m.user_id,
@@ -71,7 +85,7 @@ export const useOrganizationMembers = () => {
 
           if (!emailsError && emailsData) {
             const emailMap = new Map(
-              emailsData.map((e: any) => [e.user_id, e.email])
+              (emailsData as UserEmailRpcRow[]).map(e => [e.user_id, e.email])
             );
             
             const finalMembers: OrganizationMemberWithUser[] = (data || []).map(member => {
@@ -124,7 +138,10 @@ export const useOrganizationMembers = () => {
 
       // Buscar el user_id del email usando una función RPC
       const { data: userData, error: userError } = await supabase
-        .rpc('get_user_id_by_email', { user_email: email });
+        .rpc('get_user_id_by_email', {
+          user_email: email,
+          org_id: activeOrganizationId,
+        });
 
       if (userError) {
         throw new Error('Error al buscar usuario: ' + userError.message);

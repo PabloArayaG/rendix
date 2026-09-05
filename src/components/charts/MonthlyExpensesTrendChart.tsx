@@ -3,12 +3,23 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useAuthStore } from '../../store/authStore';
 import { supabase, getCurrentUserId } from '../../lib/supabase';
 import { formatCurrency } from '../../lib/utils';
-import { TimeRangeSelector, TimeRange, getMonthsFromRange } from './TimeRangeSelector';
+import { TimeRangeSelector } from './TimeRangeSelector';
+import { TimeRange, getMonthsFromRange } from '../../lib/timeRanges';
 
 interface MonthlyData {
   month: string;
   total: number;
   expenses: number;
+}
+
+interface MonthlyAccumulator {
+  total: number;
+  expenses: number;
+}
+
+interface ExpenseRow {
+  net_amount: number;
+  date: string;
 }
 
 interface MonthlyExpensesTrendChartProps {
@@ -38,7 +49,7 @@ export function MonthlyExpensesTrendChart({ projectId, compact = false }: Monthl
 
         let query = supabase
           .from('expenses')
-          .select('amount, date')
+          .select('net_amount, date')
           .eq('organization_id', activeOrganizationId)
           .gte('date', startDate.toISOString().split('T')[0])
           .order('date');
@@ -51,24 +62,24 @@ export function MonthlyExpensesTrendChart({ projectId, compact = false }: Monthl
         if (error) throw error;
 
         // Agrupar por mes
-        const monthlyMap = (expenses || []).reduce((acc: any, expense: any) => {
+        const monthlyMap = ((expenses || []) as ExpenseRow[]).reduce((acc, expense) => {
           const month = expense.date.substring(0, 7);
           if (!acc[month]) {
             acc[month] = { total: 0, expenses: 0 };
           }
-          acc[month].total += expense.amount;
+          acc[month].total += expense.net_amount || 0;
           acc[month].expenses += 1;
           return acc;
-        }, {});
+        }, {} as Record<string, MonthlyAccumulator>);
 
-        const monthlyData = Object.entries(monthlyMap).map(([month, data]: [string, any]) => ({
+        const monthlyData = Object.entries(monthlyMap).map(([month, monthData]) => ({
           month,
-          total: data.total,
-          expenses: data.expenses,
+          total: monthData.total,
+          expenses: monthData.expenses,
         }));
         
         // Formatear datos para el gráfico
-        const formattedData = monthlyData.map((item: any) => ({
+        const formattedData = monthlyData.map(item => ({
           month: formatMonthLabel(item.month),
           total: item.total,
           expenses: item.expenses,
@@ -83,7 +94,7 @@ export function MonthlyExpensesTrendChart({ projectId, compact = false }: Monthl
     };
 
     fetchMonthlyData();
-  }, [activeOrganizationId, timeRange]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeOrganizationId, timeRange, projectId, compact]);
 
   const formatMonthLabel = (monthStr: string) => {
     const [year, month] = monthStr.split('-');
@@ -128,7 +139,7 @@ export function MonthlyExpensesTrendChart({ projectId, compact = false }: Monthl
           strokeWidth={2}
           dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
           activeDot={{ r: 6 }}
-          name="Gastos Totales"
+          name="Gastos Netos"
         />
       </LineChart>
     </ResponsiveContainer>
