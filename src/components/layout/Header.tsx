@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Bell, CalendarClock, HelpCircle, Loader2, User } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useCreditAlerts } from '../../hooks/useCreditAlerts';
@@ -17,55 +17,12 @@ interface HeaderProps {
   subtitle?: string;
 }
 
-const getCreditAlertFingerprint = (credit: Parameters<typeof getCreditAlertStatus>[0] & { id: string }) => {
-  const alert = getCreditAlertStatus(credit);
-  return `${credit.id}:${credit.credit_due_date || 'missing'}:${alert?.level || 'none'}`;
-};
-
-const readSeenAlerts = (storageKey: string | null): string[] => {
-  if (!storageKey) return [];
-
-  try {
-    const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    return Array.isArray(stored) ? stored.filter(value => typeof value === 'string') : [];
-  } catch {
-    return [];
-  }
-};
-
 export function Header({ title, subtitle }: HeaderProps) {
-  const { user, activeOrganizationId } = useAuthStore();
+  const { user } = useAuthStore();
   const { actionable, loading: loadingCredits, error: creditsError, refetch } = useCreditAlerts();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [seenAlertFingerprints, setSeenAlertFingerprints] = useState<string[]>([]);
   const notificationsRef = useRef<HTMLDivElement>(null);
-
-  const notificationStorageKey = useMemo(() => {
-    if (!user?.id || !activeOrganizationId) return null;
-    return `rendix:credit-alerts-seen:${user.id}:${activeOrganizationId}`;
-  }, [activeOrganizationId, user?.id]);
-
-  const actionableFingerprints = useMemo(
-    () => actionable.map(getCreditAlertFingerprint),
-    [actionable],
-  );
-
-  const unreadCount = useMemo(() => {
-    const seen = new Set(seenAlertFingerprints);
-    return actionableFingerprints.filter(fingerprint => !seen.has(fingerprint)).length;
-  }, [actionableFingerprints, seenAlertFingerprints]);
-
-  useEffect(() => {
-    setSeenAlertFingerprints(readSeenAlerts(notificationStorageKey));
-    setNotificationsOpen(false);
-  }, [notificationStorageKey]);
-
-  useEffect(() => {
-    if (!notificationsOpen || loadingCredits || creditsError || !notificationStorageKey) return;
-
-    setSeenAlertFingerprints(actionableFingerprints);
-    localStorage.setItem(notificationStorageKey, JSON.stringify(actionableFingerprints));
-  }, [actionableFingerprints, creditsError, loadingCredits, notificationStorageKey, notificationsOpen]);
+  const notificationCount = actionable.length;
 
   useEffect(() => {
     if (!notificationsOpen) return;
@@ -125,7 +82,7 @@ export function Header({ title, subtitle }: HeaderProps) {
             <button
               type="button"
               onClick={toggleNotifications}
-              aria-label={`Notificaciones de créditos${unreadCount ? `: ${unreadCount} nuevas` : ''}`}
+              aria-label={`Notificaciones de créditos${notificationCount ? `: ${notificationCount} activas` : ''}`}
               aria-expanded={notificationsOpen}
               className={`relative p-2 rounded-full transition-colors ${
                 notificationsOpen
@@ -134,9 +91,9 @@ export function Header({ title, subtitle }: HeaderProps) {
               }`}
             >
               <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
+              {notificationCount > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-gray-950">
-                  {unreadCount > 99 ? '99+' : unreadCount}
+                  {notificationCount > 99 ? '99+' : notificationCount}
                 </span>
               )}
             </button>
