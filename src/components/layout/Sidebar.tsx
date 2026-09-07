@@ -7,6 +7,7 @@ import {
   Menu,
   X,
   Building2,
+  Receipt,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
@@ -29,6 +30,12 @@ const sidebarItems: SidebarItem[] = [
     label: 'Proyectos',
     icon: FolderOpen,
     href: '/projects',
+  },
+  {
+    id: 'expenses',
+    label: 'Gastos',
+    icon: Receipt,
+    href: '/expenses',
   },
 ];
 

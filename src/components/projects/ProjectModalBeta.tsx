@@ -8,12 +8,13 @@ import {
   Upload, ExternalLink
 } from 'lucide-react';
 import { useProjects, ProjectDocumentFiles } from '../../hooks/useProjects';
-import { Project, CreateProjectDTO, PROJECT_STATUSES } from '../../types/database';
+import { Project, CreateProjectDTO, UpdateProjectDTO, PROJECT_STATUSES } from '../../types/database';
 import { formatCurrency, formatDateForInput, parseInputDate, getMarginColor } from '../../lib/utils';
+import { openStorageFile } from '../../lib/supabase';
 
 /* ─── Schema ────────────────────────────────────────────────────────────── */
 const projectSchema = z.object({
-  custom_id:      z.string().min(1, 'El ID es requerido').max(50).regex(/^[A-Za-z0-9\-_\.]+$/, 'Solo letras, números, guiones y puntos'),
+  custom_id:      z.string().min(1, 'El ID es requerido').max(50).regex(/^[A-Za-z0-9_.-]+$/, 'Solo letras, números, guiones y puntos'),
   name:           z.string().min(1, 'El nombre es requerido'),
   description:    z.string().optional(),
   client:         z.string().min(1, 'El cliente es requerido'),
@@ -150,8 +151,10 @@ export function ProjectModalBeta({ isOpen, onClose, project, onSuccess }: Projec
         purchase_order: data.purchase_order || undefined, hes: data.hes || undefined,
         sale_invoice: data.sale_invoice || undefined, notes: data.notes || undefined, tags: [],
       };
-      if (project && data.status) (projectData as any).status = data.status;
-      if (project) await updateProject(project.id, projectData, docFiles);
+      if (project) {
+        const updateData: UpdateProjectDTO = { ...projectData, status: data.status };
+        await updateProject(project.id, updateData, docFiles);
+      }
       else await createProject(projectData, docFiles);
       onSuccess?.();
     } catch (err) {
@@ -577,7 +580,7 @@ export function ProjectModalBeta({ isOpen, onClose, project, onSuccess }: Projec
                             <span className="truncate">{existingFilename || 'Archivo adjunto'}</span>
                           </div>
                           <div className="flex items-center gap-1 shrink-0 ml-2">
-                            <button type="button" onClick={() => window.open(existingUrl, '_blank')}
+                            <button type="button" onClick={() => { void openStorageFile(existingUrl); }}
                               className="text-blue-500 hover:text-blue-700 transition-colors p-1" title="Ver archivo">
                               <ExternalLink className="h-3.5 w-3.5" />
                             </button>

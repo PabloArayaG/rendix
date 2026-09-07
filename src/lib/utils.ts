@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { CreateExpenseDTO } from '../types/database';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -75,7 +76,6 @@ export const parseInputDate = (dateString: string): string => {
   // Validar que el formato sea correcto y normalizar
   const date = new Date(dateString);
   if (isNaN(date.getTime())) {
-    console.error('🔍 FECHA INVÁLIDA:', dateString);
     return '';
   }
   // Devolver en formato ISO (YYYY-MM-DD)
@@ -96,21 +96,17 @@ export const normalizeNumber = (value: number | string): number => {
     const parsed = parseFloat(normalized);
     
     if (isNaN(parsed)) {
-      console.error('🔍 NÚMERO INVÁLIDO:', value, '-> normalizado:', normalized);
       return 0;
     }
     
     return Number(parsed.toFixed(2));
   }
   
-  console.error('🔍 VALOR NO NUMÉRICO:', value);
   return 0;
 };
 
 // Función para validar y normalizar datos de gasto antes del envío
-export const normalizeExpenseData = (data: any) => {
-  console.log('🔍 DATOS ORIGINALES:', data);
-  
+export const normalizeExpenseData = (data: CreateExpenseDTO): CreateExpenseDTO => {
   // Verificar si los números están dentro de los límites de DECIMAL(15,2)
   const MAX_AMOUNT = 9999999999999.99;
   const net_amount = normalizeNumber(data.net_amount);
@@ -128,28 +124,17 @@ export const normalizeExpenseData = (data: any) => {
     throw new Error(`El monto total ($${amount.toLocaleString()}) excede el límite máximo permitido`);
   }
   
-  const normalized = {
+  return {
     ...data,
     net_amount,
     tax_amount,
     amount,
     date: parseInputDate(data.date),
-    // Asegurar que campos opcionales sean null en lugar de undefined
-    document_number: data.document_number || null,
-    supplier: data.supplier || null,
-    invoice_number: data.invoice_number || null,
-    notes: data.notes || null,
+    document_number: data.document_number || undefined,
+    supplier: data.supplier || undefined,
+    invoice_number: data.invoice_number || undefined,
+    notes: data.notes || undefined,
   };
-  
-  console.log('🔍 DATOS NORMALIZADOS:', normalized);
-  console.log('🔍 VALIDACIÓN LÍMITES:', {
-    net_amount_ok: net_amount <= MAX_AMOUNT,
-    tax_amount_ok: tax_amount <= MAX_AMOUNT,
-    amount_ok: amount <= MAX_AMOUNT,
-    max_allowed: MAX_AMOUNT,
-  });
-  
-  return normalized;
 };
 
 export const formatDateTime = (date: string | Date): string => {
@@ -232,15 +217,15 @@ export const generateColors = (count: number): string[] => {
 };
 
 // Utilidad para debounce
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: never[]) => unknown>(
   func: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {
-  let timeoutId: NodeJS.Timeout;
+  let timeoutId: ReturnType<typeof setTimeout>;
   
   return (...args: Parameters<T>) => {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(null, args), delay);
+    timeoutId = setTimeout(() => func(...args), delay);
   };
 };
 

@@ -54,6 +54,7 @@ CREATE TABLE expenses (
     amount DECIMAL(10, 2) NOT NULL CHECK (amount > 0),
     category VARCHAR(100) DEFAULT 'general',
     date DATE NOT NULL DEFAULT CURRENT_DATE,
+    credit_due_date DATE,
     
     -- Información adicional
     notes TEXT,
@@ -246,7 +247,7 @@ CREATE POLICY "Users can delete their own expenses" ON expenses
     FOR DELETE USING (auth.uid()::text = user_id);
 
 -- Configurar Storage para comprobantes
-INSERT INTO storage.buckets (id, name, public) VALUES ('receipts', 'receipts', true);
+INSERT INTO storage.buckets (id, name, public) VALUES ('receipts', 'receipts', false);
 
 -- Política de storage para comprobantes
 CREATE POLICY "Users can upload their own receipts" ON storage.objects

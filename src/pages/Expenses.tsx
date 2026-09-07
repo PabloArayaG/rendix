@@ -4,14 +4,18 @@ import {
   Search, 
   Receipt,
   Calendar,
+  CalendarClock,
   DollarSign,
   Tag,
+  FolderKanban,
+  CircleDollarSign,
+  Tags,
   Edit,
   Trash2
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { ExpenseModal } from '../components/expenses/ExpenseModal';
-import { ConfirmDialog } from '../components/ui';
+import { ConfirmDialog, SelectMenu } from '../components/ui';
 import { useExpenses } from '../hooks/useExpenses';
 import { useProjects } from '../hooks/useProjects';
 import { Expense } from '../types/database';
@@ -21,6 +25,10 @@ import {
   formatShortDate
 } from '../lib/utils';
 import { getCategoryColor } from '../lib/categoryColors';
+import { openStorageFile } from '../lib/supabase';
+import { getCreditAlertClasses, getCreditAlertStatus } from '../lib/creditAlerts';
+
+type CreditFilter = 'all' | 'credit' | 'due-soon' | 'overdue';
 
 export function Expenses() {
   const { expenses, loading, error, refetch, deleteExpense } = useExpenses();
@@ -28,6 +36,7 @@ export function Expenses() {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [projectFilter, setProjectFilter] = useState<string>('all');
+  const [creditFilter, setCreditFilter] = useState<CreditFilter>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>(undefined);
@@ -43,8 +52,13 @@ export function Expenses() {
     
     const matchesCategory = categoryFilter === 'all' || expense.category === categoryFilter;
     const matchesProject = projectFilter === 'all' || expense.project_id === projectFilter;
+    const creditAlert = getCreditAlertStatus(expense);
+    const matchesCredit = creditFilter === 'all'
+      || (creditFilter === 'credit' && expense.status === 'credit')
+      || (creditFilter === 'due-soon' && !!creditAlert && ['urgent', 'upcoming'].includes(creditAlert.level))
+      || (creditFilter === 'overdue' && creditAlert?.level === 'overdue');
     
-    return matchesSearch && matchesCategory && matchesProject;
+    return matchesSearch && matchesCategory && matchesProject && matchesCredit;
   });
 
   const getCategoryLabel = (category: string) => {
@@ -100,8 +114,11 @@ export function Expenses() {
     </span>
   );
 
-  const ExpenseCard = ({ expense }: { expense: Expense }) => (
-    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6 hover:shadow-md transition-shadow">
+  const ExpenseCard = ({ expense }: { expense: Expense }) => {
+    const creditAlert = getCreditAlertStatus(expense);
+
+    return (
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
@@ -170,12 +187,24 @@ export function Expenses() {
           </div>
           
           <div className="flex items-center justify-between">
-            <CategoryBadge category={expense.category} />
+            <div className="flex flex-wrap items-center gap-2">
+              <CategoryBadge category={expense.category} />
+              {creditAlert && (
+                <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full border ${getCreditAlertClasses(creditAlert.level)}`}>
+                  <CalendarClock className="h-3.5 w-3.5" />
+                  {creditAlert.label}
+                </span>
+              )}
+            </div>
             {expense.receipt_url && (
-              <div className="flex items-center text-sm text-blue-600">
+              <button
+                type="button"
+                onClick={() => { void openStorageFile(expense.receipt_url!); }}
+                className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+              >
                 <Receipt className="h-4 w-4 mr-1" />
-                Comprobante
-              </div>
+                Ver comprobante
+              </button>
             )}
           </div>
           
@@ -186,8 +215,9 @@ export function Expenses() {
           )}
         </div>
       </div>
-    </div>
-  );
+      </div>
+    );
+  };
 
   if (loading) {
     return (
@@ -209,7 +239,7 @@ export function Expenses() {
     );
   }
 
-  const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.net_amount, 0);
   const monthlyTotal = filteredExpenses
     .filter(expense => {
       const expenseDate = new Date(expense.date);
@@ -217,7 +247,35 @@ export function Expenses() {
       return expenseDate.getMonth() === currentDate.getMonth() && 
              expenseDate.getFullYear() === currentDate.getFullYear();
     })
-    .reduce((sum, expense) => sum + expense.amount, 0);
+    .reduce((sum, expense) => sum + expense.net_amount, 0);
+
+  const projectOptions = [
+    { value: 'all', label: 'Todos los proyectos', count: expenses.length },
+    ...projects.map(project => ({
+      value: project.id,
+      label: `${project.custom_id} - ${project.name}`,
+      count: expenses.filter(expense => expense.project_id === project.id).length,
+    })),
+  ];
+
+  const creditOptions = [
+    { value: 'all', label: 'Todos los estados', count: expenses.length },
+    { value: 'credit', label: 'Solo créditos', count: expenses.filter(expense => expense.status === 'credit').length },
+    { value: 'due-soon', label: 'Vencen en 30 días', count: expenses.filter(expense => {
+      const alert = getCreditAlertStatus(expense);
+      return !!alert && ['urgent', 'upcoming'].includes(alert.level);
+    }).length },
+    { value: 'overdue', label: 'Créditos vencidos', count: expenses.filter(expense => getCreditAlertStatus(expense)?.level === 'overdue').length },
+  ];
+
+  const categoryOptions = [
+    { value: 'all', label: 'Todas las categorías', count: expenses.length },
+    ...EXPENSE_CATEGORIES.map(category => ({
+      value: category.value,
+      label: category.label,
+      count: expenses.filter(expense => expense.category === category.value).length,
+    })),
+  ];
 
   return (
     <Layout title="Gastos" subtitle="Gestiona todos los gastos de tus proyectos">
@@ -250,32 +308,34 @@ export function Expenses() {
           </div>
 
           {/* Filtros */}
-          <div className="flex flex-wrap gap-4">
-            <select
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(280px,1.45fr)_minmax(210px,0.8fr)_minmax(240px,0.9fr)]">
+            <SelectMenu
+              label="Proyecto"
               value={projectFilter}
-              onChange={(e) => setProjectFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="all">Todos los proyectos</option>
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.custom_id} - {project.name}
-                </option>
-              ))}
-            </select>
-            
-            <select
+              options={projectOptions}
+              onChange={setProjectFilter}
+              icon={FolderKanban}
+              accent="blue"
+              className="sm:col-span-2 xl:col-span-1"
+            />
+
+            <SelectMenu
+              label="Estado de pago"
+              value={creditFilter}
+              options={creditOptions}
+              onChange={value => setCreditFilter(value as CreditFilter)}
+              icon={CircleDollarSign}
+              accent="orange"
+            />
+
+            <SelectMenu
+              label="Categoría"
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-800 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 hover:border-orange-400 cursor-pointer"
-            >
-              <option value="all" className="bg-white dark:bg-gray-900">Todas las categorías</option>
-              {EXPENSE_CATEGORIES.map((category) => (
-                <option key={category.value} value={category.value} className="bg-white dark:bg-gray-900">
-                  {category.label}
-                </option>
-              ))}
-            </select>
+              options={categoryOptions}
+              onChange={setCategoryFilter}
+              icon={Tags}
+              accent="violet"
+            />
           </div>
         </div>
 
@@ -299,7 +359,7 @@ export function Expenses() {
                 <DollarSign className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Monto Total</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Monto Neto Filtrado</p>
                 <p className="text-xl font-semibold text-gray-900 dark:text-white">{formatCurrency(totalAmount)}</p>
               </div>
             </div>
@@ -311,7 +371,7 @@ export function Expenses() {
                 <Calendar className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Este Mes</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Neto Este Mes</p>
                 <p className="text-xl font-semibold text-gray-900 dark:text-white">{formatCurrency(monthlyTotal)}</p>
               </div>
             </div>

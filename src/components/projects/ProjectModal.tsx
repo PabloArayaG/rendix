@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Calendar, FileText, AlertTriangle } from 'lucide-react';
 import { useProjects } from '../../hooks/useProjects';
-import { Project, CreateProjectDTO, PROJECT_STATUSES } from '../../types/database';
+import { Project, CreateProjectDTO, UpdateProjectDTO, PROJECT_STATUSES } from '../../types/database';
 import { Button, Card, CardContent, Badge } from '../ui';
 import { formatDateForInput, parseInputDate } from '../../lib/utils';
 
@@ -12,7 +12,7 @@ const projectSchema = z.object({
   custom_id: z.string()
     .min(1, 'El ID del proyecto es requerido')
     .max(50, 'El ID no puede exceder 50 caracteres')
-    .regex(/^[A-Za-z0-9\-_\.]+$/, 'Solo se permiten letras, números, guiones y puntos'),
+    .regex(/^[A-Za-z0-9_.-]+$/, 'Solo se permiten letras, números, guiones y puntos'),
   name: z.string().min(1, 'El nombre es requerido'),
   description: z.string().optional(),
   client: z.string().min(1, 'El cliente es requerido'),
@@ -131,8 +131,6 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
         }
       }
 
-      console.log('Datos del formulario:', data); // Debug
-
       const projectData: CreateProjectDTO = {
         custom_id: data.custom_id,
         name: data.name,
@@ -149,27 +147,16 @@ export function ProjectModal({ isOpen, onClose, project, onSuccess }: ProjectMod
         tags: [],
       };
 
-      // Si es edición, incluir status
-      if (project && data.status) {
-        (projectData as any).status = data.status;
-      };
-
-      console.log('Datos a enviar:', projectData); // Debug
-
       if (project) {
-        console.log('Actualizando proyecto existente...'); // Debug
-        await updateProject(project.id, projectData);
+        const updateData: UpdateProjectDTO = { ...projectData, status: data.status };
+        await updateProject(project.id, updateData);
       } else {
-        console.log('Creando nuevo proyecto...'); // Debug
-        const result = await createProject(projectData);
-        console.log('Proyecto creado:', result); // Debug
+        await createProject(projectData);
       }
 
-      console.log('Operación exitosa, ejecutando callbacks...'); // Debug
       onSuccess?.();
       // No llamar onClose() ni reset() aquí porque onSuccess ya lo maneja
     } catch (err) {
-      console.error('Error en onSubmit:', err); // Debug
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);

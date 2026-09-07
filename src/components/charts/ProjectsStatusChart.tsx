@@ -5,6 +5,17 @@ interface ProjectsStatusChartProps {
   completedProjects: number;
 }
 
+interface ChartTooltipEntry {
+  name: string;
+  value: number;
+  payload: { color: string };
+}
+
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: ChartTooltipEntry[];
+}
+
 const COLORS = {
   'En Proceso': '#F97316', // orange-500
   'Terminados': '#10B981', // green-500
@@ -26,7 +37,7 @@ export function ProjectsStatusChart({ activeProjects, completedProjects }: Proje
     );
   }
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0];
       const percent = ((data.value / total) * 100).toFixed(1);

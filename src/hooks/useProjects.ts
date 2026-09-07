@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase, getCurrentUserId, uploadProjectDocument } from '../lib/supabase';
 import { Project, CreateProjectDTO, UpdateProjectDTO, ProjectStats, ProjectStatus } from '../types/database';
 
@@ -9,13 +9,32 @@ export interface ProjectDocumentFiles {
 }
 import { useAuthStore } from '../store/authStore';
 
+type ProjectDocumentType = keyof ProjectDocumentFiles;
+
+const assignProjectDocument = (
+  target: UpdateProjectDTO,
+  docType: ProjectDocumentType,
+  result: { url: string; filename: string },
+) => {
+  if (docType === 'purchase_order') {
+    target.purchase_order_url = result.url;
+    target.purchase_order_filename = result.filename;
+  } else if (docType === 'hes') {
+    target.hes_url = result.url;
+    target.hes_filename = result.filename;
+  } else {
+    target.sale_invoice_url = result.url;
+    target.sale_invoice_filename = result.filename;
+  }
+};
+
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const activeOrganizationId = useAuthStore(state => state.activeOrganizationId);
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -42,7 +61,7 @@ export const useProjects = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeOrganizationId]);
 
   const createProject = async (projectData: CreateProjectDTO, files?: ProjectDocumentFiles): Promise<Project> => {
     const userId = await getCurrentUserId();
@@ -73,14 +92,13 @@ export const useProjects = () => {
 
     // Subir documentos si existen
     if (files && Object.values(files).some(Boolean)) {
-      const docUpdates: Partial<UpdateProjectDTO> = {};
+      const docUpdates: UpdateProjectDTO = {};
       const docTypes = ['purchase_order', 'hes', 'sale_invoice'] as const;
       for (const docType of docTypes) {
         const file = files[docType];
         if (file) {
           const result = await uploadProjectDocument(file, data.id, docType);
-          docUpdates[`${docType}_url` as keyof UpdateProjectDTO] = result.url as any;
-          docUpdates[`${docType}_filename` as keyof UpdateProjectDTO] = result.filename as any;
+          assignProjectDocument(docUpdates, docType, result);
         }
       }
       if (Object.keys(docUpdates).length > 0) {
@@ -96,7 +114,7 @@ export const useProjects = () => {
     const userId = await getCurrentUserId();
     if (!userId) throw new Error('Usuario no autenticado');
 
-    let updateData = { ...projectData };
+    const updateData = { ...projectData };
     if (projectData.sale_amount !== undefined || projectData.projected_cost !== undefined) {
       const current = projects.find(p => p.id === id);
       if (current) {
@@ -114,8 +132,7 @@ export const useProjects = () => {
         const file = files[docType];
         if (file) {
           const result = await uploadProjectDocument(file, id, docType);
-          (updateData as any)[`${docType}_url`] = result.url;
-          (updateData as any)[`${docType}_filename`] = result.filename;
+          assignProjectDocument(updateData, docType, result);
         }
       }
     }
@@ -246,7 +263,7 @@ export const useProjects = () => {
     if (activeOrganizationId) {
       fetchProjects();
     }
-  }, [activeOrganizationId]);
+  }, [activeOrganizationId, fetchProjects]);
 
   return {
     projects,

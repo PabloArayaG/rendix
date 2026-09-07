@@ -17,6 +17,7 @@ import {
   Minus,
   ChevronDown,
   Check,
+  CalendarClock,
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { useDashboard } from '../hooks/useDashboard';
@@ -28,6 +29,9 @@ import { getCategoryColor } from '../lib/categoryColors';
 import { ExpenseModal } from '../components/expenses/ExpenseModal';
 import { Expense } from '../types/database';
 import { IncomeVsCostsChart, MonthlyExpensesTrendChart, ExpensesByCategoryChart } from '../components/charts';
+import { useCreditAlerts } from '../hooks/useCreditAlerts';
+import { getCreditAlertClasses, getCreditAlertStatus } from '../lib/creditAlerts';
+import { openStorageFile } from '../lib/supabase';
 
 const CATEGORY_LABELS: Record<string, string> = {
   materials: 'Materiales', labor: 'Mano de obra', equipment: 'Equipos',
@@ -51,6 +55,7 @@ export function Dashboard() {
 
   const { rawProjects, rawExpenses, loading, error, refetch } = useDashboard();
   const { projects } = useProjects();
+  const { credits, loading: loadingCredits, error: creditsError } = useCreditAlerts();
   const activeOrganizationId = useAuthStore(s => s.activeOrganizationId);
   const { loading: loadingOrgs } = useOrganizations();
 
@@ -85,7 +90,7 @@ export function Dashboard() {
     const marginPercentage = totalSales > 0 ? (totalMargin / totalSales) * 100 : 0;
 
     const byCat: Record<string, number> = {};
-    exp.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + e.amount; });
+    exp.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + (e.net_amount || 0); });
     const topCategories = Object.entries(byCat)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
@@ -117,7 +122,7 @@ export function Dashboard() {
       total_costs: project.real_cost,
       total_margin: project.real_margin,
       margin_percentage: project.sale_amount > 0 ? (project.real_margin / project.sale_amount) * 100 : 0,
-      recent_expenses: stats.recent_expenses.filter(e => (e as any).project_id === selectedProjectId),
+      recent_expenses: stats.recent_expenses.filter(e => e.project_id === selectedProjectId),
       topCategories: stats.topCategories,
     };
   }, [stats, selectedProjectId, projects]);
@@ -129,6 +134,27 @@ export function Dashboard() {
       .sort((a, b) => b.marginPct - a.marginPct)
       .slice(0, 5);
   }, [projects]);
+
+  const visibleCredits = useMemo(() => {
+    const scopedCredits = selectedProjectId === 'all'
+      ? credits
+      : credits.filter(credit => credit.project_id === selectedProjectId);
+
+    const priority: Record<string, number> = { overdue: 0, urgent: 1, upcoming: 2, missing: 3, later: 4 };
+    return [...scopedCredits].sort((a, b) => {
+      const levelA = getCreditAlertStatus(a)?.level || 'later';
+      const levelB = getCreditAlertStatus(b)?.level || 'later';
+      return priority[levelA] - priority[levelB];
+    });
+  }, [credits, selectedProjectId]);
+
+  const creditSummary = useMemo(() => ({
+    overdue: visibleCredits.filter(credit => getCreditAlertStatus(credit)?.level === 'overdue').length,
+    dueSoon: visibleCredits.filter(credit => getCreditAlertStatus(credit)?.level === 'urgent').length,
+    nextThirtyDays: visibleCredits.filter(credit => getCreditAlertStatus(credit)?.level === 'upcoming').length,
+    missingDate: visibleCredits.filter(credit => getCreditAlertStatus(credit)?.level === 'missing').length,
+    totalAmount: visibleCredits.reduce((total, credit) => total + (credit.amount || 0), 0),
+  }), [visibleCredits]);
 
   useEffect(() => { refetch(); }, []); // eslint-disable-line
 
@@ -378,6 +404,87 @@ export function Dashboard() {
           </div>
         </div>
 
+        {/* Seguimiento de créditos */}
+        <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                <CalendarClock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Seguimiento de créditos</h3>
+                <p className="text-xs text-gray-400 mt-0.5">Avisos desde 30 días antes del vencimiento</p>
+              </div>
+            </div>
+            <div className="text-left sm:text-right">
+              <p className="text-xs text-gray-400">Total pendiente</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white tabular-nums">{formatCurrency(creditSummary.totalAmount)}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-gray-100 dark:divide-gray-800 border-b border-gray-100 dark:border-gray-800">
+            {[
+              { label: 'Vencidos', value: creditSummary.overdue, color: 'text-red-600 dark:text-red-400' },
+              { label: 'Próximos 7 días', value: creditSummary.dueSoon, color: 'text-orange-600 dark:text-orange-400' },
+              { label: 'Entre 8 y 30 días', value: creditSummary.nextThirtyDays, color: 'text-yellow-600 dark:text-yellow-400' },
+              { label: 'Sin fecha', value: creditSummary.missingDate, color: 'text-gray-600 dark:text-gray-300' },
+            ].map(item => (
+              <div key={item.label} className="px-3 py-3 text-center">
+                <p className={`text-xl font-bold tabular-nums ${item.color}`}>{item.value}</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">{item.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {creditsError ? (
+            <div className="px-5 py-4 flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              No se pudieron cargar los vencimientos. Verifica que la migración esté aplicada.
+            </div>
+          ) : loadingCredits ? (
+            <div className="px-5 py-6 text-sm text-gray-400">Cargando créditos…</div>
+          ) : visibleCredits.length === 0 ? (
+            <div className="px-5 py-8 text-center">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-200">No hay créditos pendientes</p>
+              <p className="text-xs text-gray-400 mt-1">Los gastos marcados como crédito aparecerán aquí.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-50 dark:divide-gray-800">
+              {visibleCredits.slice(0, 5).map(credit => {
+                const alert = getCreditAlertStatus(credit);
+                if (!alert) return null;
+
+                return (
+                  <button
+                    key={credit.id}
+                    type="button"
+                    onClick={() => { window.location.hash = `/projects/${credit.project_id}`; }}
+                    className="w-full px-5 py-3 flex items-center gap-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors group"
+                  >
+                    <span className={`inline-flex px-2 py-1 rounded-lg border text-xs font-medium whitespace-nowrap ${getCreditAlertClasses(alert.level)}`}>
+                      {alert.label}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{credit.description}</p>
+                      <p className="text-xs text-gray-400 truncate">
+                        {credit.projects?.custom_id ? `${credit.projects.custom_id} · ` : ''}{credit.projects?.name || credit.supplier || 'Sin proyecto'}
+                        {credit.credit_due_date ? ` · ${formatShortDate(credit.credit_due_date)}` : ''}
+                      </p>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums whitespace-nowrap">{formatCurrency(credit.amount)}</span>
+                    <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-gray-500 shrink-0" />
+                  </button>
+                );
+              })}
+              {visibleCredits.length > 5 && (
+                <div className="px-5 py-2 text-center text-xs text-gray-400">
+                  Y {visibleCredits.length - 5} créditos pendientes más
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Fila principal */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
@@ -519,9 +626,9 @@ export function Dashboard() {
                     </span>
                   </div>
                   <div>
-                    {(expense as any).projects ? (
+                    {expense.projects ? (
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
-                        {(expense as any).projects.custom_id}
+                        {expense.projects.custom_id}
                       </span>
                     ) : <Minus className="h-3 w-3 text-gray-300" />}
                   </div>
@@ -539,7 +646,7 @@ export function Dashboard() {
                     </button>
                     {expense.receipt_url && (
                       <button
-                        onClick={() => window.open(expense.receipt_url!, '_blank')}
+                        onClick={() => { void openStorageFile(expense.receipt_url!); }}
                         className="p-1.5 text-gray-300 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                         title="Ver comprobante"
                       >
@@ -573,11 +680,11 @@ export function Dashboard() {
             {
               label: 'Gasto promedio',
               value: filteredStats?.recent_expenses.length
-                ? formatCurrency(filteredStats.recent_expenses.reduce((s, e) => s + e.amount, 0) / filteredStats.recent_expenses.length)
+                ? formatCurrency(filteredStats.recent_expenses.reduce((s, e) => s + (e.net_amount || 0), 0) / filteredStats.recent_expenses.length)
                 : '$0',
               icon: Receipt,
               positive: true,
-              sub: 'por registro reciente',
+              sub: 'neto por registro reciente',
             },
           ].map(card => {
             const Icon = card.icon;

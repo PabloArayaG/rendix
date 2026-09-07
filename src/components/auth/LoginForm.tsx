@@ -45,7 +45,7 @@ export function LoginForm({ onToggleMode }: LoginFormProps) {
     setResetError('');
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/#/reset-password`,
+        redirectTo: `${window.location.origin}/?recovery=1`,
       });
       if (error) throw error;
       setResetSent(true);
@@ -61,7 +61,7 @@ export function LoginForm({ onToggleMode }: LoginFormProps) {
     setIsLoading(true);
     try {
       await login(data.email, data.password);
-    } catch (err) {
+    } catch {
       setAuthError('Contraseña o email inválido, reintentar nuevamente');
     } finally {
       setIsLoading(false);

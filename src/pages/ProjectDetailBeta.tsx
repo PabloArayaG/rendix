@@ -3,19 +3,21 @@ import { useRef, useEffect } from 'react';
 import {
   ArrowLeft, Plus, Search, Edit, Trash2,
   ChevronDown, ChevronRight, TrendingUp, TrendingDown,
-  DollarSign, Receipt, Building2, ExternalLink, Tag, X, FileDown
+  DollarSign, Receipt, Building2, ExternalLink, Tag, X, FileDown, CalendarClock
 } from 'lucide-react';
 import { generateProjectPdf } from '../lib/generateProjectPdf';
 import { Layout } from '../components/layout/Layout';
 import { ExpenseModalBeta } from '../components/expenses/ExpenseModalBeta';
 import { ProjectModalBeta } from '../components/projects/ProjectModalBeta';
-import { ConfirmDialog } from '../components/ui';
+import { ConfirmDialog, CopyButton } from '../components/ui';
 import { ExpensesByCategoryChart } from '../components/charts/ExpensesByCategoryChart';
 import { MonthlyExpensesTrendChart } from '../components/charts/MonthlyExpensesTrendChart';
 import { useProject } from '../hooks/useProjects';
 import { useExpenses } from '../hooks/useExpenses';
-import { EXPENSE_CATEGORIES } from '../types/database';
+import { Expense, EXPENSE_CATEGORIES } from '../types/database';
 import { getCategoryColor } from '../lib/categoryColors';
+import { getCreditAlertClasses, getCreditAlertStatus } from '../lib/creditAlerts';
+import { openStorageFile } from '../lib/supabase';
 import {
   formatCurrency, formatShortDate,
   getMarginColor, getStatusColor
@@ -50,9 +52,9 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
   const [showAddModal, setShowAddModal]       = useState(false);
   const [showEditModal, setShowEditModal]     = useState(false);
   const [showEditProject, setShowEditProject] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState<any>(undefined);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>(undefined);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [expenseToDelete, setExpenseToDelete] = useState<any>(null);
+  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [isDeleting, setIsDeleting]           = useState(false);
   const [expenseSummaryView, setExpenseSummaryView] = useState<'summary' | 'categories'>('summary');
 
@@ -60,7 +62,11 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
     const matchSearch = e.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         e.supplier?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchCat    = categoryFilter === 'all' || e.category === categoryFilter;
-    const matchSt     = statusFilter   === 'all' || e.status   === statusFilter;
+    const creditAlert = getCreditAlertStatus(e);
+    const matchSt = statusFilter === 'all'
+      || e.status === statusFilter
+      || (statusFilter === 'credit_due_soon' && ['urgent', 'upcoming'].includes(creditAlert?.level || ''))
+      || (statusFilter === 'credit_overdue' && creditAlert?.level === 'overdue');
     return matchSearch && matchCat && matchSt;
   }), [expenses, searchTerm, categoryFilter, statusFilter]);
 
@@ -82,13 +88,13 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
   const toggleRow = (id: string) =>
     setExpandedRows(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
-  const handleEdit = (expense: any, e: React.MouseEvent) => {
+  const handleEdit = (expense: Expense, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedExpense(expense);
     setShowEditModal(true);
   };
 
-  const handleDeleteClick = (expense: any, e: React.MouseEvent) => {
+  const handleDeleteClick = (expense: Expense, e: React.MouseEvent) => {
     e.stopPropagation();
     setExpenseToDelete(expense);
     setShowDeleteConfirm(true);
@@ -239,10 +245,12 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
               { label: 'Cliente', val: project.client },
               project.start_date ? { label: 'Inicio',  val: formatShortDate(project.start_date) } : null,
               project.end_date   ? { label: 'Término', val: formatShortDate(project.end_date)   } : null,
-            ].filter(Boolean).map(({ label, val }: any) => (
+            ].filter((item): item is { label: string; val: string } => item !== null).map(({ label, val }) => (
               <div key={label} className="flex justify-between text-sm">
                 <span className="text-gray-400">{label}</span>
-                <span className="font-medium text-gray-900 dark:text-white text-right">{val}</span>
+                {label === 'ID'
+                  ? <CopyButton value={val} />
+                  : <span className="font-medium text-gray-900 dark:text-white text-right">{val}</span>}
               </div>
             ))}
 
@@ -261,7 +269,7 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
                       {num && <span className="font-medium text-gray-900 dark:text-white truncate">{num}</span>}
                       {url && (
                         <button
-                          onClick={() => window.open(url, '_blank')}
+                          onClick={() => { void openStorageFile(url); }}
                           title={`Ver ${label}`}
                           className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
                         >
@@ -364,12 +372,14 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
                 </div>
 
                 {/* Filtro estado — segmented control */}
-                <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
+                <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5 max-w-full overflow-x-auto">
                   {[
                     { value: 'all',       label: 'Todos'     },
                     { value: 'provision', label: 'Provisión' },
                     { value: 'paid',      label: 'Pagado'    },
                     { value: 'credit',    label: 'Crédito'   },
+                    { value: 'credit_due_soon', label: 'Por vencer' },
+                    { value: 'credit_overdue', label: 'Vencido' },
                     { value: 'advance',   label: 'Anticipo'  },
                   ].map(opt => (
                     <button
@@ -385,7 +395,12 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
                       {opt.label}
                       {opt.value !== 'all' && (
                         <span className={`ml-1 tabular-nums text-xs ${statusFilter === opt.value ? 'text-orange-500' : 'text-gray-400'}`}>
-                          {expenses.filter(e => e.status === opt.value).length}
+                          {expenses.filter(e => {
+                            const alert = getCreditAlertStatus(e);
+                            if (opt.value === 'credit_due_soon') return ['urgent', 'upcoming'].includes(alert?.level || '');
+                            if (opt.value === 'credit_overdue') return alert?.level === 'overdue';
+                            return e.status === opt.value;
+                          }).length}
                         </span>
                       )}
                     </button>
@@ -422,6 +437,7 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
                 {filteredExpenses.map(expense => {
                   const isOpen = expandedRows.has(expense.id);
                   const payStatus = STATUS_PAYMENT[expense.status] || { label: expense.status, dot: 'bg-gray-400' };
+                  const creditAlert = getCreditAlertStatus(expense);
                   return (
                     <div key={expense.id}>
                       {/* Fila compacta */}
@@ -436,7 +452,14 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
                         {/* Descripción + fecha */}
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{expense.description}</p>
-                          <p className="text-xs text-gray-400">{formatShortDate(expense.date)}</p>
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <p className="text-xs text-gray-400">{formatShortDate(expense.date)}</p>
+                            {creditAlert && (
+                              <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-medium ${getCreditAlertClasses(creditAlert.level)}`}>
+                                <CalendarClock className="h-2.5 w-2.5" />{creditAlert.label}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {/* Categoría badge */}
@@ -520,6 +543,14 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
                             <div>
                               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Proveedor</p>
                               <p className="font-medium text-gray-900 dark:text-white">{expense.supplier || '—'}</p>
+                              {expense.status === 'credit' && (
+                                <div className="mt-2">
+                                  <p className="text-xs text-gray-400">Vencimiento</p>
+                                  <p className={`mt-1 inline-flex px-2 py-0.5 rounded border text-xs font-medium ${getCreditAlertClasses(creditAlert?.level || 'missing')}`}>
+                                    {expense.credit_due_date ? formatShortDate(expense.credit_due_date) : 'Fecha pendiente'}
+                                  </p>
+                                </div>
+                              )}
                             </div>
 
                             {/* Acciones */}
@@ -534,7 +565,7 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
                                 </button>
                                 {expense.receipt_url && (
                                   <button
-                                    onClick={e => { e.stopPropagation(); window.open(expense.receipt_url, '_blank'); }}
+                                    onClick={e => { e.stopPropagation(); void openStorageFile(expense.receipt_url!); }}
                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
                                   >
                                     <ExternalLink className="h-3 w-3" /> Ver comprobante

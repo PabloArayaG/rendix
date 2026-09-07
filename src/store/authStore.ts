@@ -2,6 +2,14 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase, AuthUser } from '../lib/supabase';
 
+let authListenerRegistered = false;
+
+const toAuthUser = (user: { id: string; email?: string; created_at?: string }): AuthUser => ({
+  id: user.id,
+  email: user.email || '',
+  created_at: user.created_at || '',
+});
+
 interface AuthState {
   user: AuthUser | null;
   loading: boolean;
@@ -33,40 +41,25 @@ export const useAuthStore = create<AuthState>()(
 
   login: async (email: string, password: string) => {
     // NO cambiar loading global para evitar re-renders
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) {
-        // Manejar errores específicos de autenticación
-        if (error.message.includes('Invalid login credentials')) {
-          throw new Error('Contraseña incorrecta');
-        } else if (error.message.includes('Email not confirmed')) {
-          throw new Error('Confirma tu email antes de iniciar sesión');
-        } else if (error.message.includes('Too many requests')) {
-          throw new Error('Demasiados intentos. Espera unos minutos');
-        } else {
-          // Solo hacer log de errores inesperados
-          console.error('Error inesperado en login:', error);
-          throw new Error('Error de autenticación');
-        }
+    if (error) {
+      if (error.message.includes('Invalid login credentials')) {
+        throw new Error('Contraseña incorrecta');
+      } else if (error.message.includes('Email not confirmed')) {
+        throw new Error('Confirma tu email antes de iniciar sesión');
+      } else if (error.message.includes('Too many requests')) {
+        throw new Error('Demasiados intentos. Espera unos minutos');
       }
+      console.error('Error inesperado en login:', error);
+      throw new Error('Error de autenticación');
+    }
 
-      if (data.user) {
-        set({ 
-          user: {
-            id: data.user.id,
-            email: data.user.email || '',
-            created_at: data.user.created_at || ''
-          }
-        });
-      }
-    } catch (error) {
-      // Re-lanzar el error sin hacer log adicional
-      // (el log ya se hizo arriba si era necesario)
-      throw error;
+    if (data.user) {
+      set({ user: toAuthUser(data.user) });
     }
   },
 
@@ -80,12 +73,12 @@ export const useAuthStore = create<AuthState>()(
 
       if (error) throw error;
 
-      if (data.user) {
+      if (data.session?.user) {
         set({ 
           user: {
-            id: data.user.id,
-            email: data.user.email || '',
-            created_at: data.user.created_at || ''
+            id: data.session.user.id,
+            email: data.session.user.email || '',
+            created_at: data.session.user.created_at || ''
           }
         });
       }
@@ -134,31 +127,27 @@ export const useAuthStore = create<AuthState>()(
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
-        set({ 
-          user: {
-            id: session.user.id,
-            email: session.user.email || '',
-            created_at: session.user.created_at || ''
+        set({ user: toAuthUser(session.user) });
+
+        if (new URLSearchParams(window.location.search).get('recovery') === '1') {
+          window.location.hash = '/reset-password';
+        }
+      }
+
+      if (!authListenerRegistered) {
+        authListenerRegistered = true;
+        supabase.auth.onAuthStateChange((event, nextSession) => {
+          if ((event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') && nextSession?.user) {
+            set({ user: toAuthUser(nextSession.user) });
+          } else if (event === 'SIGNED_OUT') {
+            set({ user: null, activeOrganizationId: null });
+          }
+
+          if (event === 'PASSWORD_RECOVERY') {
+            window.location.hash = '/reset-password';
           }
         });
       }
-
-      // Escuchar cambios de autenticación
-      supabase.auth.onAuthStateChange((event, session) => {
-        // Solo actualizar el estado si el evento es SIGNED_IN o SIGNED_OUT explícito
-        // Esto evita que se limpie el estado en errores de login
-        if (event === 'SIGNED_IN' && session?.user) {
-          set({ 
-            user: {
-              id: session.user.id,
-              email: session.user.email || '',
-              created_at: session.user.created_at || ''
-            }
-          });
-        } else if (event === 'SIGNED_OUT') {
-          set({ user: null });
-        }
-      });
       
       set({ initialized: true });
     } catch (error) {

@@ -21,7 +21,7 @@ Migraciones y fixes específicos para el ambiente de staging.
 - `supabase_migration_staging_v4.sql` - Migración staging v4
 
 ### `/production`
-Migraciones para el ambiente de producción (actualmente vacío).
+Historial de migraciones y diagnósticos usados en producción. No ejecutar fixes históricos de RLS sobre una base ya endurecida.
 
 ### `/fixes`
 Fixes y mejoras incrementales que se han aplicado.
@@ -29,16 +29,22 @@ Fixes y mejoras incrementales que se han aplicado.
 - `add_expense_categories.sql` - Añade categorías de gastos
 - `add_fuel_category.sql` - Añade categoría de combustible
 - `add_iva_to_expenses.sql` - Añade campos de IVA a expenses
+- `add_credit_due_date.sql` - Añade vencimiento y soporte para alertas de créditos
+- `harden_multitenancy.sql` - Corrige RLS, RPC e integridad entre organizaciones
+- `setup_storage_receipts.sql` - Convierte documentos a privados y restringe acceso por proyecto
 - `update_currency_to_clp.sql` - Actualiza moneda a CLP
 
 ## 🚀 Cómo Usar
+
+Los cambios nuevos aún no aplicados están documentados en `APPLY_PENDING_CHANGES.md` con su orden y validaciones.
 
 ### Para configurar Staging desde cero:
 1. Ejecuta el esquema: `/schemas/supabase_schema_staging_clean.sql`
 2. Ejecuta la migración: `/staging/staging_complete_migration.sql`
 
 ### Para aplicar fixes en Staging:
-- Usa directamente: `/staging/staging_complete_migration.sql`
+- Para una instalación histórica usa `/staging/staging_complete_migration.sql` y luego sigue `APPLY_PENDING_CHANGES.md`.
+- No ejecutes los fixes RLS antiguos después de `fixes/harden_multitenancy.sql`.
 
 ### Para configurar Producción desde cero:
 - Ejecuta: `/schemas/supabase_schema.sql`

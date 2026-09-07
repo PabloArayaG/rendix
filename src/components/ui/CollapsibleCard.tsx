@@ -11,7 +11,6 @@ export function CollapsibleCard({ title, children, defaultExpanded = true }: Col
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   const handleToggle = () => {
-    console.log(`Toggling ${title}: ${isExpanded} -> ${!isExpanded}`);
     setIsExpanded(!isExpanded);
   };
 

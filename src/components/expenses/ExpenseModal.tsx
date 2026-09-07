@@ -27,6 +27,7 @@ const expenseSchema = z.object({
     .max(MAX_AMOUNT, 'El monto total no puede exceder $9.999.999.999.999'),
   category: z.string().min(1, 'La categoría es requerida'),
   date: z.string().min(1, 'La fecha es requerida'),
+  credit_due_date: z.string().optional(),
   status: z.enum(['provision', 'paid', 'credit', 'advance'], {
     required_error: 'El estado es requerido',
   }),
@@ -37,6 +38,22 @@ const expenseSchema = z.object({
   supplier: z.string().optional(),
   invoice_number: z.string().optional(),
   notes: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.status === 'credit' && !data.credit_due_date) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['credit_due_date'],
+      message: 'La fecha de vencimiento es requerida para un crédito',
+    });
+  }
+
+  if (data.status === 'credit' && data.credit_due_date && data.credit_due_date < data.date) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['credit_due_date'],
+      message: 'El vencimiento no puede ser anterior a la fecha del gasto',
+    });
+  }
 });
 
 type ExpenseFormData = z.infer<typeof expenseSchema>;
@@ -73,6 +90,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
       amount: 0,
       category: 'general',
       date: formatDateForInput(new Date()),
+      credit_due_date: '',
       status: 'provision',
       document_type: 'boleta',
       document_number: '',
@@ -86,6 +104,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
   const netAmount = watch('net_amount') || 0;
   const taxAmount = watch('tax_amount') || 0;
   const totalAmount = netAmount + taxAmount;
+  const expenseStatus = watch('status');
 
   // Función para calcular IVA del 19%
   const calculateTax = (netAmount: number) => {
@@ -107,6 +126,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
         amount: expense.amount,
         category: expense.category,
         date: formatDateForInput(expense.date),
+        credit_due_date: expense.credit_due_date ? formatDateForInput(expense.credit_due_date) : '',
         status: expense.status || 'provision',
         document_type: expense.document_type || 'boleta',
         document_number: expense.document_number || '',
@@ -123,6 +143,10 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
         amount: 0,
         category: 'general',
         date: formatDateForInput(new Date()),
+        credit_due_date: '',
+        status: 'provision',
+        document_type: 'boleta',
+        document_number: '',
         supplier: '',
         invoice_number: '',
         notes: '',
@@ -135,25 +159,17 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
       setLoading(true);
       setError('');
 
-      // Log de debugging para identificar problemas
-      console.log('🔍 GERARDO DEBUG - Browser Info:', {
-        userAgent: navigator.userAgent,
-        language: navigator.language,
-        languages: navigator.languages,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        locale: Intl.NumberFormat().resolvedOptions().locale,
-      });
-
       const rawExpenseData: CreateExpenseDTO = {
         project_id: data.project_id,
         description: data.description,
         net_amount: data.net_amount,
         tax_amount: data.tax_amount,
         amount: data.net_amount + data.tax_amount,
-        category: data.category as any,
+        category: data.category as CreateExpenseDTO['category'],
         date: data.date,
-        status: data.status as any,
-        document_type: data.document_type as any,
+        credit_due_date: data.status === 'credit' ? data.credit_due_date : null,
+        status: data.status,
+        document_type: data.document_type,
         document_number: data.document_number || undefined,
         supplier: data.supplier || undefined,
         invoice_number: data.invoice_number || undefined,
@@ -176,11 +192,6 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
       setReceiptFile(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-      console.error('🔍 GERARDO DEBUG - Error completo:', {
-        error: err,
-        message: errorMessage,
-        stack: err instanceof Error ? err.stack : undefined,
-      });
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -453,7 +464,7 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <div className={`grid grid-cols-1 ${expenseStatus === 'credit' ? 'md:grid-cols-2' : ''} gap-4`}>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -473,6 +484,29 @@ export function ExpenseModal({ isOpen, onClose, expense, onSuccess, defaultProje
                   <p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
                 )}
               </div>
+
+              {expenseStatus === 'credit' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Vencimiento del crédito *
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Calendar className="h-4 w-4 text-orange-500" />
+                    </div>
+                    <input
+                      {...register('credit_due_date')}
+                      type="date"
+                      min={watch('date')}
+                      className="w-full pl-9 pr-3 py-2 border border-orange-300 dark:border-orange-700 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                  </div>
+                  {errors.credit_due_date && (
+                    <p className="mt-1 text-sm text-red-600">{errors.credit_due_date.message}</p>
+                  )}
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Recibirás avisos desde 30 días antes.</p>
+                </div>
+              )}
             </div>
           </div>
 

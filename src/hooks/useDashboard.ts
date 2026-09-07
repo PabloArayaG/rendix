@@ -16,7 +16,7 @@ export interface ExpenseWithProject extends Expense {
 }
 
 interface MonthlyExpense {
-  amount: number;
+  net_amount: number;
   date: string;
   category: string;
 }
@@ -65,7 +65,7 @@ export const useDashboard = () => {
         .from('expenses')
         .select(`
           *,
-          projects (name, custom_id)
+          projects!expenses_project_organization_fkey (name, custom_id)
         `)
         .eq('organization_id', activeOrganizationId)
         .order('created_at', { ascending: false })
@@ -95,7 +95,7 @@ export const useDashboard = () => {
 
     const { data: expenses, error } = await supabase
       .from('expenses')
-      .select('amount, date, category')
+      .select('net_amount, date, category')
       .eq('organization_id', activeOrganizationId)
       .gte('date', startDate.toISOString().split('T')[0])
       .order('date');
@@ -108,7 +108,7 @@ export const useDashboard = () => {
       if (!acc[month]) {
         acc[month] = { total: 0, expenses: 0 };
       }
-      acc[month].total += expense.amount;
+      acc[month].total += expense.net_amount || 0;
       acc[month].expenses += 1;
       return acc;
     }, {} as Record<string, { total: number; expenses: number }>);
