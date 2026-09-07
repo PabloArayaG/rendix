@@ -19,3 +19,5 @@ export { Tooltip, type TooltipProps } from './Tooltip';
 export { ConfirmDialog } from './ConfirmDialog';
 export { CollapsibleCard } from './CollapsibleCard';
 export { ThemeToggle } from './ThemeToggle';
+export { SelectMenu, type SelectMenuOption, type SelectMenuProps } from './SelectMenu';
+export { CopyButton, type CopyButtonProps } from './CopyButton';

@@ -1,5 +1,7 @@
 # Cambios pendientes en Supabase online
 
+> Producción en pausa: completar y validar primero los ajustes de interfaz en local y staging. El próximo paso productivo será ejecutar `preflight_pending_changes.sql` en modo de solo lectura.
+
 Estos scripts quedaron preparados localmente y **no han sido ejecutados** en staging ni producción.
 
 ## Antes de aplicar

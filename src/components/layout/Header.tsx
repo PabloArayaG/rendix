@@ -92,7 +92,7 @@ export function Header({ title, subtitle }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-800/60 px-6 py-4 shadow-sm">
+    <header className="relative z-40 shrink-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-800/60 px-6 py-4 shadow-sm">
       <div className="flex items-center justify-between">
         {/* Title section */}
         <div>
@@ -142,7 +142,7 @@ export function Header({ title, subtitle }: HeaderProps) {
             </button>
 
             {notificationsOpen && (
-              <div className="absolute right-0 top-full mt-2 w-[min(24rem,calc(100vw-2rem))] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+              <div className="absolute right-0 top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-gray-900 dark:text-white">Créditos por vencer</p>

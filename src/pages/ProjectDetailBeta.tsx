@@ -9,7 +9,7 @@ import { generateProjectPdf } from '../lib/generateProjectPdf';
 import { Layout } from '../components/layout/Layout';
 import { ExpenseModalBeta } from '../components/expenses/ExpenseModalBeta';
 import { ProjectModalBeta } from '../components/projects/ProjectModalBeta';
-import { ConfirmDialog } from '../components/ui';
+import { ConfirmDialog, CopyButton } from '../components/ui';
 import { ExpensesByCategoryChart } from '../components/charts/ExpensesByCategoryChart';
 import { MonthlyExpensesTrendChart } from '../components/charts/MonthlyExpensesTrendChart';
 import { useProject } from '../hooks/useProjects';
@@ -248,7 +248,9 @@ export function ProjectDetailBeta({ projectId, onBack }: ProjectDetailBetaProps)
             ].filter((item): item is { label: string; val: string } => item !== null).map(({ label, val }) => (
               <div key={label} className="flex justify-between text-sm">
                 <span className="text-gray-400">{label}</span>
-                <span className="font-medium text-gray-900 dark:text-white text-right">{val}</span>
+                {label === 'ID'
+                  ? <CopyButton value={val} />
+                  : <span className="font-medium text-gray-900 dark:text-white text-right">{val}</span>}
               </div>
             ))}
 

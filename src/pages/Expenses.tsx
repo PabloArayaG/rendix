@@ -7,12 +7,15 @@ import {
   CalendarClock,
   DollarSign,
   Tag,
+  FolderKanban,
+  CircleDollarSign,
+  Tags,
   Edit,
   Trash2
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { ExpenseModal } from '../components/expenses/ExpenseModal';
-import { ConfirmDialog } from '../components/ui';
+import { ConfirmDialog, SelectMenu } from '../components/ui';
 import { useExpenses } from '../hooks/useExpenses';
 import { useProjects } from '../hooks/useProjects';
 import { Expense } from '../types/database';
@@ -246,6 +249,34 @@ export function Expenses() {
     })
     .reduce((sum, expense) => sum + expense.net_amount, 0);
 
+  const projectOptions = [
+    { value: 'all', label: 'Todos los proyectos', count: expenses.length },
+    ...projects.map(project => ({
+      value: project.id,
+      label: `${project.custom_id} - ${project.name}`,
+      count: expenses.filter(expense => expense.project_id === project.id).length,
+    })),
+  ];
+
+  const creditOptions = [
+    { value: 'all', label: 'Todos los estados', count: expenses.length },
+    { value: 'credit', label: 'Solo créditos', count: expenses.filter(expense => expense.status === 'credit').length },
+    { value: 'due-soon', label: 'Vencen en 30 días', count: expenses.filter(expense => {
+      const alert = getCreditAlertStatus(expense);
+      return !!alert && ['urgent', 'upcoming'].includes(alert.level);
+    }).length },
+    { value: 'overdue', label: 'Créditos vencidos', count: expenses.filter(expense => getCreditAlertStatus(expense)?.level === 'overdue').length },
+  ];
+
+  const categoryOptions = [
+    { value: 'all', label: 'Todas las categorías', count: expenses.length },
+    ...EXPENSE_CATEGORIES.map(category => ({
+      value: category.value,
+      label: category.label,
+      count: expenses.filter(expense => expense.category === category.value).length,
+    })),
+  ];
+
   return (
     <Layout title="Gastos" subtitle="Gestiona todos los gastos de tus proyectos">
       <div className="space-y-6">
@@ -277,43 +308,34 @@ export function Expenses() {
           </div>
 
           {/* Filtros */}
-          <div className="flex flex-wrap gap-4">
-            <select
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(280px,1.45fr)_minmax(210px,0.8fr)_minmax(240px,0.9fr)]">
+            <SelectMenu
+              label="Proyecto"
               value={projectFilter}
-              onChange={(e) => setProjectFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="all">Todos los proyectos</option>
-              {projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.custom_id} - {project.name}
-                </option>
-              ))}
-            </select>
+              options={projectOptions}
+              onChange={setProjectFilter}
+              icon={FolderKanban}
+              accent="blue"
+              className="sm:col-span-2 xl:col-span-1"
+            />
 
-            <select
+            <SelectMenu
+              label="Estado de pago"
               value={creditFilter}
-              onChange={(e) => setCreditFilter(e.target.value as CreditFilter)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-800 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-            >
-              <option value="all">Todos los estados</option>
-              <option value="credit">Solo créditos</option>
-              <option value="due-soon">Vencen en 30 días</option>
-              <option value="overdue">Créditos vencidos</option>
-            </select>
-            
-            <select
+              options={creditOptions}
+              onChange={value => setCreditFilter(value as CreditFilter)}
+              icon={CircleDollarSign}
+              accent="orange"
+            />
+
+            <SelectMenu
+              label="Categoría"
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-800 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 hover:border-orange-400 cursor-pointer"
-            >
-              <option value="all" className="bg-white dark:bg-gray-900">Todas las categorías</option>
-              {EXPENSE_CATEGORIES.map((category) => (
-                <option key={category.value} value={category.value} className="bg-white dark:bg-gray-900">
-                  {category.label}
-                </option>
-              ))}
-            </select>
+              options={categoryOptions}
+              onChange={setCategoryFilter}
+              icon={Tags}
+              accent="violet"
+            />
           </div>
         </div>
 

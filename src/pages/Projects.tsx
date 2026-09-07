@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { ProjectModalBeta } from '../components/projects/ProjectModalBeta';
-import { ConfirmDialog } from '../components/ui';
+import { ConfirmDialog, CopyButton } from '../components/ui';
 import { useProjects } from '../hooks/useProjects';
 import { Project } from '../types/database';
 import { formatCurrency, formatShortDate, getStatusColor, getMarginColor } from '../lib/utils';
@@ -389,9 +389,7 @@ export function Projects() {
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 shrink-0">
-                            {project.custom_id}
-                          </span>
+                          <CopyButton value={project.custom_id} variant="badge" />
                           <span className="font-semibold text-gray-900 dark:text-white text-sm truncate">
                             {project.name}
                           </span>
