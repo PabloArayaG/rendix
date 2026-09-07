@@ -48,11 +48,15 @@ WITH expected_policies(table_name, policy_name) AS (
 
   SELECT
     'FK compuesta gasto/proyecto',
-    count(*) = 1,
-    COALESCE(string_agg(pg_get_constraintdef(oid), ', '), 'no encontrada')
+    count(*) FILTER (WHERE conname = 'expenses_project_organization_fkey') = 1
+      AND count(*) FILTER (WHERE conname = 'expenses_project_id_fkey') = 0,
+    COALESCE(
+      string_agg(conname || ': ' || pg_get_constraintdef(oid), ', ' ORDER BY conname),
+      'no encontrada'
+    )
   FROM pg_constraint
   WHERE conrelid = 'public.expenses'::regclass
-    AND conname = 'expenses_project_organization_fkey'
+    AND conname IN ('expenses_project_organization_fkey', 'expenses_project_id_fkey')
 
   UNION ALL
 

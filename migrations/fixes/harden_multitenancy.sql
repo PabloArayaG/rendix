@@ -292,6 +292,11 @@ ALTER TABLE public.expenses
   REFERENCES public.projects (id, organization_id)
   ON DELETE CASCADE;
 
+-- La FK compuesta reemplaza por completo a la FK simple. Mantener ambas hace
+-- que PostgREST vea dos relaciones posibles entre expenses y projects.
+ALTER TABLE public.expenses
+  DROP CONSTRAINT IF EXISTS expenses_project_id_fkey;
+
 -- ---------------------------------------------------------------------
 -- RPCs: validar siempre al solicitante y limitar exposición de emails.
 -- ---------------------------------------------------------------------
